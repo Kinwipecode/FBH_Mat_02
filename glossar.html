@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Glossar - FBH Material Rechner</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .glossar-container {
+            padding: 30px 50px;
+            margin-top: 40px;
+            margin-bottom: 40px;
+        }
+        .glossar-container h1 {
+            color: #0078d7;
+            border-bottom: 2px solid #0078d7;
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+        }
+        .glossar-container p {
+            font-size: 1.1em;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+        .glossar-table {
+            width: 100%;
+            border-collapse: collapse;
+            box-shadow: 0 1px 5px rgba(0,0,0,0.1);
+        }
+        .glossar-table th, .glossar-table td {
+            border: 1px solid #ddd;
+            padding: 15px;
+            text-align: left;
+            vertical-align: top;
+        }
+        .glossar-table th {
+            background-color: #f9f9f9;
+            font-weight: 600;
+            width: 250px;
+            color: #333;
+        }
+        .glossar-table tr:nth-child(even) {
+            background-color: #fcfcfc;
+        }
+        .glossar-table tr:hover {
+            background-color: #f0f8ff;
+        }
+        .back-link {
+            display: inline-block;
+            margin-top: 40px;
+            padding: 12px 24px;
+            background-color: #0078d7;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 1.1em;
+            transition: background-color 0.2s;
+        }
+        .back-link:hover {
+            background-color: #005a9e;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container glossar-container">
+        <h1>Glossar & Erläuterungen</h1>
+        <p>Hier finden Sie eine Übersicht und Erklärung aller Bezeichnungen, Abkürzungen und Funktionen, die im FBH (Fußbodenheizung) Material Rechner verwendet werden. Ideal für Nutzer, die das Tool zum ersten Mal verwenden.</p>
+        
+        <table class="glossar-table">
+            <tbody>
+                <tr>
+                    <th>Objektbez.</th>
+                    <td><strong>Objektbezeichnung.</strong> Der Name, die Projektnummer oder die Adresse des Bauprojekts / Gebäudes.</td>
+                </tr>
+                <tr>
+                    <th>Vert+</th>
+                    <td>Mit diesem Button fügen Sie der Tabelle eine komplett neue Ebene bzw. ein neues Geschoss hinzu (z. B. Erdgeschoss, Obergeschoss). Für jedes Geschoss wird eine eigene Gruppe mit zugehörigem Heizkreisverteiler angelegt.</td>
+                </tr>
+                <tr>
+                    <th>Bez. FBHV</th>
+                    <td><strong>Bezeichnung des Fußbodenheizungsverteilers.</strong> Jeder Verteilerkreis bekommt hier einen Namen (z. B. "Heizkreisverteiler EG").</td>
+                </tr>
+                <tr>
+                    <th>Ebene/Geschoss</th>
+                    <td>Gibt an, in welchem Geschoss sich der Heizkreisverteiler befindet (z. B. EG, OG, KG).</td>
+                </tr>
+                <tr>
+                    <th>Raum+ (Raum hinzufügen)</th>
+                    <td>Fügt dem jeweiligen Geschoss einen neuen Raum als neue Tabellenzeile hinzu.</td>
+                </tr>
+                <tr>
+                    <th>Raum Bez.</th>
+                    <td><strong>Raumbezeichnung.</strong> Der Name des Raumes (z. B. Wohnzimmer, Bad, Küche, Flur).</td>
+                </tr>
+                <tr>
+                    <th>Verlege Abst. Rz [cm]</th>
+                    <td><strong>Verlegeabstand in der Randzone.</strong> Der Abstand der Heizrohre zueinander in Bereichen mit höherem Wärmebedarf, typischerweise direkt vor großen Fensterflächen oder Außenwänden (oft enger verlegt, z.B. 10 cm).</td>
+                </tr>
+                <tr>
+                    <th>Rz Fläche [m²]</th>
+                    <td>Die Fläche der Randzone in Quadratmetern.</td>
+                </tr>
+                <tr>
+                    <th>Verlege Abst. Iz [cm]</th>
+                    <td><strong>Verlegeabstand in der Innenzone.</strong> Der reguläre Abstand der Heizrohre im restlichen Raum, wo der Wärmebedarf normal ist (oft weiter verlegt, z.B. 15 cm oder 20 cm).</td>
+                </tr>
+                <tr>
+                    <th>Iz Fläche [m²]</th>
+                    <td>Die Fläche der Innenzone in Quadratmetern.</td>
+                </tr>
+                <tr>
+                    <th>Raum-Thermostat</th>
+                    <td>Gibt an, ob der jeweilige Raum über ein eigenes Raumthermostat zur Einzelraumregelung verfügt. Wenn angehakt, wird dieses Thermostat in die Summe des Verteilers eingerechnet.</td>
+                </tr>
+                <tr>
+                    <th>Antrieb</th>
+                    <td>Gibt an, ob für diesen Raum Stellantriebe am Verteiler vorgesehen sind (standardmäßig aktiv). Wenn der Haken gesetzt ist, wird für jeden berechneten Heizkreis (Ring) des Raumes automatisch ein Antrieb in die Stückliste aufgenommen.</td>
+                </tr>
+                <tr>
+                    <th>Rz + Iz</th>
+                    <td>Wenn dieses Häkchen gesetzt ist, werden Randzone und Innenzone <strong>zusammen</strong> an denselben Heizkreis (Zuleitung) angeschlossen. Ist es nicht gesetzt, werden beide Zonen separat vom Verteiler angefahren (benötigen eigene Zuleitungen).</td>
+                </tr>
+                <tr>
+                    <th>Ziel Ringlänge [m]</th>
+                    <td>Die gewünschte oder maximal zulässige Rohrlänge für einen einzelnen Heizkreis (Ring). Oft werden Werte um 100m bis 120m gewählt, damit der Druckverlust und die Temperaturspreizung nicht zu groß werden.</td>
+                </tr>
+                <tr>
+                    <th>Anz. Dehnungs-Fugen [Stk]</th>
+                    <td>Anzahl der Dehnungsfugen im Estrich, die von den Heizrohren in diesem Raum gekreuzt werden. Relevant für die Planung von Schutzrohren.</td>
+                </tr>
+                <tr>
+                    <th>Distanz Raum zu FBHV</th>
+                    <td>Die einfache Entfernung (Länge der Zuleitung) vom Raum bis zum Fußbodenheizungsverteiler. Der Rechner multipliziert diesen Wert automatisch mit 2 (für Vor- und Rücklauf), um die benötigte Rohrlänge für die Anbindung zu ermitteln.</td>
+                </tr>
+                <tr>
+                    <th>Summe Ringlänge [m]</th>
+                    <td>Die berechnete <strong>Gesamtlänge der benötigten Rohre</strong> für diesen Raum. Diese Summe beinhaltet die Rohrleitungen für die Randzone, die Innenzone sowie die Zuleitungen vom Verteiler zum Raum (Vor- und Rücklauf).</td>
+                </tr>
+                <tr>
+                    <th>Anz. Ringe [Stk]</th>
+                    <td>Die berechnete <strong>Anzahl der Heizkreise (Ringe)</strong> für diesen Raum. Dies ergibt sich aus der Gesamtlänge geteilt durch die "Ziel Ringlänge". Ist die Gesamtlänge größer als die Ziel Ringlänge, wird der Raum auf mehrere Kreise aufgeteilt.</td>
+                </tr>
+                <tr>
+                    <th>Σ RT</th>
+                    <td>Summe der benötigten <strong>Raumthermostate</strong> für das gesamte Geschoss bzw. den jeweiligen Verteiler.</td>
+                </tr>
+                <tr>
+                    <th>Σ Antr.</th>
+                    <td>Summe der benötigten <strong>Stellantriebe</strong> für das gesamte Geschoss bzw. den jeweiligen Verteiler.</td>
+                </tr>
+                <tr>
+                    <th>Σ (Heizkreise)</th>
+                    <td>Summe der berechneten <strong>Heizkreise (Ringe)</strong> für das gesamte Geschoss. Dies gibt an, wie viele Anschlüsse am Verteiler benötigt werden.</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <a href="index.html" class="back-link">Zurück zum Rechner</a>
+    </div>
+</body>
+</html>

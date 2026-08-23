@@ -1,0 +1,2337 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="data:,">
+    <link rel="stylesheet" href="style.css?v=300">
+    <style>
+/* CSS Custom Properties / Theme Variables */
+:root {
+    --bg-body: #f4f6f8;
+    --bg-container: #ffffff;
+    --primary-color: #0078d7;
+    --primary-hover: #005a9e;
+    --secondary-bg: #e2e8f0;
+    --secondary-bg-hover: #cbd5e1;
+    --secondary-text: #334155;
+    --accent-green: #28a745;
+    --accent-green-hover: #218838;
+    --border-color: #cbd5e1;
+    --border-light: #e2e8f0;
+    --text-main: #0f172a;
+    --text-secondary: #475569;
+    --header-bg: #f1f5f9;
+    --floor-header-bg: #e6f7ff;
+    --floor-header-border: #0078d7;
+    --zebra-even: #f8fafc;
+    --input-focus-border: #0078d7;
+    --input-hover-bg: rgba(0, 0, 0, 0.03);
+    --shadow-color: rgba(0, 0, 0, 0.08);
+}
+
+/* Base Styles */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--bg-body);
+    color: var(--text-main);
+    margin: 0;
+    padding: 20px;
+    box-sizing: border-box;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.app-container {
+    background-color: var(--bg-container);
+    max-width: 98%;
+    margin: 0 auto;
+    border-radius: 8px;
+    box-shadow: 0 2px 12px var(--shadow-color);
+    border: 1px solid var(--border-color);
+    transition: background-color 0.2s, border-color 0.2s;
+}
+
+/* Verstecke die Pfeile bei Nummernfeldern */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+input[type="number"] {
+    -moz-appearance: textfield;
+}
+
+/* Sticky Header "Objektbez." */
+.sticky-header {
+    background-color: var(--bg-container);
+    min-height: fit-content;
+    height: auto;
+    padding: 12px 20px;
+    box-sizing: border-box;
+    border-bottom: 2px solid var(--border-color);
+    position: sticky;
+    top: 0;
+    z-index: 200;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    gap: 10px;
+    transition: background-color 0.2s, border-color 0.2s;
+}
+
+.project-info-row {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    font-size: 1.1em;
+    font-weight: bold;
+}
+
+.project-info-row input {
+    padding: 8px;
+    font-size: 1em;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    width: 300px;
+    background-color: var(--bg-container);
+    color: var(--text-main);
+    transition: background-color 0.2s, color 0.2s, border-color 0.2s, box-shadow 0.2s;
+}
+
+.project-info-row input:focus {
+    border-color: var(--input-focus-border);
+    outline: none;
+    box-shadow: 0 0 6px var(--shadow-color);
+}
+
+/* Helper for placeholder styling */
+::placeholder {
+    color: #aaa;
+    opacity: 1;
+}
+
+input:focus::placeholder {
+    color: transparent;
+}
+
+
+/* Buttons */
+.btn-primary {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-hover);
+}
+
+.btn-secondary {
+    background-color: var(--secondary-bg);
+    color: var(--secondary-text);
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.btn-secondary:hover {
+    background-color: var(--secondary-bg-hover);
+}
+
+.btn-danger {
+    background-color: #d9534f;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+
+.btn-danger:hover {
+    background-color: #c9302c;
+}
+
+.btn-add-room {
+    background-color: var(--accent-green);
+    color: white;
+    border: none;
+    padding: 4px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9em;
+    font-weight: bold;
+    flex-shrink: 0;
+    transition: background-color 0.2s;
+}
+
+.btn-add-room:hover {
+    background-color: var(--accent-green-hover);
+}
+
+.btn-add-floor-inline,
+.btn-copy-floor-inline {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 4px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9em;
+    font-weight: bold;
+    margin-right: 5px;
+    flex-shrink: 0;
+    transition: background-color 0.2s;
+}
+
+.btn-add-floor-inline:hover,
+.btn-copy-floor-inline:hover {
+    background-color: var(--primary-hover);
+}
+
+/* Delete Buttons */
+.btn-delete-floor,
+.btn-delete-room {
+    background-color: transparent;
+    color: #999;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    font-size: 1.2em;
+    padding: 0 5px;
+    transition: color 0.2s;
+}
+
+.btn-delete-floor:hover {
+    color: #d9534f;
+}
+
+.btn-delete-room:hover {
+    color: #d9534f;
+}
+
+/* Toggle Floor Button */
+.btn-toggle-floor {
+    background-color: transparent;
+    color: var(--primary-color);
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    font-size: 1.1em;
+    padding: 0;
+    transition: transform 0.2s ease, color 0.2s;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-toggle-floor:hover {
+    color: var(--primary-hover);
+}
+
+.floor-group.collapsed .btn-toggle-floor {
+    transform: rotate(-90deg);
+}
+
+/* Rz Toggle Button in Column Header */
+.btn-toggle-rz {
+    background-color: var(--secondary-bg);
+    color: var(--secondary-text);
+    border: 1px solid var(--border-color);
+    padding: 2px 4px;
+    font-size: 0.8em;
+    font-weight: bold;
+    border-radius: 4px;
+    cursor: pointer;
+    width: 100%;
+    box-sizing: border-box;
+    transition: all 0.15s ease-in-out;
+    text-align: center;
+    display: inline-block;
+}
+
+.btn-toggle-rz.active {
+    background-color: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+.btn-toggle-rz:hover {
+    filter: brightness(0.9);
+}
+
+.room-row input:disabled {
+    background-color: var(--bg-body);
+    color: var(--text-secondary);
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Floor Spacer Row */
+.floor-spacer-row td {
+    height: 20px;
+    background-color: var(--bg-container) !important;
+    border: none !important;
+    padding: 0;
+}
+
+/* Collapse Floor Rows */
+.floor-group.collapsed tr.room-row,
+.floor-group.collapsed tr.column-header-row {
+    display: none;
+}
+
+/* Table */
+.table-wrapper {
+    overflow-x: auto;
+    padding-bottom: 20px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 950px;
+}
+
+th,
+td {
+    padding: 8px;
+    text-align: left;
+    border: 1px solid var(--border-color);
+    vertical-align: middle;
+    color: var(--text-main);
+    transition: color 0.2s, border-color 0.2s, background-color 0.2s;
+}
+
+.column-header-row th {
+    background-color: var(--header-bg);
+    font-size: 0.85em;
+    font-weight: 600;
+    text-align: center;
+    padding: 4px 6px;
+    line-height: 1.2;
+    border-bottom: 2px solid var(--border-color);
+    color: var(--text-main);
+    transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+}
+
+/* Column Widths */
+.w-tiny {
+    width: 30px;
+    text-align: center;
+}
+
+.w-action, .cell-action {
+    width: 85px;
+    min-width: 85px;
+    text-align: center;
+}
+
+.w-small {
+    width: 70px;
+    text-align: center;
+}
+
+.w-narrow {
+    width: 48px;
+    text-align: center;
+}
+
+.w-wide-rings {
+    width: 135px;
+    text-align: center;
+}
+
+.w-large {
+    width: 180px;
+}
+
+/* Floor Header Row */
+.floor-header-row {
+    background-color: var(--floor-header-bg);
+    border-top: 2px solid var(--floor-header-border);
+    border-bottom: 2px solid var(--floor-header-border);
+    transition: background-color 0.2s, border-color 0.2s;
+}
+
+.floor-header-row td {
+    border: none;
+    padding: 6px 10px; /* Reduced padding to make this row elegantly short! */
+}
+
+/* Floor Footer Row */
+.floor-footer-row {
+    background-color: var(--floor-header-bg);
+    border-top: 2px solid var(--floor-header-border);
+    border-bottom: 2px solid var(--floor-header-border);
+    font-weight: bold;
+    transition: background-color 0.2s, border-color 0.2s;
+}
+
+.floor-footer-row td {
+    padding: 6px 8px;
+    text-align: center;
+    border: 1px solid var(--border-color);
+    color: var(--text-main);
+    font-size: 0.9em;
+}
+
+.floor-footer-row .label-floor-sum {
+    text-align: left;
+    font-size: 0.85em;
+    color: var(--primary-color);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 800;
+}
+
+.floor-footer-row .highlight-sum {
+    color: var(--primary-color);
+    font-size: 0.95em;
+}
+
+.cell-g-index {
+    text-align: center;
+    font-weight: bold;
+    font-size: 1.2em;
+}
+
+.cell-floor-inputs {
+    padding-left: 20px;
+}
+
+.floor-meta {
+    display: flex;
+    gap: 40px;
+    align-items: center;
+}
+
+.meta-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: bold;
+}
+
+.meta-group input {
+    padding: 5px;
+    border: 1px solid var(--border-color);
+    border-radius: 3px;
+    font-weight: normal;
+    background-color: var(--bg-container);
+    color: var(--text-main);
+    transition: background-color 0.2s, color 0.2s, border-color 0.2s, box-shadow 0.2s;
+}
+
+.meta-group input:focus {
+    border-color: var(--input-focus-border);
+    outline: none;
+    box-shadow: 0 0 6px var(--shadow-color);
+}
+
+/* Room Row & Zebra Striping */
+.room-row {
+    transition: background-color 0.2s;
+}
+
+.room-row:nth-of-type(even) {
+    background-color: var(--zebra-even);
+}
+
+.room-row:nth-of-type(odd) {
+    background-color: var(--bg-container);
+}
+
+.room-row td {
+    background-color: inherit; /* Cleanly inherit zebra background colors! */
+}
+
+/* Room Row Inputs */
+.room-row input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 6px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    text-align: center;
+    background-color: transparent;
+    color: var(--text-main);
+    transition: all 0.15s ease-in-out;
+}
+
+.room-row input.input-room-name {
+    text-align: left;
+}
+
+.room-row input:hover {
+    border-color: var(--border-color);
+    background-color: var(--input-hover-bg);
+}
+
+.room-row input:focus {
+    border-color: var(--input-focus-border);
+    background-color: var(--bg-container);
+    box-shadow: 0 0 6px var(--shadow-color);
+    outline: none;
+}
+
+/* Calculated Output Fields (Read-Only) */
+.room-row input[readonly] {
+    font-weight: bold;
+    color: var(--primary-color);
+    background-color: transparent;
+    border-color: transparent;
+    cursor: default;
+}
+
+.room-row input.input-room-name[readonly] {
+    cursor: not-allowed;
+    background-color: transparent;
+    color: var(--text-secondary);
+    font-weight: normal;
+}
+
+.room-row input[readonly]:hover,
+.room-row input[readonly]:focus {
+    background-color: transparent;
+    border-color: transparent;
+    box-shadow: none;
+}
+
+.cell-center {
+    text-align: center;
+}
+
+.input-check-iz,
+.input-check-thermostat {
+    transform: scale(1.2);
+    margin-right: 5px;
+}
+
+/* Multi-Paste Active Styles */
+body.multi-paste-mode-active input[type="text"],
+body.multi-paste-mode-active input:not([type]),
+body.multi-paste-mode-active textarea {
+    cursor: copy !important;
+}
+
+body.multi-paste-mode-active input[type="text"]:hover,
+body.multi-paste-mode-active input:not([type]):hover,
+body.multi-paste-mode-active textarea:hover {
+    outline: 2px solid #22c55e !important;
+    background-color: #f0fdf4 !important;
+}
+
+/* Modal Styles */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.55);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    opacity: 1;
+    transition: opacity 0.2s;
+}
+
+.modal-overlay.hidden {
+    display: none;
+    opacity: 0;
+}
+
+.modal-box {
+    background-color: var(--bg-container);
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    text-align: center;
+    max-width: 400px;
+    width: 100%;
+    animation: slideDown 0.3s ease-out;
+    color: var(--text-main);
+    transition: background-color 0.2s, color 0.2s;
+}
+
+@keyframes slideDown {
+    from {
+        transform: translateY(-30px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.modal-box h3 {
+    margin-top: 0;
+    color: var(--text-main);
+}
+
+.modal-actions {
+    margin-top: 25px;
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+
+/* Summary Card */
+.summary-card {
+    background-color: var(--bg-container);
+    border-radius: 8px;
+    box-shadow: 0 2px 10px var(--shadow-color);
+    border: 1px solid var(--border-color);
+    padding: 20px;
+    margin-top: 20px;
+    transition: background-color 0.2s, border-color 0.2s;
+}
+.summary-card h3 {
+    margin-top: 0;
+    color: var(--primary-color);
+    border-bottom: 2px solid var(--primary-color);
+    padding-bottom: 10px;
+    transition: color 0.2s, border-color 0.2s;
+}
+.summary-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+.summary-item {
+    flex: 1;
+    min-width: 200px;
+    background-color: var(--zebra-even);
+    padding: 15px;
+    border-radius: 6px;
+    border: 1px solid var(--border-light);
+    font-size: 1.1em;
+    transition: background-color 0.2s, border-color 0.2s;
+}
+.summary-label {
+    display: block;
+    color: var(--text-secondary);
+    font-size: 0.9em;
+    margin-bottom: 5px;
+    transition: color 0.2s;
+}
+.summary-value {
+    font-weight: bold;
+    font-size: 1.3em;
+    color: var(--text-main);
+    transition: color 0.2s;
+}
+
+/* Settings Form */
+.settings-form {
+    text-align: left;
+    margin-top: 20px;
+}
+.settings-group {
+    margin-bottom: 15px;
+}
+.settings-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: var(--text-main);
+}
+.settings-group input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    box-sizing: border-box;
+    background-color: var(--bg-container);
+    color: var(--text-main);
+    transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+}
+
+/* Tooltip */
+.custom-tooltip {
+    position: absolute;
+    background: rgba(30, 41, 59, 0.95);
+    color: #f8fafc;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 0.85em;
+    line-height: 1.4;
+    max-width: 280px;
+    z-index: 10000;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(8px);
+    pointer-events: none;
+    opacity: 0;
+    transform: translateY(10px) scale(0.95);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    display: none;
+}
+.custom-tooltip.visible {
+    display: block;
+    opacity: 1;
+    transform: translateY(0) scale(1);
+}
+
+/* Dynamic Drag & Drop Toolbar Styles */
+.toolbar-rows-container {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    width: 100%;
+}
+
+.toolbar-row {
+    position: relative;
+    width: 100%;
+    min-height: 38px;
+    height: 38px;
+    box-sizing: border-box;
+    border: 1px solid var(--border-color, #cbd5e1);
+    border-radius: 6px;
+    background-color: var(--zebra-even, #f8fafc);
+    transition: border-color 0.2s ease, background-color 0.2s ease, height 0.2s ease;
+}
+
+.toolbar-row.collapsed {
+    min-height: 18px !important;
+    height: 18px !important;
+    background-color: #f1f5f9;
+    border-style: dashed;
+    border-color: #cbd5e1;
+    overflow: hidden;
+}
+
+.toolbar-row.collapsed .toolbar-item {
+    display: none !important;
+}
+
+.toolbar-row.collapsed::after {
+    content: "─── Zeile ausgeblendet ───";
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.7em;
+    font-weight: 600;
+    color: #94a3b8;
+    letter-spacing: 0.5px;
+    pointer-events: none;
+}
+
+.btn-toggle-row {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
+    border: 1px solid transparent;
+    color: #64748b;
+    cursor: pointer;
+    font-size: 0.85em;
+    padding: 1px 5px;
+    border-radius: 4px;
+    opacity: 0.75;
+    transition: all 0.2s ease;
+    z-index: 10;
+}
+
+.toolbar-row.has-delete .btn-toggle-row {
+    right: 32px;
+}
+
+.btn-toggle-row:hover {
+    opacity: 1;
+    color: var(--primary-color, #0078d7);
+    background-color: rgba(0, 120, 215, 0.1);
+}
+
+.toolbar-row.drag-over {
+    border-color: var(--primary-color, #0078d7);
+    background-color: rgba(0, 120, 215, 0.08);
+    box-shadow: 0 0 0 2px rgba(0, 120, 215, 0.2);
+}
+
+.toolbar-item {
+    position: absolute;
+    top: 3px;
+    cursor: grab;
+    user-select: none;
+    transition: transform 0.15s ease, opacity 0.15s ease, box-shadow 0.15s ease;
+    white-space: nowrap;
+    z-index: 5;
+}
+
+.toolbar-item:active {
+    cursor: grabbing;
+}
+
+.toolbar-item.dragging {
+    opacity: 0.4;
+    transform: scale(0.96);
+    z-index: 100;
+}
+
+.btn-delete-row {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
+    border: 1px solid transparent;
+    color: #ef4444;
+    cursor: pointer;
+    font-size: 0.95em;
+    padding: 2px 6px;
+    border-radius: 4px;
+    opacity: 0.7;
+    transition: all 0.2s ease;
+    z-index: 10;
+}
+
+.btn-delete-row:hover {
+    opacity: 1;
+    color: #dc2626;
+    background-color: #fee2e2;
+    border-color: #fca5a5;
+}
+
+
+
+.drag-handle {
+    display: none !important;
+}
+
+body:not(.menu-edit-mode) .toolbar-item {
+    cursor: pointer !important;
+}
+
+body.menu-edit-mode .toolbar-item,
+body.menu-edit-mode .fh-draggable-item {
+    cursor: grab !important;
+    outline: 1.5px dashed var(--primary-color, #0078d7) !important;
+    outline-offset: 1px !important;
+}
+
+body.menu-edit-mode .toolbar-item:hover,
+body.menu-edit-mode .fh-draggable-item:hover {
+    outline: 2px solid var(--primary-color, #0078d7) !important;
+    background-color: #f0f7ff !important;
+}
+
+/* ──────────────────────────────────────────────
+   Floor-Header Drag Items (fh-drag-row system)
+   ────────────────────────────────────────────── */
+.fh-draggable-item {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    flex-shrink: 0;
+    border-radius: 4px;
+    transition: outline 0.15s;
+}
+
+/* The ⋮⋮ handle – hidden unless in edit mode */
+.fh-dh {
+    display: none;
+    color: #94a3b8;
+    font-weight: bold;
+    font-size: 0.95em;
+    cursor: grab;
+    user-select: none;
+    opacity: 0.55;
+    padding: 0 1px;
+    transition: opacity 0.2s, color 0.2s;
+    flex-shrink: 0;
+}
+
+body.menu-edit-mode .fh-dh {
+    display: inline;
+}
+
+.fh-draggable-item:hover .fh-dh {
+    opacity: 1;
+    color: var(--primary-color, #0078d7);
+}
+
+/* Highlight item being dragged */
+.fh-draggable-item.fh-is-dragging {
+    opacity: 0.45;
+}
+
+/* Drop position indicator */
+.fh-draggable-item.fh-drop-before {
+    outline: 2px solid var(--primary-color, #0078d7);
+    outline-offset: 1px;
+}
+.fh-draggable-item.fh-drop-after {
+    outline: 2px solid var(--primary-color, #0078d7);
+    outline-offset: 1px;
+}
+/* Ensure fh-draggable-item items in the top bar keep inline-flex layout */
+.header-top-bar .fh-draggable-item {
+    display: inline-flex;
+    align-items: center;
+}
+
+/* Subtle border when edit mode active – shows the row is draggable */
+body.menu-edit-mode .header-top-bar.fh-drag-row {
+    outline: 1px dashed rgba(0, 120, 215, 0.25);
+    outline-offset: 3px;
+    border-radius: 4px;
+}
+
+
+.folder-controls {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 8px;
+    border: 1px dashed var(--border-color);
+    border-radius: 6px;
+    background-color: var(--bg-container);
+}
+
+
+.folder-badge {
+    font-size: 0.8em;
+    color: var(--text-secondary);
+    max-width: 180px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.app-logo-badge {
+    width: 28px;
+    height: 28px;
+    background-color: var(--primary-color);
+    color: white;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 0.9em;
+}
+#tools-pool-container .toolbar-item {
+    position: relative !important;
+    top: auto !important;
+    left: auto !important;
+    margin: 0 !important;
+}
+
+/* Zoom HUD / Floating Badge */
+.zoom-hud {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(30, 41, 59, 0.95);
+    color: #f8fafc;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 0.9em;
+    font-weight: 600;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(8px);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.zoom-hud.visible {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.zoom-hud-input {
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 4px;
+    color: #ffffff;
+    width: 50px;
+    text-align: center;
+    padding: 2px 4px;
+    font-size: 0.9em;
+    font-weight: bold;
+    outline: none;
+}
+
+.zoom-hud-input:focus {
+    border-color: var(--primary-color, #0078d7);
+    background: rgba(255, 255, 255, 0.25);
+}
+    </style>
+</head>
+
+<body>
+
+    <div class="app-container">
+        <!-- Sticky Header Area -->
+        <header class="sticky-header">
+            <!-- Top Info Bar (Fixed minimal header) -->
+            <div class="header-top-bar" style="display: flex; align-items: center; justify-content: space-between; width: 100%; gap: 10px; flex-wrap: wrap; padding-bottom: 4px;">
+
+                <div style="display: flex; align-items: center; gap: 10px; flex: 1;">
+                    <span class="badge-v1" style="font-size: 0.85em; color: var(--text-secondary, #64748b); opacity: 0.85; font-weight: 700; background: var(--bg-container-alt, #e2e8f0); padding: 3px 8px; border-radius: 4px; border: 1px solid var(--border-color, #cbd5e1); flex-shrink: 0;" title="Programmversion">v1.0</span>
+                    <input type="text" id="objekt-bez" placeholder="Objektbezeichnung..." title="Objektbezeichnung (Haupttitel des Projekts)">
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <button id="btn-toggle-menu-edit" class="btn-secondary" style="font-size: 0.85em; padding: 5px 12px; cursor: pointer; font-weight: bold; transition: all 0.2s;" title="Menü-Bearbeitungsmodus aktivieren / deaktivieren">✏️ Menüs bearbeiten</button>
+                    <div id="menu-edit-actions" style="display: none; align-items: center; gap: 6px;">
+                        <button id="btn-export-layout-file" class="btn-secondary" style="font-size: 0.8em; padding: 5px 10px; cursor: pointer;" title="Aktuelles Menü-Layout in menu_layout.json Datei speichern">💾 Layout speichern</button>
+                        <button id="btn-import-layout-file" class="btn-secondary" style="font-size: 0.8em; padding: 5px 10px; cursor: pointer;" title="Menü-Layout aus menu_layout.json Datei laden">📂 Layout laden</button>
+                        <input type="file" id="layout-file-input" style="display: none;" accept=".json">
+                        <button id="btn-apply-layout-bat" class="btn-secondary" style="font-size: 0.8em; padding: 5px 10px; cursor: pointer; background: #e0f2fe; border-color: #0284c7; color: #0369a1; font-weight: bold;" title="Layout speichern & Code-Sync (Apply_Menu_Layout.bat) Anleitung anzeigen">⚡ Code-Sync (.bat)</button>
+                        <button id="btn-add-toolbar-row" class="btn-secondary" style="font-size: 0.8em; padding: 5px 10px; cursor: pointer;" title="Eine neue leere Zeile für Knöpfe hinzufügen">➕ Zeile hinzufügen</button>
+                        <button id="btn-reset-layout" class="btn-secondary" style="font-size: 0.8em; padding: 5px 10px; opacity: 0.8; cursor: pointer;" title="Knopf-Anordnung auf Standard zurücksetzen">🔄 Anordnung zurücksetzen</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Horizontal Divider -->
+            <div style="width: 100%; border-top: 1px solid var(--border-color); margin: 2px 0 4px 0;"></div>
+
+            <!-- Dynamic Toolbar Rows Container (Menü 2) -->
+            <div id="toolbar-rows-container" class="toolbar-rows-container">
+                <!-- Row 1: Filter, Hilfe & Tools Controls -->
+                <div class="toolbar-row" data-row-index="0">
+                    <button id="btn-add-floor-main" class="btn-tool toolbar-item" draggable="false" data-btn-id="btn-add-floor-main" style="left: 15px;" title="Neue Ebene / Verteiler hinzufügen (Vert+)">
+                        <span class="drag-handle">⋮⋮</span> Vert+
+                    </button>
+                    <button id="btn-copy-floor-main" class="btn-tool toolbar-item" draggable="false" data-btn-id="btn-copy-floor-main" style="left: 100px;" title="Aktiven Verteiler duplizieren (Copy V.)">
+                        <span class="drag-handle">⋮⋮</span> Copy V.
+                    </button>
+                    <button id="btn-add-room-main" class="btn-tool toolbar-item" draggable="false" data-btn-id="btn-add-room-main" style="left: 205px;" title="Raum zum aktiven Verteiler hinzufügen (Raum+)">
+                        <span class="drag-handle">⋮⋮</span> Raum+
+                    </button>
+                    <button id="btn-help" class="btn-tool toolbar-item" draggable="false" data-btn-id="btn-help" style="left: 300px;" title="Hilfe & Glossar öffnen (Ziehen am Griff ⋮⋮ zum Verschieben)">
+                        <span class="drag-handle">⋮⋮</span> ℹ️ Hilfe
+                    </button>
+                    <button id="btn-toggle-tooltips" class="btn-secondary btn-tool toolbar-item" draggable="false" data-btn-id="btn-toggle-tooltips" style="left: 405px;" title="Tooltip-Hilfe aktivieren / deaktivieren (Ziehen am Griff ⋮⋮ zum Verschieben)">
+                        <span class="drag-handle">⋮⋮</span> 💡 Info: Aus
+                    </button>
+                    <button id="btn-select-folder" class="btn-tool toolbar-item" draggable="false" data-btn-id="btn-select-folder" style="left: 535px;" title="Aktueller Zielordner (Klicken zum Ändern, Ziehen am Griff ⋮⋮ zum Verschieben)">
+                        <span class="drag-handle">⋮⋮</span> 📁 <span id="header-folder-name" style="font-family: inherit; color: #0284c7;">g:\FBH Mat\FBH_Projekte</span>
+                    </button>
+                    <div id="main-floor-filter-item" class="toolbar-item" draggable="false" data-btn-id="main-floor-filter" style="left: 845px; display: inline-flex; align-items: center; gap: 4px; background: var(--bg-container, #ffffff); border: 1px solid var(--border-color, #cbd5e1); border-radius: 6px; padding: 2px 6px;">
+                        <span class="drag-handle">⋮⋮</span>
+                        <input type="text" id="main-floor-filter" placeholder="🔍 Geschoss filtern..." style="padding: 3px 6px; font-size: 0.85em; border: none; outline: none; background: transparent; width: 220px;" title="Filtert die Tabelle nach Geschossname">
+                    </div>
+                    <div id="main-fbhv-filter-item" class="toolbar-item" draggable="false" data-btn-id="main-fbhv-filter" style="left: 1025px; display: inline-flex; align-items: center; gap: 4px; background: var(--bg-container, #ffffff); border: 1px solid var(--border-color, #cbd5e1); border-radius: 6px; padding: 2px 6px;">
+                        <span class="drag-handle">⋮⋮</span>
+                        <input type="text" id="main-fbhv-filter" placeholder="🔍 Verteiler / FBHV filtern..." style="padding: 3px 6px; font-size: 0.85em; border: none; outline: none; background: transparent; width: 220px;" title="Filtert die Tabelle nach FBHV-Bezeichnung">
+                    </div>
+                    <button id="btn-open-tools" class="btn-secondary btn-tool toolbar-item" draggable="false" data-btn-id="btn-open-tools" style="left: 1205px;" title="Tools-Fenster öffnen/schließen, um Menü-Knöpfe zu verwalten">
+                        <span class="drag-handle">⋮⋮</span> 🛠️ Tools
+                    </button>
+                    <button class="btn-delete-row" title="Diese leere Zeile löschen">🗑️</button>
+                </div>
+
+                <!-- Row 2: Primary Calculation Tools -->
+                <div class="toolbar-row" data-row-index="1">
+                    <button id="btn-settings" class="btn-tool toolbar-item" draggable="false" data-btn-id="btn-settings" style="left: 15px;" title="Material-Parameter einstellen (Ziehen am Griff ⋮⋮ zum Verschieben)">
+                        <span class="drag-handle">⋮⋮</span> ⚙️ Parameter
+                    </button>
+                    <button id="btn-design" class="btn-tool toolbar-item" draggable="false" data-btn-id="btn-design" style="left: 160px;" title="Wähle ein Farb-Design (Ziehen am Griff ⋮⋮ zum Verschieben)">
+                        <span class="drag-handle">⋮⋮</span> 🎨 Design
+                    </button>
+                    <button id="btn-print-report" class="btn-tool toolbar-item" draggable="false" data-btn-id="btn-print-report" style="left: 280px;" title="PDF Report / Drucken über Druckdialog erstellen (Ziehen am Griff ⋮⋮ zum Verschieben)">
+                        <span class="drag-handle">⋮⋮</span> 🖨️ Drucken
+                    </button>
+                    <button id="btn-verteilerkasten-config" class="btn-tool toolbar-item" draggable="false" data-btn-id="btn-verteilerkasten-config" style="left: 440px;" title="Zugelassene Verteiler- & Kasten-Optionen für dieses Projekt konfigurieren">
+                        <span class="drag-handle">⋮⋮</span> 📦 FBHV-Konfig
+                    </button>
+                    <button id="btn-open-rapportliste" class="btn-tool toolbar-item" draggable="false" data-btn-id="btn-open-rapportliste" style="left: 600px;" title="Rapportliste & Material-Zusammenfassung als Fenster anzeigen">
+                        <span class="drag-handle">⋮⋮</span> 📋 Rapportliste
+                    </button>
+                    <button id="btn-multi-paste" class="btn-tool toolbar-item" draggable="false" data-btn-id="btn-multi-paste" style="left: 760px;" title="Markierten Text kopieren und per Klick in beliebige Textfelder stempeln (Esc = Beenden)">
+                        <span class="drag-handle">⋮⋮</span> 📋 Text stempeln
+                    </button>
+                    <button id="btn-column-widths" class="btn-tool toolbar-item" draggable="false" data-btn-id="btn-column-widths" style="left: 925px;" title="Spaltenbreiten im Verteiler anpassen (wie in Excel)">
+                        <span class="drag-handle">⋮⋮</span> 📏 Spaltenbreiten
+                    </button>
+                    <button id="btn-db-check" class="btn-tool toolbar-item" draggable="false" data-btn-id="btn-db-check" style="left: 1090px;" title="Datenbank-Auslegung für 1 bis 12 Heizkreise anhand der aktuellen Auto-Einstellungen prüfen">
+                        <span class="drag-handle">⋮⋮</span> 🔍 DB-Check
+                    </button>
+                    <button id="btn-auto-pos-nr" class="btn-tool toolbar-item" draggable="false" data-btn-id="btn-auto-pos-nr" style="left: 1250px;" title="Automatisches Vergeben von Pos. Nrn. für aktive Verteiler (Start- & Endzahl festlegen)">
+                        <span class="drag-handle">⋮⋮</span> 🚗 Pos. Auto
+                    </button>
+                    <button id="btn-clear-pos-nr" class="btn-tool toolbar-item" draggable="false" data-btn-id="btn-clear-pos-nr" style="left: 1390px;" title="Pos. Nrn. aller aktiven Verteiler löschen / leeren">
+                        <span class="drag-handle">⋮⋮</span> 🗑️ Pos. leeren
+                    </button>
+                    <button id="btn-verteiler-move" class="btn-tool toolbar-item" draggable="false" data-btn-id="btn-verteiler-move" style="left: 1530px;" title="Verteiler-Verschiebemodus (Wenn aktiv, wird der aktive Verteiler mit den Pfeiltasten ↑ / ↓ nach oben oder unten verschoben)">
+                        <span class="drag-handle">⋮⋮</span> ↕️ Vert. move
+                    </button>
+                    <button class="btn-delete-row" title="Diese leere Zeile löschen">🗑️</button>
+                </div>
+
+                <!-- Row 3: Storage & File Operations -->
+                <div class="toolbar-row" data-row-index="2">
+                    <button id="btn-save-to-folder" class="btn-tool toolbar-item" draggable="false" data-btn-id="btn-save-to-folder" style="left: 15px; display: none;" title="Ergebnisse im Zielordner speichern (Ziehen am Griff ⋮⋮ zum Verschieben)">
+                        <span class="drag-handle">⋮⋮</span> 💾 In Ordner speichern
+                    </button>
+                    <button id="btn-load-from-folder" class="btn-tool toolbar-item" draggable="false" data-btn-id="btn-load-from-folder" style="left: 175px; display: none;" title="Projekt aus dem Zielordner laden (Ziehen am Griff ⋮⋮ zum Verschieben)">
+                        <span class="drag-handle">⋮⋮</span> 📂 Aus Ordner laden
+                    </button>
+                    <button id="btn-import-cad" class="btn-tool toolbar-item" draggable="false" data-btn-id="btn-import-cad" style="left: 335px;" title="Excel-Bericht aus CAD/CD importieren (Ziehen am Griff ⋮⋮ zum Verschieben)">
+                        <span class="drag-handle">⋮⋮</span> 📊 Import aus CAD
+                    </button>
+                    <button id="btn-open-cad-pool" class="btn-tool toolbar-item" draggable="false" data-btn-id="btn-open-cad-pool" style="left: 485px;" title="Gespeicherte CAD-Räume anzeigen und per Drag-and-Drop zuweisen (Ziehen am Griff ⋮⋮ zum Verschieben)">
+                        <span class="drag-handle">⋮⋮</span> 📋 CAD-Pool
+                    </button>
+                    <button id="btn-open-verteiler-overview" class="btn-tool toolbar-item" draggable="false" data-btn-id="btn-open-verteiler-overview" style="left: 615px;" title="Übersicht aller Verteiler anzeigen (Ziehen am Griff ⋮⋮ zum Verschieben)">
+                        <span class="drag-handle">⋮⋮</span> 📊 Verteiler-Übersicht
+                    </button>
+                    <button id="btn-export-file" class="btn-tool toolbar-item" draggable="false" data-btn-id="btn-export-file" style="left: 790px;" title="Projekt als Datei speichern (Ziehen am Griff ⋮⋮ zum Verschieben)">
+                        <span class="drag-handle">⋮⋮</span> 💾 Export
+                    </button>
+                    <button id="btn-import-file" class="btn-tool toolbar-item" draggable="false" data-btn-id="btn-import-file" style="left: 885px;" title="Projekt aus Datei laden (Ziehen am Griff ⋮⋮ zum Verschieben)">
+                        <span class="drag-handle">⋮⋮</span> 📂 Import
+                    </button>
+                    <input type="file" id="file-input" style="display: none;" accept=".json">
+                    <button id="btn-clear-cache" class="btn-tool btn-danger-tool toolbar-item" draggable="false" data-btn-id="btn-clear-cache" style="left: 985px;" title="Löscht alles und startet neues Projekt (Ziehen am Griff ⋮⋮ zum Verschieben)">
+                        <span class="drag-handle">⋮⋮</span> 🗑️ Neu
+                    </button>
+                </div>
+            </div>
+        </header>
+
+
+        <!-- Main Layout wrapper for table (100% full width) -->
+        <div class="layout-wrapper" style="display: block; padding: 20px;">
+            
+            <!-- Main Table Area -->
+            <div class="table-wrapper" style="width: 100%; padding-bottom: 20px; overflow-x: auto;">
+                <table id="main-table">
+
+                    <tbody id="content-body">
+                        <!-- Floors (Groups) will be injected here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Templates -->
+    <template id="tpl-floor-header">
+        <!-- Floor Info Row -->
+        <tr class="floor-header-row">
+            <td colspan="16" style="padding: 6px 12px;">
+                <div class="floor-header-container" style="display: flex; flex-direction: column; gap: 6px; width: 100%;">
+                    <!-- Zeile 1: Bez. FBHV, Ebene/Geschoss & Status-Badge -->
+                    <div class="floor-meta-row1 fh-drag-row" data-fh-row="meta-row1" style="display: flex; align-items: center; gap: 8px; width: 100%;">
+                        <div class="fh-draggable-item" data-fh-id="input-fbhv">
+                            <span class="drag-handle fh-dh">⋮⋮</span>
+                            <input type="text" class="input-fbhv-name" placeholder="Bez. Verteiler / FBHV" style="width: 190px; padding: 4px 8px; font-weight: bold; border-radius: 4px; border: 1px solid var(--border-color, #cbd5e1);">
+                        </div>
+                        <div class="fh-draggable-item" data-fh-id="input-floor">
+                            <span class="drag-handle fh-dh">⋮⋮</span>
+                            <input type="text" class="input-floor-name" placeholder="Ebene / Geschoss" style="width: 190px; padding: 4px 8px; font-weight: bold; border-radius: 4px; border: 1px solid var(--border-color, #cbd5e1);">
+                        </div>
+                        <div class="fh-draggable-item" data-fh-id="input-pos" style="flex-shrink: 0;">
+                            <span class="drag-handle fh-dh">⋮⋮</span>
+                            <input type="text" class="input-pos-nr is-auto" placeholder="" title="Pos. Nr. (Automatisch fortlaufend, frei überschreibbar)" style="width: 36px !important; min-width: 36px !important; max-width: 45px !important; padding: 4px 2px !important; font-weight: bold; border-radius: 4px; border: 1px solid var(--border-color, #cbd5e1); text-align: center; color: #64748b;">
+                        </div>
+                        <div class="fh-draggable-item" data-fh-id="badge-active" style="flex-shrink:0;">
+                            <span class="drag-handle fh-dh">⋮⋮</span>
+                            <button type="button" class="active-verteiler-badge" title="Klicken = einzeln auswählen&#10;Ctrl+Klick = zur Mehrfachauswahl hinzufügen&#10;&#10;Wenn mehrere markiert (&#10;grüner Haken&#10;):&#10;• RZ-Klick überträgt auf alle&#10;• Bez./Ebene + Enter überträgt auf alle">Aktiv</button>
+                            <button type="button" class="btn-sync-mark" title="Zur Sync-Gruppe hinzufügen (Ctrl+Klick)&#10;Dann RZ / Bez. / Ebene ändern → alle markierten erhalten die Änderung" style="margin-left:4px; padding:2px 8px; font-size:0.8em; border-radius:4px; border:2px solid #94a3b8; background:#f8fafc; color:#64748b; cursor:pointer; font-weight:700; display:inline-flex; align-items:center; gap:3px; transition:all 0.2s;">☐ Sync</button>
+                        </div>
+                    </div>
+
+
+                    <!-- Zeile 2: ALLE Steuerungselemente & Anzeigen auf EINER HÖHE (Single Horizontal Line) -->
+                    <div class="floor-header-row2" style="display: flex; align-items: center; justify-content: space-between; gap: 10px; width: 100%; flex-wrap: nowrap; overflow-x: auto;">
+                        <!-- Links: Knöpfe, Anschl. Hor/Ver, Verteilerkasten-Dropdown -->
+                        <div class="fh-drag-row" data-fh-row="row2-left" style="display: flex; align-items: center; gap: 8px; flex-shrink: 0;">
+                            <!-- Action Buttons -->
+                            <div class="fh-draggable-item" data-fh-id="toggle-floor">
+                                <span class="drag-handle fh-dh">⋮⋮</span>
+                                <button class="btn-toggle-floor" title="Geschoss ein-/ausklappen" style="font-size: 1.0em; padding: 3px 8px; border-radius: 4px; border: 1px solid var(--border-color, #cbd5e1); background: #ffffff; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.05); display: inline-flex; align-items: center; justify-content: center;">▼</button>
+                            </div>
+                            <div class="fh-draggable-item" data-fh-id="delete-floor">
+                                <span class="drag-handle fh-dh">⋮⋮</span>
+                                <button class="btn-delete-floor" title="Geschoss löschen" style="font-size: 0.95em; padding: 3px 8px; border-radius: 4px; border: 1px solid var(--border-color, #cbd5e1); background: #ffffff; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.05); display: inline-flex; align-items: center; justify-content: center;">🗑️</button>
+                            </div>
+
+                            <!-- Anschluss Orientierung & Verteilerkasten Steuerung (als Gruppe) -->
+                            <div class="fh-draggable-item" data-fh-id="anschl-group" style="gap: 4px;">
+                                <span class="drag-handle fh-dh">⋮⋮</span>
+                                <span style="font-size: 0.85em; font-weight: bold; color: var(--primary-color, #0078d7); flex-shrink: 0;">Anschl.:</span>
+                                <!-- Hor -->
+                                <label style="display: flex; align-items: center; gap: 3px; font-size: 0.82em; cursor: pointer; font-weight: 600; color: var(--text-main, #0f172a); flex-shrink: 0;" title="Horizontaler Anschluss">
+                                    <input type="checkbox" class="cb-floor-hor" checked> Hor
+                                </label>
+                                <!-- Ver -->
+                                <label style="display: flex; align-items: center; gap: 3px; font-size: 0.82em; cursor: pointer; font-weight: 600; color: var(--text-main, #0f172a); flex-shrink: 0;" title="Vertikaler Anschluss">
+                                    <input type="checkbox" class="cb-floor-ver"> Ver
+                                </label>
+                            </div>
+
+                            <!-- Kasten 3: Verteilerkastentyp Dropdown -->
+                            <div class="fh-draggable-item" data-fh-id="kasten-select">
+                                <span class="drag-handle fh-dh">⋮⋮</span>
+                                <select class="select-floor-kasten" style="padding: 3px 6px; font-size: 0.82em; font-weight: bold; border-radius: 4px; border: 1px solid #bae6fd; background: #e0f2fe; color: #0369a1; min-width: 145px; flex-shrink: 0; transition: all 0.2s;" title="Verteilerkasten-Typ für dieses Geschoss wählen (Auto = Empfehlung aus Konfigurator)">
+                                    <option value="auto" selected>🚗 Auto (Empfehlung)</option>
+                                    <option value="beton_150">✋ Beton-Kasten 150 (UP 150mm)</option>
+                                    <option value="beton_125">✋ Beton-Kasten 125 (UP 125mm)</option>
+                                    <option value="blech_teleskop">✋ Blech-Teleskopkasten (UP)</option>
+                                    <option value="stahlblech">✋ Stahlblechkasten (AP/UP)</option>
+                                    <option value="eps_wand">✋ EPS-Wand Kasten (UP)</option>
+                                    <option value="eps_boden">✋ EPS-Boden Kasten (Boden)</option>
+                                    <option value="klapptuer_weiss">✋ Klapptür weiss</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Rechts: Verteilerkasten-Abmessungen & Ansch.-Set Dropdown auf derselben Höhe ganz rechts -->
+                        <div class="fh-drag-row" data-fh-row="row2-right" style="display: flex; align-items: center; gap: 0px; flex-shrink: 0; margin-left: auto;">
+                            <div class="fh-draggable-item" data-fh-id="kasten-dims">
+                                <span class="drag-handle fh-dh">⋮⋮</span>
+                                <span class="floor-kasten-dims" style="font-size: 0.82em; font-weight: bold; padding: 4px 10px; border-radius: 4px; background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; white-space: nowrap; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; transition: all 0.2s; flex-shrink: 0;" title="Klicken für vollständige Abmessungen (Länge, Breite, Höhe) & Schrankdetails">
+                                    Verteilerkasten: -<span style="margin: 0 14px; opacity: 0.45; font-weight: normal;">|</span>Index -<span style="margin: 0 14px; opacity: 0.45; font-weight: normal;">|</span>B: - × H: - × T: - ℹ️
+                                </span>
+                            </div>
+                            <div class="fh-draggable-item" data-fh-id="ansch-set-group" style="gap: 4px;">
+                                <span class="drag-handle fh-dh">⋮⋮</span>
+                                <span style="font-size: 0.82em; font-weight: bold; color: #0369a1; white-space: nowrap; flex-shrink: 0;">Ansch.-Set:</span>
+                                <select class="select-floor-conn" style="padding: 4px 8px; font-size: 0.82em; font-weight: bold; border-radius: 4px; border: 1px solid #bae6fd; background: #e0f2fe; color: #0369a1; max-width: 380px; flex-shrink: 0; transition: all 0.2s;" title="Anschluss-Set / Garnitur für dieses Geschoss manuell wählen oder auf Auto belassen">
+                                    <option value="auto" selected>🚗 Auto (aus Konfiguration)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </td>
+        </tr>
+        <tr class="column-header-row">
+
+            <th class="w-tiny"><button class="btn-toggle-rz active" type="button" title="Randzone (RZ) aktivieren / deaktivieren (Ctrl-Klick für alle Verteiler)">RZ</button></th>
+            <th class="w-action"></th>
+            <th class="w-large">Raum Bez.</th>
+            <th class="w-small">VA Rz<br>[cm]</th>
+            <th class="w-small">Fläche Rz<br>[m²]</th>
+            <th class="w-narrow">VA Iz<br>[cm]</th>
+            <th class="w-small">Fläche Iz<br>[m²]</th>
+            <th class="w-small">Raum-<br>Therm.</th>
+            <th class="w-narrow">Antrieb</th>
+            <th class="w-narrow">Rz+Iz</th>
+            <th class="w-small">Ziel Ringl.<br>[m]</th>
+            <th class="w-small">Fugen<br>[Stk]</th>
+            <th class="w-small">Anbindung<br>[m]</th>
+            <th class="w-small">Gesamtl.<br>[m]</th>
+            <th class="w-wide-rings">Ringe<br>[Stk]</th>
+            <th class="w-small">Erweit.</th>
+        </tr>
+    </template>
+
+    <template id="tpl-room-row">
+        <tr class="room-row">
+            <td>
+                <button class="btn-delete-room" title="Raum löschen" style="font-size: 0.9em;">🗑️</button>
+            </td>
+            <td></td> <!-- Indentation for R+ -->
+            <td><input type="text" class="input-room-name" placeholder="Raumbezeichnung"></td>
+            <td><input type="number" class="input-va-rz" value="10"></td>
+            <td><input type="number" class="input-area" value="0"></td>
+            <td><input type="number" class="input-va-iz" value="20"></td>
+            <td><input type="number" class="input-area-iz" value="0"></td>
+            <td class="cell-center"><input type="checkbox" class="input-check-thermostat" checked></td>
+            <td class="cell-center"><input type="checkbox" class="input-check-antrieb" checked></td>
+            <td class="cell-center"><input type="checkbox" class="input-check-iz"></td>
+            <td><input type="number" class="input-target" value="100"></td>
+            <td><input type="number" class="input-fugen" value="0"></td>
+            <td><input type="number" class="input-dist" value="10"></td>
+            <td><input type="number" class="input-sum" readonly value="0"></td>
+            <td><input type="number" class="input-rings" readonly value="0"></td>
+            <td></td>
+        </tr>
+    </template>
+
+    <template id="tpl-floor-footer">
+        <tr class="floor-footer-row">
+            <td></td> <!-- Col 1: Action delete -->
+            <td></td> <!-- Col 2: Action spacer -->
+            <td class="label-floor-sum">Summe / Verteiler</td> <!-- Col 3: Room name sum label -->
+            <td></td> <!-- Col 4: VA Rz spacer -->
+            <td class="floor-sum-area-rz">0.00</td> <!-- Col 5: Rz Area Sum -->
+            <td></td> <!-- Col 6: VA Iz spacer -->
+            <td class="floor-sum-area-iz">0.00</td> <!-- Col 7: Iz Area Sum -->
+            <td class="floor-sum-thermostate">0</td> <!-- Col 8: Thermostat Sum -->
+            <td class="floor-sum-antriebe">0</td> <!-- Col 9: Actuators Sum -->
+            <td></td> <!-- Col 10: combined check spacer -->
+            <td></td> <!-- Col 11: target spacer -->
+            <td class="floor-sum-fugen">0</td> <!-- Col 12: Fugen Sum -->
+            <td class="floor-sum-dist">0</td> <!-- Col 13: Anbindung Sum -->
+            <td class="floor-sum-pipe highlight-sum">0.00</td> <!-- Col 14: total pipe length sum -->
+            <td class="floor-sum-verteiler highlight-sum">0</td> <!-- Col 15: distributor type -->
+            <td class="floor-sum-erweit highlight-sum"></td> <!-- Col 16: extensions -->
+        </tr>
+        <tr class="floor-spacer-row">
+            <td colspan="16"></td>
+        </tr>
+    </template>
+
+    <!-- Custom Confirmation Modal -->
+    <div id="modal-overlay" class="modal-overlay hidden">
+        <div class="modal-box">
+            <h3>Geschoss löschen?</h3>
+            <p>Möchten Sie dieses Geschoss inklusive aller Räume wirklich löschen?</p>
+            <div class="modal-actions">
+                <button id="btn-modal-cancel" class="btn-secondary">Abbrechen</button>
+                <button id="btn-modal-confirm" class="btn-danger">Löschen</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ctrl-Key Batch Apply Modal -->
+    <div id="ctrl-batch-modal" class="modal-overlay hidden">
+        <div class="modal-box" style="max-width: 500px; text-align: left; background: var(--bg-container, #ffffff);">
+            <div style="display: flex; align-items: center; gap: 10px; border-bottom: 2px solid var(--primary-color, #0078d7); padding-bottom: 10px; margin-bottom: 15px;">
+                <span style="font-size: 1.4em;">⌨️</span>
+                <h3 style="margin: 0; color: var(--primary-color, #0078d7); font-size: 1.15em;">Änderung auf andere Verteiler übertragen?</h3>
+            </div>
+            
+            <p id="ctrl-batch-desc" style="font-size: 0.9em; color: var(--text-main, #0f172a); margin-bottom: 18px; line-height: 1.4;">
+                Sie haben mit gedrückter <strong>Ctrl-Taste</strong> eine Einstellung geändert. Wo soll diese Änderung übernommen werden?
+            </p>
+
+            <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px;">
+                <button type="button" id="btn-ctrl-apply-marked" class="btn-primary" style="padding: 10px 14px; font-weight: 600; text-align: left; display: none; align-items: center; gap: 10px; font-size: 0.9em; cursor: pointer; background: #16a34a; border-color: #16a34a;">
+                    <span style="font-size: 1.2em;">📌</span> <span id="lbl-ctrl-apply-marked">In allen <strong>markierten Verteilern</strong> übernehmen</span>
+                </button>
+                <button type="button" id="btn-ctrl-apply-all" class="btn-primary" style="padding: 10px 14px; font-weight: 600; text-align: left; display: flex; align-items: center; gap: 10px; font-size: 0.9em; cursor: pointer;">
+                    <span style="font-size: 1.2em;">🌐</span> <span>In <strong>ALLEN Verteilern</strong> übernehmen</span>
+                </button>
+                <button type="button" id="btn-ctrl-apply-same" class="btn-secondary" style="padding: 10px 14px; font-weight: 600; text-align: left; display: flex; align-items: center; gap: 10px; font-size: 0.9em; cursor: pointer; border: 1.5px solid var(--primary-color, #0078d7); color: var(--primary-color, #0078d7);">
+                    <span style="font-size: 1.2em;">🏢</span> <span id="lbl-ctrl-apply-same">Nur in Verteilern vom <strong>gleichen Geschoss</strong> übernehmen</span>
+                </button>
+                <button type="button" id="btn-ctrl-apply-single" class="btn-secondary" style="padding: 8px 14px; text-align: left; display: flex; align-items: center; gap: 10px; font-size: 0.85em; cursor: pointer; opacity: 0.8;">
+                    <span style="font-size: 1.1em;">✖</span> <span>Nur für diesen einzelnen Verteiler belassen</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Multi-Paste Active Toast Banner -->
+    <div id="multi-paste-toast" class="modal-overlay hidden" style="position: fixed; top: 15px; left: 50%; transform: translateX(-50%); z-index: 10000; background: #0f172a; color: #ffffff; padding: 10px 20px; border-radius: 30px; box-shadow: 0 10px 25px rgba(0,0,0,0.35); display: flex; align-items: center; gap: 14px; font-size: 0.9em; border: 2px solid #22c55e; height: auto; width: auto;">
+        <span style="font-size: 1.3em;">📋</span>
+        <span>Stempel-Modus aktiv: <strong id="multi-paste-toast-text" style="color: #4ade80;">""</strong></span>
+        <span style="font-size: 0.85em; opacity: 0.85; background: rgba(255,255,255,0.15); padding: 3px 10px; border-radius: 12px; white-space: nowrap;">Klicken Sie in Textfelder zum Einfügen (Esc = Stop)</span>
+        <button id="btn-multi-paste-close" style="background: rgba(255,255,255,0.2); border: none; color: #fff; width: 22px; height: 22px; border-radius: 50%; font-size: 0.9em; cursor: pointer; display: flex; align-items: center; justify-content: center; margin-left: 6px;" title="Beenden (Escape)">✕</button>
+    </div>
+    <!-- Auto Pos. Nr. Dialog Modal -->
+    <div id="modal-auto-pos-nr" class="modal-overlay hidden">
+        <div class="modal-box" style="max-width: 420px; text-align: left; background: var(--bg-container, #ffffff);">
+            <div style="display: flex; align-items: center; gap: 10px; border-bottom: 2px solid var(--primary-color, #0078d7); padding-bottom: 10px; margin-bottom: 15px;">
+                <span style="font-size: 1.4em;">🚗</span>
+                <h3 style="margin: 0; color: var(--primary-color, #0078d7); font-size: 1.15em;">Automatisches Pos. Nr. Vergeben</h3>
+            </div>
+            
+            <p style="font-size: 0.9em; color: var(--text-main, #0f172a); margin-bottom: 15px; line-height: 1.4;">
+                Nummerierung für <strong id="lbl-auto-pos-count" style="color: var(--primary-color, #0078d7);">0 aktive Verteiler</strong> ab dem obersten aktiven Verteiler durchführen:
+            </p>
+
+            <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px;">
+                <div style="display: flex; flex-direction: column; gap: 4px;">
+                    <label for="input-auto-pos-start" style="font-size: 0.85em; font-weight: bold; color: var(--text-main, #0f172a);">Startnummer (Beginn):</label>
+                    <input type="number" id="input-auto-pos-start" value="1" min="1" step="1" style="padding: 6px 10px; border-radius: 4px; border: 1px solid var(--border-color, #cbd5e1); font-weight: bold; width: 100%; box-sizing: border-box; background: var(--bg-container, #ffffff); color: var(--text-main, #0f172a);">
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 4px;">
+                    <label for="input-auto-pos-end" style="font-size: 0.85em; font-weight: bold; color: var(--text-main, #0f172a);">Stoppen bei Zahl (Optional - 'Bis'):</label>
+                    <input type="number" id="input-auto-pos-end" placeholder="Leer = alle aktiven nummerieren" min="1" step="1" style="padding: 6px 10px; border-radius: 4px; border: 1px solid var(--border-color, #cbd5e1); font-weight: bold; width: 100%; box-sizing: border-box; background: var(--bg-container, #ffffff); color: var(--text-main, #0f172a);">
+                    <span style="font-size: 0.78em; color: var(--text-secondary, #64748b);">Wenn eingegeben, stoppt die Vergabe nach dieser Zahl.</span>
+                </div>
+            </div>
+
+            <div class="modal-actions" style="display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-top: 15px;">
+                <button type="button" id="btn-auto-pos-clear" class="btn-danger" style="padding: 8px 14px; background-color: #ef4444; color: #ffffff; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 6px;" title="Löscht alle Pos. Nrn. der aktiven Verteiler">🗑️ Pos. Nrn. löschen</button>
+                <div style="display: flex; gap: 10px;">
+                    <button type="button" id="btn-auto-pos-cancel" class="btn-secondary" style="padding: 8px 16px;">Abbrechen</button>
+                    <button type="button" id="btn-auto-pos-confirm" class="btn-primary" style="padding: 8px 16px;">Nummern vergeben</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bat Sync Info Modal -->
+    <div id="modal-bat-sync-info" class="modal-overlay hidden">
+        <div class="modal-box" style="max-width: 480px; text-align: left; background: var(--bg-container, #ffffff);">
+            <div style="display: flex; align-items: center; gap: 10px; border-bottom: 2px solid var(--primary-color, #0078d7); padding-bottom: 10px; margin-bottom: 15px;">
+                <span style="font-size: 1.4em;">⚡</span>
+                <h3 style="margin: 0; color: var(--primary-color, #0078d7); font-size: 1.15em;">Menü-Layout Code-Synchronisation</h3>
+            </div>
+            
+            <p style="font-size: 0.9em; color: var(--text-main, #0f172a); margin-bottom: 12px; line-height: 1.4;">
+                Das aktuelle Menü-Layout wurde als <strong style="color: #0284c7;">menu_layout.json</strong> gespeichert und heruntergeladen!
+            </p>
+
+            <div style="background: var(--zebra-even, #f8fafc); border: 1px solid var(--border-color, #cbd5e1); border-radius: 6px; padding: 12px; margin-bottom: 15px; font-size: 0.85em; color: var(--text-main, #0f172a); line-height: 1.5;">
+                <div style="font-weight: bold; margin-bottom: 6px; color: #0f172a;">Nächster Schritt für dauerhaften App-Standard:</div>
+                Führen Sie im Projektordner die Datei aus:
+                <div style="margin: 8px 0; background: #0f172a; color: #38bdf8; padding: 6px 10px; border-radius: 4px; font-family: monospace; font-weight: bold; text-align: center; font-size: 1.05em;">
+                    Apply_Menu_Layout.bat
+                </div>
+                Dadurch wird der Quellcode in <code>default_toolbar_layout.js</code> automatisch mit der neuen Knopf-Anordnung aktualisiert.
+            </div>
+
+            <div class="modal-actions" style="display: flex; justify-content: flex-end;">
+                <button type="button" id="btn-bat-sync-close" class="btn-primary" style="padding: 8px 18px;">Verstanden</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="modal-overlay hidden">
+        <div class="modal-box">
+            <h3>Material-Parameter</h3>
+            <p style="font-size: 0.9em; color: #666; margin-top: 0;">Diese Werte beeinflussen die Berechnung des Gesamtbedarfs.</p>
+            <div class="settings-form">
+                <div class="settings-group">
+                    <label for="setting-schiene">Verlegeschiene (lfm pro m² Fläche):</label>
+                    <input type="number" id="setting-schiene" step="0.1" value="1.0">
+                </div>
+                <div class="settings-group">
+                    <label for="setting-klips">Clips/Tackerklammer Abstand [m]:</label>
+                    <input type="number" id="setting-klips" step="0.1" value="0.5">
+                </div>
+                <div class="settings-group">
+                    <label for="setting-target">Ziel Ringlänge [m]:</label>
+                    <input type="number" id="setting-target" step="1" value="100">
+                </div>
+                <div class="settings-group">
+                    <label for="setting-max-over">Max. Überschreitung der Ziel Ringlänge [m]:</label>
+                    <input type="number" id="setting-max-over" step="1" value="0">
+                </div>
+                <div class="settings-group">
+                    <label for="setting-dist">Standard-Anbindungsleitung [m]:</label>
+                    <input type="number" id="setting-dist" step="1" value="10">
+                </div>
+
+                <hr style="border: 0; border-top: 1px solid var(--border-color, #e2e8f0); margin: 15px 0;">
+                <h4 style="margin: 0 0 10px 0; color: var(--primary-color, #0078d7); font-size: 1.05em;">📦 Verteiler & Verteilerkasten Auslegung</h4>
+
+                <div class="settings-group">
+                    <label for="setting-verteiler-type">Verteiler-Ausführung:</label>
+                    <select id="setting-verteiler-type" style="width: 100%; padding: 8px 10px; border-radius: 6px; border: 1px solid var(--border-color, #cbd5e1); font-size: 0.9em; background: var(--bg-container, #fff); color: var(--text-main, #0f172a);">
+                        <option value="metalplast">metalplast Inox-Verteiler 1" (Edelstahl)</option>
+                        <option value="stramax">Stramax Messing-Verteiler 1" (Messing)</option>
+                    </select>
+                </div>
+
+                <div class="settings-group">
+                    <label for="setting-connection-type">Anschlussgarnitur / Anschlussart:</label>
+                    <select id="setting-connection-type" style="width: 100%; padding: 8px 10px; border-radius: 6px; border: 1px solid var(--border-color, #cbd5e1); font-size: 0.9em; background: var(--bg-container, #fff); color: var(--text-main, #0f172a);">
+                        <optgroup label="Grund- & Standard-Sets">
+                            <option value="kugelhahnset">metalplast Kugelhahnset (51192.107/108)</option>
+                            <option value="anschluss_horiz" selected>Anschluss-Set horizontal (51192.073/074)</option>
+                            <option value="anschluss_vert">Anschluss-Set vertikal (51192.070/071)</option>
+                        </optgroup>
+                        <optgroup label="WMZ-Sets (Wärmezähler)">
+                            <option value="wmz_horiz">WMZ-Set horizontal (51192.061/062)</option>
+                            <option value="wmz_vert">WMZ-Set vertikal (51192.064/065)</option>
+                            <option value="wmz_horiz_mp">metalplast Anschluss-Set WMZ horizontal (51192.140/142)</option>
+                            <option value="wmz_vert_mp">metalplast Anschluss-Set WMZ vertikal (51192.144/146)</option>
+                            <option value="winkel_wmz_vert_mp">Winkel zu metalplast WMZ vertikal (51192.130)</option>
+                        </optgroup>
+                        <optgroup label="Stramax Garnituren">
+                            <option value="stramax_horiz">Stramax Garnitur horizontal (51191.101/102)</option>
+                            <option value="stramax_vert">Stramax Garnitur vertikal (51191.105/106)</option>
+                            <option value="stramax_versal1">Stramax Versal 1 Garnitur (51191.117)</option>
+                        </optgroup>
+                        <optgroup label="Danfoss AB-PM Sets">
+                            <option value="danfoss_horiz">Danfoss AB-PM Set horizontal (00199.520/522/524/679)</option>
+                            <option value="danfoss_vert">Danfoss AB-PM Set vertikal (00199.526/528/530/679)</option>
+                        </optgroup>
+                        <optgroup label="Oventrop Sets">
+                            <option value="oventrop_hycocon_horiz">oventrop Hycocon VTZ horizontal (00227.111/113/118)</option>
+                            <option value="oventrop_cocon_horiz">oventrop Cocon QTZ / QDP horizontal (00227.117/102/104/118)</option>
+                            <option value="oventrop_hycocon_vert">oventrop Hycocon VTZ vertikal (00227.110/112/118)</option>
+                            <option value="oventrop_cocon_vert">oventrop Cocon QTZ / QDP vertikal (00227.116/103/105/118)</option>
+                        </optgroup>
+                        <optgroup label="TA-Compact Sets">
+                            <option value="ta_compact_dp_horiz">TA-Compact-DP Set horizontal (00434.690..692)</option>
+                            <option value="ta_compact_p_horiz">TA-Compact-P Set horizontal (00434.680..682)</option>
+                            <option value="ta_compact_dp_vert">TA-Compact-DP Set vertikal (00434.693..695)</option>
+                            <option value="ta_compact_p_vert">TA-Compact-P Set vertikal (00434.683..685)</option>
+                        </optgroup>
+                    </select>
+                </div>
+
+                <div class="settings-group" style="align-items: flex-start;">
+                    <label style="margin-bottom: 5px;">Zugelassene Verteilerkasten-Modelle:</label>
+                    <div id="setting-cabinets-checkboxes" style="display: flex; flex-direction: column; gap: 6px; width: 100%; font-size: 0.88em; background: var(--zebra-even, #f8fafc); padding: 10px 12px; border-radius: 6px; border: 1px solid var(--border-color, #cbd5e1);">
+                        <label style="display: flex; align-items: center; gap: 8px; font-weight: normal; cursor: pointer;">
+                            <input type="checkbox" class="cb-cabinet-type" value="beton_150" checked> Beton-Kasten 150 (Unterputz, Tiefe 150 mm)
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 8px; font-weight: normal; cursor: pointer;">
+                            <input type="checkbox" class="cb-cabinet-type" value="beton_125" checked> Beton-Kasten 125 (Unterputz, Tiefe 125 mm)
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 8px; font-weight: normal; cursor: pointer;">
+                            <input type="checkbox" class="cb-cabinet-type" value="blech_teleskop" checked> Blech-Teleskopkasten (Unterputz)
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 8px; font-weight: normal; cursor: pointer;">
+                            <input type="checkbox" class="cb-cabinet-type" value="stahlblech" checked> Stahlblechkasten (Aufputz / Unterputz)
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 8px; font-weight: normal; cursor: pointer;">
+                            <input type="checkbox" class="cb-cabinet-type" value="eps_wand" checked> EPS-Wand Kasten (Unterputz)
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 8px; font-weight: normal; cursor: pointer;">
+                            <input type="checkbox" class="cb-cabinet-type" value="eps_boden" checked> EPS-Boden Kasten (Bodenkasten)
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 8px; font-weight: normal; cursor: pointer;">
+                            <input type="checkbox" class="cb-cabinet-type" value="klapptuer_weiss"> Klapptür weiss (Frontabdeckung)
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button id="btn-settings-close" class="btn-primary">Übernehmen</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dedicated Verteilerkasten Konfigurator Modal -->
+    <div id="verteilerkasten-config-modal" class="modal-overlay hidden">
+        <div class="modal-box" style="max-width: 800px; text-align: left; max-height: 88vh; display: flex; flex-direction: column; padding: 20px 24px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--primary-color, #0078d7); padding-bottom: 10px; margin-bottom: 15px;">
+                <h3 style="margin: 0; color: var(--primary-color, #0078d7); font-size: 1.25em;">📦 Verteilerkasten-Konfigurator (Projekt-Einstellungen)</h3>
+                <span id="btn-vconfig-close-x" style="cursor: pointer; font-size: 1.5em; font-weight: bold; color: #94a3b8; line-height: 1;">&times;</span>
+            </div>
+            
+            <p style="font-size: 0.9em; color: var(--text-secondary, #64748b); margin-top: 0; margin-bottom: 15px; line-height: 1.4;">
+                Wählen Sie mit Häkchen alle Verteiler-Typen, Kasten-Bauformen und Anschlussarten aus, die für dieses konkrete Projekt zugelassen sind. Alle Häkchen werden <strong>direkt im Projekt gespeichert</strong>.
+            </p>
+
+            <div style="flex: 1; overflow-y: auto; padding-right: 8px; display: flex; flex-direction: column; gap: 18px;">
+                
+                <!-- Abschnitt 1: Verteiler-Materialien -->
+                <div class="vconfig-section" style="background: var(--zebra-even, #f8fafc); padding: 14px 16px; border-radius: 8px; border: 1px solid var(--border-color, #cbd5e1);">
+                    <h4 style="margin: 0 0 10px 0; color: var(--primary-color, #0078d7); font-size: 1.02em;">1. Zugelassene Verteiler-Materialien</h4>
+                    <div style="display: flex; flex-wrap: wrap; gap: 18px; font-size: 0.9em;">
+                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 600; color: var(--text-main, #0f172a);">
+                            <input type="checkbox" class="cb-vconfig-dtype" value="metalplast" checked> metalplast Inox-Verteiler 1" (Edelstahl)
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 600; color: var(--text-main, #0f172a);">
+                            <input type="checkbox" class="cb-vconfig-dtype" value="stramax" checked> Stramax Messing-Verteiler 1" (Messing)
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Abschnitt 2: Kasten-Bauarten -->
+                <div class="vconfig-section" style="background: var(--zebra-even, #f8fafc); padding: 14px 16px; border-radius: 8px; border: 1px solid var(--border-color, #cbd5e1);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <h4 style="margin: 0; color: var(--primary-color, #0078d7); font-size: 1.02em;">2. Zugelassene Verteilerkasten-Modelle</h4>
+                        <div style="display: flex; gap: 8px;">
+                            <button type="button" id="btn-vconfig-cabs-all" class="btn-secondary" style="font-size: 0.75em; padding: 2px 8px;">Alle auswählen</button>
+                            <button type="button" id="btn-vconfig-cabs-none" class="btn-secondary" style="font-size: 0.75em; padding: 2px 8px;">Keine</button>
+                        </div>
+                    </div>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 8px; font-size: 0.88em;">
+                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                            <input type="checkbox" class="cb-vconfig-cabinet" value="beton_150" checked> Beton-Kasten 150 (Tiefe 150 mm)
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                            <input type="checkbox" class="cb-vconfig-cabinet" value="beton_125" checked> Beton-Kasten 125 (Tiefe 125 mm)
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                            <input type="checkbox" class="cb-vconfig-cabinet" value="blech_teleskop" checked> Blech-Teleskopkasten (Unterputz)
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                            <input type="checkbox" class="cb-vconfig-cabinet" value="stahlblech" checked> Stahlblechkasten (Aufputz / UP)
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                            <input type="checkbox" class="cb-vconfig-cabinet" value="eps_wand" checked> EPS-Wand Kasten (Unterputz)
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                            <input type="checkbox" class="cb-vconfig-cabinet" value="eps_boden" checked> EPS-Boden Kasten (Bodenkasten)
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                            <input type="checkbox" class="cb-vconfig-cabinet" value="klapptuer_weiss"> Klapptür weiss (Frontabdeckung)
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Abschnitt 3: Zugelassene Anschlussarten -->
+                <div class="vconfig-section" style="background: var(--zebra-even, #f8fafc); padding: 14px 16px; border-radius: 8px; border: 1px solid var(--border-color, #cbd5e1);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 10px;">
+                        <h4 style="margin: 0; color: var(--primary-color, #0078d7); font-size: 1.02em;">3. Zugelassene Anschlussarten & Garnituren</h4>
+                        
+                        <!-- WMZ Toggle Checkbox -->
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <label style="display: flex; align-items: center; gap: 6px; font-weight: bold; color: #d35400; cursor: pointer; background: #fff3e0; padding: 4px 10px; border-radius: 6px; border: 1px solid #ffe0b2; font-size: 0.88em;" title="Bei Aktivierung werden Anschlusssets mit Wärmezähler (WMZ) deaktiviert und ausgegraut">
+                                <input type="checkbox" id="cb-vconfig-wmz"> 🌡️ Kein Wärmezähler (WMZ)
+                            </label>
+                            
+                            <div style="display: flex; gap: 6px;">
+                                <button type="button" id="btn-vconfig-conn-all" class="btn-secondary" style="font-size: 0.75em; padding: 2px 8px;">Alle auswählen</button>
+                                <button type="button" id="btn-vconfig-conn-none" class="btn-secondary" style="font-size: 0.75em; padding: 2px 8px;">Keine</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; flex-direction: column; gap: 12px; font-size: 0.88em;">
+                        <!-- Group: Grund- & Standard-Sets -->
+                        <div>
+                            <div style="font-weight: bold; color: var(--text-main, #0f172a); margin-bottom: 4px;">Grund- & Standard-Sets (ohne WMZ):</div>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 6px; margin-left: 8px;">
+                                <label class="lbl-vconfig-conn" data-is-wmz="false" style="display: flex; align-items: center; gap: 8px; cursor: pointer; transition: opacity 0.2s;">
+                                    <input type="checkbox" class="cb-vconfig-conn" data-is-wmz="false" value="kugelhahnset" checked> metalplast Kugelhahnset (51192.107/108)
+                                </label>
+                                <label class="lbl-vconfig-conn" data-is-wmz="false" style="display: flex; align-items: center; gap: 8px; cursor: pointer; transition: opacity 0.2s;">
+                                    <input type="checkbox" class="cb-vconfig-conn" data-is-wmz="false" value="anschluss_horiz" checked> Anschluss-Set horizontal (51192.073/074)
+                                </label>
+                                <label class="lbl-vconfig-conn" data-is-wmz="false" style="display: flex; align-items: center; gap: 8px; cursor: pointer; transition: opacity 0.2s;">
+                                    <input type="checkbox" class="cb-vconfig-conn" data-is-wmz="false" value="anschluss_vert" checked> Anschluss-Set vertikal (51192.070/071)
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Group: WMZ-Sets -->
+                        <div>
+                            <div style="font-weight: bold; color: var(--text-main, #0f172a); margin-bottom: 4px;">WMZ-Sets (mit Wärmezähler):</div>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 6px; margin-left: 8px;">
+                                <label class="lbl-vconfig-conn" data-is-wmz="true" style="display: flex; align-items: center; gap: 8px; cursor: pointer; transition: opacity 0.2s;">
+                                    <input type="checkbox" class="cb-vconfig-conn" data-is-wmz="true" value="wmz_horiz" checked> WMZ-Set horizontal (51192.061/062)
+                                </label>
+                                <label class="lbl-vconfig-conn" data-is-wmz="true" style="display: flex; align-items: center; gap: 8px; cursor: pointer; transition: opacity 0.2s;">
+                                    <input type="checkbox" class="cb-vconfig-conn" data-is-wmz="true" value="wmz_vert" checked> WMZ-Set vertikal (51192.064/065)
+                                </label>
+                                <label class="lbl-vconfig-conn" data-is-wmz="true" style="display: flex; align-items: center; gap: 8px; cursor: pointer; transition: opacity 0.2s;">
+                                    <input type="checkbox" class="cb-vconfig-conn" data-is-wmz="true" value="wmz_horiz_mp" checked> metalplast WMZ horiz. (51192.140/142)
+                                </label>
+                                <label class="lbl-vconfig-conn" data-is-wmz="true" style="display: flex; align-items: center; gap: 8px; cursor: pointer; transition: opacity 0.2s;">
+                                    <input type="checkbox" class="cb-vconfig-conn" data-is-wmz="true" value="wmz_vert_mp" checked> metalplast WMZ vert. (51192.144/146)
+                                </label>
+                                <label class="lbl-vconfig-conn" data-is-wmz="true" style="display: flex; align-items: center; gap: 8px; cursor: pointer; transition: opacity 0.2s;">
+                                    <input type="checkbox" class="cb-vconfig-conn" data-is-wmz="true" value="winkel_wmz_vert_mp" checked> Winkel zu WMZ vert. (51192.130)
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Group: Stramax -->
+                        <div>
+                            <div style="font-weight: bold; color: var(--text-main, #0f172a); margin-bottom: 4px;">Stramax Garnituren (ohne WMZ):</div>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 6px; margin-left: 8px;">
+                                <label class="lbl-vconfig-conn" data-is-wmz="false" style="display: flex; align-items: center; gap: 8px; cursor: pointer; transition: opacity 0.2s;">
+                                    <input type="checkbox" class="cb-vconfig-conn" data-is-wmz="false" value="stramax_horiz" checked> Stramax Garnitur horiz. (51191.101/102)
+                                </label>
+                                <label class="lbl-vconfig-conn" data-is-wmz="false" style="display: flex; align-items: center; gap: 8px; cursor: pointer; transition: opacity 0.2s;">
+                                    <input type="checkbox" class="cb-vconfig-conn" data-is-wmz="false" value="stramax_vert" checked> Stramax Garnitur vert. (51191.105/106)
+                                </label>
+                                <label class="lbl-vconfig-conn" data-is-wmz="false" style="display: flex; align-items: center; gap: 8px; cursor: pointer; transition: opacity 0.2s;">
+                                    <input type="checkbox" class="cb-vconfig-conn" data-is-wmz="false" value="stramax_versal1" checked> Stramax Versal 1 Garnitur (51191.117)
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Group: Danfoss -->
+                        <div>
+                            <div style="font-weight: bold; color: var(--text-main, #0f172a); margin-bottom: 4px;">Danfoss AB-PM Sets (Differenzdruckventil / auch ohne WMZ nutzbar):</div>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 6px; margin-left: 8px;">
+                                <label class="lbl-vconfig-conn" data-is-wmz="false" style="display: flex; align-items: center; gap: 8px; cursor: pointer; transition: opacity 0.2s;">
+                                    <input type="checkbox" class="cb-vconfig-conn" data-is-wmz="false" value="danfoss_horiz" checked> Danfoss AB-PM Set horiz. (00199.520..)
+                                </label>
+                                <label class="lbl-vconfig-conn" data-is-wmz="false" style="display: flex; align-items: center; gap: 8px; cursor: pointer; transition: opacity 0.2s;">
+                                    <input type="checkbox" class="cb-vconfig-conn" data-is-wmz="false" value="danfoss_vert" checked> Danfoss AB-PM Set vert. (00199.526..)
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Group: Oventrop -->
+                        <div>
+                            <div style="font-weight: bold; color: var(--text-main, #0f172a); margin-bottom: 4px;">Oventrop Sets (mit WMZ):</div>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 6px; margin-left: 8px;">
+                                <label class="lbl-vconfig-conn" data-is-wmz="true" style="display: flex; align-items: center; gap: 8px; cursor: pointer; transition: opacity 0.2s;">
+                                    <input type="checkbox" class="cb-vconfig-conn" data-is-wmz="true" value="oventrop_hycocon_horiz" checked> oventrop Hycocon horiz. (00227.111..)
+                                </label>
+                                <label class="lbl-vconfig-conn" data-is-wmz="true" style="display: flex; align-items: center; gap: 8px; cursor: pointer; transition: opacity 0.2s;">
+                                    <input type="checkbox" class="cb-vconfig-conn" data-is-wmz="true" value="oventrop_cocon_horiz" checked> oventrop Cocon horiz. (00227.117..)
+                                </label>
+                                <label class="lbl-vconfig-conn" data-is-wmz="true" style="display: flex; align-items: center; gap: 8px; cursor: pointer; transition: opacity 0.2s;">
+                                    <input type="checkbox" class="cb-vconfig-conn" data-is-wmz="true" value="oventrop_hycocon_vert" checked> oventrop Hycocon vert. (00227.110..)
+                                </label>
+                                <label class="lbl-vconfig-conn" data-is-wmz="true" style="display: flex; align-items: center; gap: 8px; cursor: pointer; transition: opacity 0.2s;">
+                                    <input type="checkbox" class="cb-vconfig-conn" data-is-wmz="true" value="oventrop_cocon_vert" checked> oventrop Cocon vert. (00227.116..)
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Group: TA-Compact -->
+                        <div>
+                            <div style="font-weight: bold; color: var(--text-main, #0f172a); margin-bottom: 4px;">TA-Compact Sets (mit WMZ):</div>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 6px; margin-left: 8px;">
+                                <label class="lbl-vconfig-conn" data-is-wmz="true" style="display: flex; align-items: center; gap: 8px; cursor: pointer; transition: opacity 0.2s;">
+                                    <input type="checkbox" class="cb-vconfig-conn" data-is-wmz="true" value="ta_compact_dp_horiz" checked> TA-Compact-DP Set horiz. (00434.690..)
+                                </label>
+                                <label class="lbl-vconfig-conn" data-is-wmz="true" style="display: flex; align-items: center; gap: 8px; cursor: pointer; transition: opacity 0.2s;">
+                                    <input type="checkbox" class="cb-vconfig-conn" data-is-wmz="true" value="ta_compact_p_horiz" checked> TA-Compact-P Set horiz. (00434.680..)
+                                </label>
+                                <label class="lbl-vconfig-conn" data-is-wmz="true" style="display: flex; align-items: center; gap: 8px; cursor: pointer; transition: opacity 0.2s;">
+                                    <input type="checkbox" class="cb-vconfig-conn" data-is-wmz="true" value="ta_compact_dp_vert" checked> TA-Compact-DP Set vert. (00434.693..)
+                                </label>
+                                <label class="lbl-vconfig-conn" data-is-wmz="true" style="display: flex; align-items: center; gap: 8px; cursor: pointer; transition: opacity 0.2s;">
+                                    <input type="checkbox" class="cb-vconfig-conn" data-is-wmz="true" value="ta_compact_p_vert" checked> TA-Compact-P Set vert. (00434.683..)
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Abschnitt 4: Bevorzugte Haupt-Anschlussarten (Horizontal & Vertikal) -->
+                <div class="vconfig-section" style="background: var(--zebra-even, #f8fafc); padding: 14px 16px; border-radius: 8px; border: 1px solid var(--border-color, #cbd5e1);">
+                    <h4 style="margin: 0 0 10px 0; color: var(--primary-color, #0078d7); font-size: 1.02em;">
+                        4. Bevorzugte Haupt-Anschlussarten für die Auslegung (Standard Horiz. & Vertikal)
+                    </h4>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px;">
+                        <div>
+                            <label style="display: block; font-weight: bold; font-size: 0.88em; margin-bottom: 4px; color: #0f172a;">
+                                ↔️ Standard für HORIZONTALE Anschlüsse (Hor):
+                            </label>
+                            <select id="vconfig-primary-connection-hor" style="width: 100%; padding: 8px 10px; border-radius: 6px; border: 1px solid var(--border-color, #cbd5e1); font-size: 0.88em; background: #fff; color: #0f172a;">
+                                <option value="anschluss_horiz" selected>Anschluss-Set horizontal (51192.073/074)</option>
+                                <option value="kugelhahnset">metalplast Kugelhahnset (51192.107/108)</option>
+                                <option value="wmz_horiz">WMZ-Set horizontal (51192.061/062)</option>
+                                <option value="wmz_horiz_mp">metalplast WMZ horiz. (51192.140/142)</option>
+                                <option value="stramax_horiz">Stramax Garnitur horiz. (51191.101/102)</option>
+                                <option value="stramax_versal1">Stramax Versal 1 Garnitur (51191.117)</option>
+                                <option value="danfoss_horiz">Danfoss AB-PM Set horiz. (00199.520..)</option>
+                                <option value="oventrop_hycocon_horiz">oventrop Hycocon VTZ horiz. (00227.111..)</option>
+                                <option value="oventrop_cocon_horiz">oventrop Cocon QTZ/QDP horiz. (00227.117..)</option>
+                                <option value="ta_compact_dp_horiz">TA-Compact-DP Set horiz. (00434.690..)</option>
+                                <option value="ta_compact_p_horiz">TA-Compact-P Set horiz. (00434.680..)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="display: block; font-weight: bold; font-size: 0.88em; margin-bottom: 4px; color: #0f172a;">
+                                ↕️ Standard für VERTIKALE Anschlüsse (Ver):
+                            </label>
+                            <select id="vconfig-primary-connection-ver" style="width: 100%; padding: 8px 10px; border-radius: 6px; border: 1px solid var(--border-color, #cbd5e1); font-size: 0.88em; background: #fff; color: #0f172a;">
+                                <option value="anschluss_vert" selected>Anschluss-Set vertikal (51192.070/071)</option>
+                                <option value="kugelhahnset">metalplast Kugelhahnset (51192.107/108)</option>
+                                <option value="wmz_vert">WMZ-Set vertikal (51192.064/065)</option>
+                                <option value="wmz_vert_mp">metalplast WMZ vert. (51192.144/146)</option>
+                                <option value="winkel_wmz_vert_mp">Winkel zu WMZ vert. (51192.130)</option>
+                                <option value="stramax_vert">Stramax Garnitur vert. (51191.105/106)</option>
+                                <option value="danfoss_vert">Danfoss AB-PM Set vert. (00199.526..)</option>
+                                <option value="oventrop_hycocon_vert">oventrop Hycocon VTZ vert. (00227.110..)</option>
+                                <option value="oventrop_cocon_vert">oventrop Cocon QTZ/QDP vert. (00227.116..)</option>
+                                <option value="ta_compact_dp_vert">TA-Compact-DP Set vert. (00434.693..)</option>
+                                <option value="ta_compact_p_vert">TA-Compact-P Set vert. (00434.683..)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="modal-actions" style="margin-top: 15px; border-top: 1px solid var(--border-color, #e2e8f0); padding-top: 12px; display: flex; justify-content: flex-end; gap: 10px;">
+                <button id="btn-vconfig-close" class="btn-secondary">Schließen</button>
+                <button id="btn-vconfig-save" class="btn-primary">Übernehmen & Im Projekt Speichern</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dedicated Verteilerkasten Abmessungen & Details Modal -->
+    <div id="kasten-details-modal" class="modal-overlay hidden">
+        <div class="modal-box" style="max-width: 650px; text-align: left; max-height: 85vh; display: flex; flex-direction: column; padding: 20px 24px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--primary-color, #0078d7); padding-bottom: 10px; margin-bottom: 15px;">
+                <h3 style="margin: 0; color: var(--primary-color, #0078d7); font-size: 1.2em;">📦 Verteilerkasten-Abmessungen & Details</h3>
+                <span id="btn-kdetails-close-x" style="cursor: pointer; font-size: 1.5em; font-weight: bold; color: #94a3b8; line-height: 1;">&times;</span>
+            </div>
+            
+            <div id="kdetails-header-info" style="font-size: 0.9em; background: #f8fafc; padding: 10px 14px; border-radius: 6px; border: 1px solid #cbd5e1; margin-bottom: 15px; color: #0f172a;">
+                <!-- Dynamically populated: Geschoss, Verteiler, Ringe -->
+            </div>
+
+            <div style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 15px;">
+                
+                <!-- Main Cabinet Spec Box -->
+                <div style="background: #e0f2fe; padding: 14px 16px; border-radius: 8px; border: 1px solid #bae6fd;">
+                    <div style="font-weight: bold; color: #0369a1; font-size: 1.05em; margin-bottom: 8px;" id="kdetails-primary-title">
+                        Empfohlener Verteilerkasten
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; font-size: 0.9em;">
+                        <div style="background: #ffffff; padding: 8px 12px; border-radius: 6px; border: 1px solid #bae6fd;">
+                            <span style="color: #64748b; font-size: 0.85em; display: block;">Breite (B):</span>
+                            <strong style="color: #0f172a; font-size: 1.1em;" id="kdetails-width">-</strong>
+                        </div>
+                        <div style="background: #ffffff; padding: 8px 12px; border-radius: 6px; border: 1px solid #bae6fd;">
+                            <span style="color: #64748b; font-size: 0.85em; display: block;">Höhe (H):</span>
+                            <strong style="color: #0f172a; font-size: 1.1em;" id="kdetails-height">-</strong>
+                        </div>
+                        <div style="background: #ffffff; padding: 8px 12px; border-radius: 6px; border: 1px solid #bae6fd;">
+                            <span style="color: #64748b; font-size: 0.85em; display: block;">Tiefe / Einbautiefe (T):</span>
+                            <strong style="color: #0f172a; font-size: 1.1em;" id="kdetails-depth">-</strong>
+                        </div>
+                        <div style="background: #ffffff; padding: 8px 12px; border-radius: 6px; border: 1px solid #bae6fd;">
+                            <span style="color: #64748b; font-size: 0.85em; display: block;">Verteiler-Länge (L):</span>
+                            <strong style="color: #0f172a; font-size: 1.1em;" id="kdetails-len">-</strong>
+                        </div>
+                        <div style="background: #ffffff; padding: 8px 12px; border-radius: 6px; border: 1px solid #bae6fd;">
+                            <span style="color: #64748b; font-size: 0.85em; display: block;">Kasten-Index:</span>
+                            <strong style="color: #d35400; font-size: 1.1em;" id="kdetails-index">-</strong>
+                        </div>
+                        <div style="background: #ffffff; padding: 8px 12px; border-radius: 6px; border: 1px solid #bae6fd;">
+                            <span style="color: #64748b; font-size: 0.85em; display: block;">Artikelnummer:</span>
+                            <strong style="color: #0078d7; font-size: 1.05em;" id="kdetails-article">-</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Alternatives Section -->
+                <div>
+                    <h4 style="margin: 0 0 8px 0; color: #0f172a; font-size: 0.95em;">Passende Kasten-Modelle für dieses Geschoss:</h4>
+                    <div id="kdetails-alternatives-list" style="display: flex; flex-direction: column; gap: 6px; font-size: 0.85em;">
+                        <!-- Dynamically populated -->
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="modal-actions" style="margin-top: 15px; border-top: 1px solid var(--border-color, #e2e8f0); padding-top: 12px; display: flex; justify-content: flex-end;">
+                <button id="btn-kdetails-close" class="btn-primary">Schließen</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Report Modal -->
+    <div id="report-modal" class="modal-overlay hidden">
+        <div class="modal-box" style="max-width: 500px; text-align: left;">
+            <h3 style="margin-top: 0; color: #0078d7; border-bottom: 2px solid #0078d7; padding-bottom: 10px;">📄 PDF Report erstellen</h3>
+            
+            <div style="margin-top: 15px;">
+                <p style="font-weight: bold; margin-bottom: 8px;">Umfang des Reports:</p>
+                <div style="margin-bottom: 10px;">
+                    <label style="display: flex; align-items: center; gap: 8px; font-weight: normal; cursor: pointer;">
+                        <input type="radio" name="report-scope" id="scope-all" value="all" checked>
+                        Alles in einem Report (Alle Geschosse)
+                    </label>
+                </div>
+                <div style="margin-bottom: 10px;">
+                    <label style="display: flex; align-items: center; gap: 8px; font-weight: normal; cursor: pointer;">
+                        <input type="radio" name="report-scope" id="scope-selected" value="selected">
+                        Ausgewählte Geschosse / Ebenen
+                    </label>
+                </div>
+                
+                <!-- Floor selection list -->
+                <div id="report-floor-select" style="margin-left: 25px; margin-bottom: 20px; padding: 10px; border: 1px solid #ddd; border-radius: 4px; background-color: #fafafa; max-height: 150px; overflow-y: auto; opacity: 0.5; pointer-events: none; transition: opacity 0.2s;">
+                    <p style="font-size: 0.85em; color: #666; margin-top: 0; margin-bottom: 8px;">Wählen Sie die einzuschließenden Geschosse aus:</p>
+                    <div id="report-floor-list">
+                        <!-- Dynamically populated -->
+                    </div>
+                </div>
+            </div>
+            
+            <div style="margin-top: 15px;">
+                <p style="font-weight: bold; margin-bottom: 8px;">Optionen:</p>
+                <div style="margin-bottom: 10px;">
+                    <label style="display: flex; align-items: center; gap: 8px; font-weight: normal; cursor: pointer;">
+                        <input type="checkbox" id="opt-show-details" checked>
+                        Detaillierte Raumlisten anzeigen
+                    </label>
+                </div>
+                <div style="margin-bottom: 10px;">
+                    <label style="display: flex; align-items: center; gap: 8px; font-weight: normal; cursor: pointer;">
+                        <input type="checkbox" id="opt-compact-mode" checked>
+                        Kompaktmodus (platzsparend für den Ausdruck)
+                    </label>
+                </div>
+                <div style="margin-bottom: 10px;">
+                    <label style="display: flex; align-items: center; gap: 8px; font-weight: bold; color: #0078d7; cursor: pointer;">
+                        <input type="checkbox" id="opt-include-bom" checked>
+                        📋 Material-Stückliste anhängen (Summen aller gleichen Bauteile für Kalkulation)
+                    </label>
+                </div>
+            </div>
+            
+            <div class="modal-actions" style="margin-top: 25px;">
+                <button id="btn-report-cancel" class="btn-secondary">Abbrechen</button>
+                <button id="btn-report-generate" class="btn-primary" style="background-color: #2e7d32;">PDF erzeugen / Drucken</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Design Modal -->
+    <div id="design-modal" class="modal-overlay hidden">
+        <div class="modal-box" style="max-width: 500px; text-align: left;">
+            <h3 style="margin-top: 0; color: var(--primary-color, #0078d7); border-bottom: 2px solid var(--primary-color, #0078d7); padding-bottom: 10px; display: flex; align-items: center; gap: 8px;">🎨 App-Design & Farbpalette</h3>
+            <p style="font-size: 0.9em; color: var(--text-secondary, #666); margin-bottom: 15px;">Wählen Sie ein harmonisches Design aus, um die Oberfläche anzupassen:</p>
+            
+            <div class="design-list" style="display: flex; flex-direction: column; gap: 10px;">
+                <!-- Theme 1: Classic -->
+                <div class="design-card" data-theme="classic" style="border: 1px solid var(--border-color); border-radius: 6px; padding: 10px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; background-color: var(--bg-container);">
+                    <div>
+                        <strong style="display: block; font-size: 0.95em; color: var(--text-main);">1. Klassisch Blau (Standard)</strong>
+                        <span style="font-size: 0.8em; color: var(--text-secondary);">Klares Design in neutralen Blautönen.</span>
+                    </div>
+                    <div style="display: flex; gap: 4px; align-items: center;">
+                        <span style="width: 12px; height: 12px; border-radius: 50%; background-color: #0078d7; display: inline-block; border: 1px solid #ccc;"></span>
+                        <span style="width: 12px; height: 12px; border-radius: 50%; background-color: #e6f7ff; display: inline-block; border: 1px solid #ccc;"></span>
+                        <span style="width: 12px; height: 12px; border-radius: 50%; background-color: #f4f6f8; display: inline-block; border: 1px solid #ccc;"></span>
+                        <span class="active-indicator" style="font-weight: bold; color: var(--primary-color); margin-left: 8px; display: none;">✔</span>
+                    </div>
+                </div>
+
+                <!-- Theme 2: Emerald Green -->
+                <div class="design-card" data-theme="emerald" style="border: 1px solid var(--border-color); border-radius: 6px; padding: 10px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; background-color: var(--bg-container);">
+                    <div>
+                        <strong style="display: block; font-size: 0.95em; color: var(--text-main);">2. Smaragd Grün (Natur & Eco)</strong>
+                        <span style="font-size: 0.8em; color: var(--text-secondary);">Beruhigendes Grün für nachhaltiges Planen.</span>
+                    </div>
+                    <div style="display: flex; gap: 4px; align-items: center;">
+                        <span style="width: 12px; height: 12px; border-radius: 50%; background-color: #1b5e20; display: inline-block; border: 1px solid #ccc;"></span>
+                        <span style="width: 12px; height: 12px; border-radius: 50%; background-color: #e8f5e9; display: inline-block; border: 1px solid #ccc;"></span>
+                        <span style="width: 12px; height: 12px; border-radius: 50%; background-color: #f0f4f1; display: inline-block; border: 1px solid #ccc;"></span>
+                        <span class="active-indicator" style="font-weight: bold; color: var(--primary-color); margin-left: 8px; display: none;">✔</span>
+                    </div>
+                </div>
+
+                <!-- Theme 3: Nordic Slate -->
+                <div class="design-card" data-theme="nordic" style="border: 1px solid var(--border-color); border-radius: 6px; padding: 10px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; background-color: var(--bg-container);">
+                    <div>
+                        <strong style="display: block; font-size: 0.95em; color: var(--text-main);">3. Nordisch Schiefer (Minimalist)</strong>
+                        <span style="font-size: 0.8em; color: var(--text-secondary);">Moderne kühle Schiefergrau-Töne.</span>
+                    </div>
+                    <div style="display: flex; gap: 4px; align-items: center;">
+                        <span style="width: 12px; height: 12px; border-radius: 50%; background-color: #2d3748; display: inline-block; border: 1px solid #ccc;"></span>
+                        <span style="width: 12px; height: 12px; border-radius: 50%; background-color: #edf2f7; display: inline-block; border: 1px solid #ccc;"></span>
+                        <span style="width: 12px; height: 12px; border-radius: 50%; background-color: #eef1f6; display: inline-block; border: 1px solid #ccc;"></span>
+                        <span class="active-indicator" style="font-weight: bold; color: var(--primary-color); margin-left: 8px; display: none;">✔</span>
+                    </div>
+                </div>
+
+                <!-- Theme 4: Sunset Warmth -->
+                <div class="design-card" data-theme="sunset" style="border: 1px solid var(--border-color); border-radius: 6px; padding: 10px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; background-color: var(--bg-container);">
+                    <div>
+                        <strong style="display: block; font-size: 0.95em; color: var(--text-main);">4. Sonnenuntergang (FBH-Wärme)</strong>
+                        <span style="font-size: 0.8em; color: var(--text-secondary);">Warme Terracotta- und Pfirsichtöne.</span>
+                    </div>
+                    <div style="display: flex; gap: 4px; align-items: center;">
+                        <span style="width: 12px; height: 12px; border-radius: 50%; background-color: #c2410c; display: inline-block; border: 1px solid #ccc;"></span>
+                        <span style="width: 12px; height: 12px; border-radius: 50%; background-color: #ffedd5; display: inline-block; border: 1px solid #ccc;"></span>
+                        <span style="width: 12px; height: 12px; border-radius: 50%; background-color: #faf6f0; display: inline-block; border: 1px solid #ccc;"></span>
+                        <span class="active-indicator" style="font-weight: bold; color: var(--primary-color); margin-left: 8px; display: none;">✔</span>
+                    </div>
+                </div>
+
+                <!-- Theme 5: Obsidian Dark -->
+                <div class="design-card" data-theme="obsidian" style="border: 1px solid var(--border-color); border-radius: 6px; padding: 10px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; background-color: var(--bg-container);">
+                    <div>
+                        <strong style="display: block; font-size: 0.95em; color: var(--text-main);">5. Obsidian Premium (Dunkelmodus)</strong>
+                        <span style="font-size: 0.8em; color: var(--text-secondary);">Edler Dark-Mode mit tiefen Kontrasten.</span>
+                    </div>
+                    <div style="display: flex; gap: 4px; align-items: center;">
+                        <span style="width: 12px; height: 12px; border-radius: 50%; background-color: #38bdf8; display: inline-block; border: 1px solid #555;"></span>
+                        <span style="width: 12px; height: 12px; border-radius: 50%; background-color: #334155; display: inline-block; border: 1px solid #555;"></span>
+                        <span style="width: 12px; height: 12px; border-radius: 50%; background-color: #0f172a; display: inline-block; border: 1px solid #555;"></span>
+                        <span class="active-indicator" style="font-weight: bold; color: var(--primary-color); margin-left: 8px; display: none;">✔</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="modal-actions" style="margin-top: 25px;">
+                <button id="btn-design-close" class="btn-primary" style="width: 100%;">Schließen</button>
+            </div>
+        </div>
+    </div>
+    <!-- Folder Files List Modal -->
+    <div id="folder-files-modal" class="modal-overlay hidden">
+        <div class="modal-box" style="max-width: 550px; text-align: left;">
+            <h3 style="margin-top: 0; color: var(--primary-color, #0078d7); border-bottom: 2px solid var(--primary-color, #0078d7); padding-bottom: 10px; display: flex; align-items: center; justify-content: space-between;">
+                <span>📂 Projekte aus Speicherordner</span>
+                <button id="btn-folder-files-refresh" class="btn-secondary" style="padding: 3px 8px; font-size: 0.8em;" title="Ordnerinhalt aktualisieren">🔄</button>
+            </h3>
+            <p style="font-size: 0.9em; color: var(--text-secondary); margin-bottom: 15px;">Wählen Sie eine Projektdatei aus dem Ordner, um sie einzulesen:</p>
+            
+            <div id="folder-files-list" style="max-height: 300px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; border: 1px solid var(--border-color); border-radius: 6px; padding: 8px; background-color: var(--bg-body);">
+                <!-- Files will be injected here dynamically -->
+            </div>
+
+            <div class="modal-actions" style="margin-top: 20px; display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                <button id="btn-folder-files-change-dir" class="btn-secondary" style="background: #f1f5f9; border: 1px solid #cbd5e1; color: #475569;" title="Anderen Speicherordner auswählen">📁 Ordner wechseln</button>
+                <button id="btn-folder-files-close" class="btn-secondary">Schließen</button>
+            </div>
+        </div>
+    </div>
+    <!-- CAD Import Modal -->
+    <div id="cad-import-modal" class="modal-overlay hidden">
+        <div class="modal-box" style="max-width: 650px; width: 90%; text-align: left; background: var(--bg-container, #ffffff);">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--primary-color, #0078d7); padding-bottom: 10px; margin-bottom: 15px;">
+                <h3 style="margin: 0; color: var(--primary-color, #0078d7); display: flex; align-items: center; gap: 8px;">
+                    📊 CAD / CD Excel-Bericht importieren
+                </h3>
+                <button id="btn-close-cad-modal" class="btn-secondary" style="padding: 2px 8px; font-size: 1.1em; cursor: pointer;">&times;</button>
+            </div>
+
+            <p style="font-size: 0.9em; color: var(--text-secondary, #64748b); margin-bottom: 15px;">
+                Ziehen Sie einen CAD/CD Excel-Bericht (z. B. <code>eg.xlsx</code>, <code>og1.xlsx</code>) per Drag-and-Drop in den Bereich oder wählen Sie die Datei aus:
+            </p>
+
+            <!-- Drag & Drop Zone -->
+            <div id="cad-drop-zone" style="border: 2px dashed #0078d7; border-radius: 8px; padding: 25px; text-align: center; background-color: rgba(0, 120, 215, 0.04); cursor: pointer; transition: all 0.2s ease;">
+                <div style="font-size: 2.2em; margin-bottom: 8px;">📥</div>
+                <p style="margin: 0 0 6px 0; font-weight: 700; color: var(--text-primary, #1e293b);">Excel-Datei (.xlsx, .xls, .csv) hierher ziehen</p>
+                <p style="margin: 0; font-size: 0.85em; color: var(--text-secondary, #64748b);">oder klicken, um Datei auf dem Computer auszuwählen</p>
+                <input type="file" id="cad-file-input" style="display: none;" accept=".xlsx, .xls, .csv">
+            </div>
+
+            <!-- Preview & Database Section -->
+            <div id="cad-preview-section" style="display: none; margin-top: 18px;">
+                <h4 style="margin: 0 0 10px 0; color: var(--text-primary, #334155); font-size: 0.95em; display: flex; justify-content: space-between; align-items: center;">
+                    <span>Erkannte CAD-Räume: <strong id="cad-room-count" style="color: var(--primary-color);">0</strong></span>
+                    <span id="cad-file-name-badge" style="font-size: 0.85em; font-weight: normal; color: #64748b;"></span>
+                </h4>
+                <div style="max-height: 220px; overflow-y: auto; border: 1px solid var(--border-color, #cbd5e1); border-radius: 6px; background-color: var(--bg-body, #ffffff);">
+                    <table style="width: 100%; border-collapse: collapse; font-size: 0.9em; text-align: left;">
+                        <thead>
+                            <tr style="background-color: var(--zebra-even, #f1f5f9); border-bottom: 1px solid #cbd5e1; position: sticky; top: 0;">
+                                <th style="padding: 8px 12px; width: 40px;">#</th>
+                                <th style="padding: 8px 12px;">Raumbezeichnung</th>
+                                <th style="padding: 8px 12px; text-align: right;">Grundfläche [m²]</th>
+                            </tr>
+                        </thead>
+                        <tbody id="cad-preview-tbody">
+                            <!-- Preview rows injected here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Modal Actions -->
+            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; border-top: 1px solid var(--border-color, #e2e8f0); padding-top: 12px;">
+                <button id="btn-cancel-cad-import" class="btn-secondary" style="padding: 6px 14px; cursor: pointer;">Abbrechen</button>
+                <button id="btn-apply-cad-import" class="btn-primary" style="padding: 6px 16px; cursor: pointer; display: none;">✔ In Projekt übernehmen</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Copy Floor Modal -->
+    <div id="copy-floor-modal" class="modal-overlay hidden" style="z-index: 1000000;">
+        <div class="modal-box" style="max-width: 460px; text-align: left; background: var(--bg-container, #ffffff); padding: 20px 24px; border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.2);">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--primary-color, #0078d7); padding-bottom: 10px; margin-bottom: 15px;">
+                <h3 style="margin: 0; color: var(--primary-color, #0078d7); display: flex; align-items: center; gap: 8px; font-size: 1.15em;">
+                    📋 Verteiler kopieren
+                </h3>
+                <span id="btn-close-copy-floor-x" style="cursor: pointer; font-size: 1.4em; font-weight: bold; color: #94a3b8; line-height: 1;">&times;</span>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 16px;">
+                <div id="copy-floor-source-info" style="background: var(--zebra-even, #f1f5f9); border-left: 4px solid var(--primary-color, #0078d7); padding: 8px 12px; font-size: 0.88em; color: var(--text-main, #334155); border-radius: 0 4px 4px 0;">
+                    Quelle: <strong id="copy-floor-source-name">-</strong>
+                </div>
+
+                <div>
+                    <label for="copy-floor-count" style="display: block; font-weight: 600; font-size: 0.9em; margin-bottom: 6px; color: var(--text-main, #0f172a);">
+                        Anzahl der Kopien:
+                    </label>
+                    <input type="number" id="copy-floor-count" value="1" min="1" max="50" style="width: 100%; padding: 6px 10px; font-size: 0.95em; border-radius: 4px; border: 1px solid var(--border-color, #cbd5e1); font-weight: bold; box-sizing: border-box;">
+                </div>
+
+                <div>
+                    <label style="display: block; font-weight: 600; font-size: 0.9em; margin-bottom: 6px; color: var(--text-main, #0f172a);">
+                        Position der Kopie(n):
+                    </label>
+                    <div style="display: flex; flex-direction: column; gap: 8px; background: var(--zebra-even, #f8fafc); padding: 10px 12px; border-radius: 6px; border: 1px solid var(--border-color, #e2e8f0);">
+                        <label style="display: inline-flex; align-items: center; gap: 8px; font-size: 0.88em; cursor: pointer; color: var(--text-main, #0f172a);">
+                            <input type="radio" name="copy-floor-position" value="after" checked>
+                            <span><strong>Nach</strong> der aktuellen Position (unter der Quelle)</span>
+                        </label>
+                        <label style="display: inline-flex; align-items: center; gap: 8px; font-size: 0.88em; cursor: pointer; color: var(--text-main, #0f172a);">
+                            <input type="radio" name="copy-floor-position" value="before">
+                            <span><strong>Vor</strong> der aktuellen Position (über der Quelle)</span>
+                        </label>
+                        <label style="display: inline-flex; align-items: center; gap: 8px; font-size: 0.88em; cursor: pointer; color: var(--text-main, #0f172a);">
+                            <input type="radio" name="copy-floor-position" value="first">
+                            <span><strong>Ganz am Anfang</strong> (ganz oben vor allen Verteilern)</span>
+                        </label>
+                        <label style="display: inline-flex; align-items: center; gap: 8px; font-size: 0.88em; cursor: pointer; color: var(--text-main, #0f172a);">
+                            <input type="radio" name="copy-floor-position" value="last">
+                            <span><strong>Ganz am Ende</strong> (ganz unten nach allen Verteilern)</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div style="background: #fffbeb; border: 1px solid #fef08a; padding: 10px 12px; border-radius: 6px;">
+                    <label style="display: inline-flex; align-items: center; gap: 8px; font-size: 0.88em; cursor: pointer; color: #854d0e; font-weight: 500;">
+                        <input type="checkbox" id="copy-floor-clear-names" checked>
+                        <span>Geschoss & Vert. Bezeichnung in Kopien löschen</span>
+                    </label>
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; border-top: 1px solid var(--border-color, #e2e8f0); padding-top: 12px;">
+                <button id="btn-cancel-copy-floor" class="btn-secondary" style="padding: 6px 14px; cursor: pointer;">Abbrechen</button>
+                <button id="btn-confirm-copy-floor" class="btn-primary" style="padding: 6px 16px; cursor: pointer;">📋 Kopieren</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Window: Column Width Manager (Excel-Style) -->
+    <div id="column-widths-modal" class="modal-overlay hidden" style="z-index: 1000000;">
+        <div class="modal-card" style="max-width: 650px; width: 92%; max-height: 85vh; display: flex; flex-direction: column;">
+            <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 12px; border-bottom: 1px solid var(--border-color, #cbd5e1);">
+                <h3 style="margin: 0; display: flex; align-items: center; gap: 8px; font-size: 1.15em; color: var(--text-main, #0f172a);">
+                    <span>📏</span> Spaltenbreiten anpassen (Excel-Modus)
+                </h3>
+                <button type="button" class="btn-close-modal" id="btn-close-column-widths-x" style="background: none; border: none; font-size: 1.3em; cursor: pointer; color: #64748b;">✕</button>
+            </div>
+
+            <div class="modal-actions-top" style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border-color, #cbd5e1); margin-bottom: 5px;">
+                <button type="button" id="btn-reset-column-widths" class="btn-secondary" style="font-size: 0.85em; padding: 6px 12px; cursor: pointer;" title="Alle Spaltenbreiten auf Standard zurücksetzen">
+                    🔄 Standardbreiten zurücksetzen
+                </button>
+                <div style="display: flex; gap: 8px;">
+                    <button type="button" id="btn-save-column-widths" class="btn-primary" style="font-size: 0.85em; padding: 6px 16px; cursor: pointer; background-color: #22c55e; border-color: #16a34a; font-weight: bold;" title="Spaltenbreiten am gleichen Ort speichern wie Menü-Einstellungen">
+                        💾 Spaltenbreiten speichern
+                    </button>
+                    <button type="button" id="btn-close-column-widths" class="btn-secondary" style="font-size: 0.85em; padding: 6px 18px; cursor: pointer;">
+                        ✔ Schließen
+                    </button>
+                </div>
+            </div>
+
+            <div class="modal-body" style="overflow-y: auto; padding: 15px 0; flex: 1;">
+                <div style="font-size: 0.85em; color: var(--text-secondary, #64748b); margin-bottom: 15px; background: var(--bg-container-alt, #f8fafc); padding: 10px 14px; border-radius: 6px; border: 1px solid var(--border-color, #e2e8f0); line-height: 1.4;">
+                    💡 <strong>Excel-Regel:</strong> Jede Spalte wird einzeln angepasst. Der rechte Rand und benachbarte Spalten verändern sich nicht automatisch.
+                </div>
+
+                <div id="column-width-controls-list" style="display: flex; flex-direction: column; gap: 10px;">
+                    <!-- Dynamically generated controls -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Window: Database Check (DB-Check 1 bis 12 Ringe) -->
+    <div id="db-check-modal" class="modal-overlay hidden" style="z-index: 1000000;">
+        <div class="modal-card" style="max-width: 980px; width: 95%; max-height: 90vh; display: flex; flex-direction: column;">
+            <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 12px; border-bottom: 1px solid var(--border-color, #cbd5e1);">
+                <h3 style="margin: 0; display: flex; align-items: center; gap: 8px; font-size: 1.15em; color: var(--text-main, #0f172a);">
+                    <span>🔍</span> Datenbank & Auslegungs-Check (1 bis 12 Ringe)
+                </h3>
+                <button type="button" class="btn-close-modal" id="btn-close-db-check-x" style="background: none; border: none; font-size: 1.3em; cursor: pointer; color: #64748b;">✕</button>
+            </div>
+
+            <div class="modal-body" style="overflow-y: auto; padding: 15px 0; flex: 1;">
+                <div id="db-check-config-summary" style="font-size: 0.88em; color: var(--text-main, #0f172a); margin-bottom: 15px; background: var(--bg-container-alt, #f8fafc); padding: 12px 16px; border-radius: 8px; border: 1px solid var(--border-color, #e2e8f0); line-height: 1.5;">
+                    <!-- Summary injected here -->
+                </div>
+
+                <div style="display: flex; gap: 10px; margin-bottom: 15px; border-bottom: 2px solid var(--border-color, #e2e8f0); padding-bottom: 6px;">
+                    <button type="button" id="tab-db-check-hor" class="btn-secondary active" style="font-weight: bold; padding: 6px 16px; cursor: pointer;">↔️ Horizontale Auslegung (Hor)</button>
+                    <button type="button" id="tab-db-check-ver" class="btn-secondary" style="font-weight: bold; padding: 6px 16px; cursor: pointer;">↕️ Vertikale Auslegung (Ver)</button>
+                </div>
+
+                <div id="db-check-table-container" style="overflow-x: auto;">
+                    <!-- Dynamic verification table -->
+                </div>
+            </div>
+
+            <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center; padding-top: 12px; border-top: 1px solid var(--border-color, #cbd5e1); margin-top: 10px;">
+                <button type="button" id="btn-print-db-check" class="btn-secondary" style="font-size: 0.85em; padding: 6px 14px; cursor: pointer;" title="Auslegungstabelle in neuem Fenster anzeigen / drucken">
+                    🖨️ Auslegungstabelle drucken / PDF
+                </button>
+                <button type="button" id="btn-close-db-check" class="btn-primary" style="font-size: 0.85em; padding: 6px 18px; cursor: pointer;">
+                    ✔ Schließen
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Draggable CAD Rooms Pool Window -->
+    <div id="cad-pool-window" class="hidden" style="position: fixed; top: 120px; right: 40px; width: 440px; max-height: 85vh; background: var(--bg-container, #ffffff); border: 2px solid var(--primary-color, #0078d7); border-radius: 10px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); z-index: 999999; flex-direction: column; overflow: hidden; display: none;">
+        <!-- Draggable Title Bar -->
+        <div id="cad-pool-header" style="background: var(--primary-color, #0078d7); color: #ffffff; padding: 10px 14px; cursor: move; user-select: none; display: flex; justify-content: space-between; align-items: center; font-weight: bold; font-size: 0.95em;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <span>🖐️</span> <span>📋 CAD-Räume Pool</span>
+            </div>
+            <div style="display: flex; gap: 6px; align-items: center;">
+                <button id="btn-close-cad-pool-modal" style="background: rgba(255,255,255,0.2); border: none; color: #fff; width: 24px; height: 24px; border-radius: 4px; font-size: 1.1em; cursor: pointer; display: flex; align-items: center; justify-content: center;" title="Fenster schließen">&times;</button>
+            </div>
+        </div>
+
+        <div style="padding: 12px; display: flex; flex-direction: column; gap: 10px; flex: 1; overflow: hidden;">
+            <p style="font-size: 0.82em; color: var(--text-secondary, #64748b); margin: 0; line-height: 1.3;">
+                Ziehen Sie einen Raum per <strong>Drag-and-Drop</strong> direkt in das gewünschte Geschoss der Haupttabelle!
+            </p>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.85em; padding-bottom: 6px; border-bottom: 1px solid var(--border-color, #cbd5e1);">
+                <span>Pool: <strong id="cad-pool-count" style="color: var(--primary-color);">0</strong> Räume</span>
+                <button id="btn-clear-cad-pool" class="btn-secondary" style="padding: 2px 6px; font-size: 0.8em; cursor: pointer; color: #dc2626; border-color: #fca5a5;" title="Alle Räume aus dem Pool löschen">🗑️ Pool leeren</button>
+            </div>
+
+            <!-- Multi-Select Actions -->
+            <div id="cad-multi-actions" style="display: none; flex-direction: column; gap: 6px; padding: 8px; background-color: var(--zebra-even, #f1f5f9); border: 1px solid var(--border-color, #cbd5e1); border-radius: 6px; margin-bottom: 4px;">
+                <div style="font-size: 0.82em; font-weight: bold; color: var(--text-secondary, #475569);">
+                    Ausgewählte Räume (<span id="cad-selected-count">0</span>):
+                </div>
+                <div style="display: flex; gap: 6px; align-items: center;">
+                    <select id="select-target-floor" style="flex: 1; padding: 4px; font-size: 0.85em; border-radius: 4px; border: 1px solid var(--border-color, #cbd5e1); background: var(--bg-container, #ffffff); color: var(--text-main, #0f172a);">
+                        <option value="">-- Geschoss wählen --</option>
+                    </select>
+                    <button id="btn-assign-selected-rooms" class="btn-primary" style="padding: 4px 10px; font-size: 0.8em; font-weight: bold; cursor: pointer;">Zuweisen</button>
+                </div>
+            </div>
+
+            <!-- Filter & Sort Controls -->
+            <div style="display: flex; gap: 6px; align-items: center; margin-bottom: 4px; margin-top: 2px;">
+                <input type="text" id="cad-pool-filter" placeholder="🔍 Filtern (z.B. 1.OG)..." style="flex: 1; padding: 4px 8px; font-size: 0.85em; border-radius: 4px; border: 1px solid var(--border-color, #cbd5e1); background: var(--bg-container, #ffffff); color: var(--text-main, #0f172a);">
+                <select id="cad-pool-sort" style="padding: 4px; font-size: 0.85em; border-radius: 4px; border: 1px solid var(--border-color, #cbd5e1); background: var(--bg-container, #ffffff); color: var(--text-main, #0f172a); width: 110px; box-sizing: border-box;">
+                    <option value="prio" selected>Prio</option>
+                    <option value="default">Standard</option>
+                    <option value="name-asc">Name (A-Z)</option>
+                    <option value="name-desc">Name (Z-A)</option>
+                    <option value="area-desc">Fläche (Abst.)</option>
+                    <option value="area-asc">Fläche (Aufst.)</option>
+                </select>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                <label style="font-size: 0.82em; color: var(--text-secondary, #64748b); cursor: pointer; display: flex; align-items: center; gap: 4px; user-select: none;">
+                    <input type="checkbox" id="cad-pool-hide-assigned" style="cursor: pointer; transform: scale(1.05);"> Zugeordnete ausblenden
+                </label>
+            </div>
+
+            <!-- Scrollable list of CAD rooms -->
+            <div id="cad-pool-list" style="max-height: 480px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; padding-right: 4px;">
+                <!-- Draggable CAD room items injected here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Draggable Verteiler-Übersicht Window -->
+    <div id="verteiler-overview-window" class="hidden" style="position: fixed; top: 120px; right: 500px; width: 440px; max-height: 85vh; background: var(--bg-container, #ffffff); border: 2px solid var(--primary-color, #0078d7); border-radius: 10px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); z-index: 999999; flex-direction: column; overflow: hidden; display: none;">
+        <!-- Draggable Title Bar -->
+        <div id="verteiler-overview-header" style="background: var(--primary-color, #0078d7); color: #ffffff; padding: 10px 14px; cursor: move; user-select: none; display: flex; justify-content: space-between; align-items: center; font-weight: bold; font-size: 0.95em;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <span>📊</span> <span>📋 Verteiler-Übersicht</span>
+            </div>
+            <div style="display: flex; gap: 6px; align-items: center;">
+                <button id="btn-close-verteiler-overview" style="background: rgba(255,255,255,0.2); border: none; color: #fff; width: 24px; height: 24px; border-radius: 4px; font-size: 1.1em; cursor: pointer; display: flex; align-items: center; justify-content: center;" title="Fenster schließen">&times;</button>
+            </div>
+        </div>
+
+        <div style="padding: 12px; display: flex; flex-direction: column; gap: 10px; flex: 1; overflow: hidden;">
+            <p style="font-size: 0.82em; color: var(--text-secondary, #64748b); margin: 0; line-height: 1.3;">
+                Ziehen Sie Räume aus dem CAD-Pool direkt auf einen Verteiler, um sie zuzuweisen!
+            </p>
+
+            <!-- Scrollable list of Verteiler (floors) -->
+            <div id="verteiler-overview-list" style="max-height: 480px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding-right: 4px;">
+                <!-- Verteiler cards injected here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Draggable Tools Window -->
+    <div id="tools-window" class="hidden" style="position: fixed; top: 120px; right: 50px; width: 320px; max-height: 85vh; background: var(--bg-container, #ffffff); border: 2px solid var(--border-color, #cbd5e1); border-radius: 10px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); z-index: 999999; flex-direction: column; overflow: hidden; display: none;">
+        <!-- Draggable Title Bar -->
+        <div id="tools-header" style="background: var(--text-secondary, #475569); color: #ffffff; padding: 10px 14px; cursor: move; user-select: none; display: flex; justify-content: space-between; align-items: center; font-weight: bold; font-size: 0.95em;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <span>🛠️</span> <span>Tools-Verwaltung</span>
+            </div>
+            <div style="display: flex; gap: 6px; align-items: center;">
+                <button id="btn-close-tools" style="background: rgba(255,255,255,0.2); border: none; color: #fff; width: 24px; height: 24px; border-radius: 4px; font-size: 1.1em; cursor: pointer; display: flex; align-items: center; justify-content: center;" title="Fenster schließen">&times;</button>
+            </div>
+        </div>
+
+        <div style="padding: 12px; display: flex; flex-direction: column; gap: 10px; flex: 1; overflow: hidden;">
+            <p style="font-size: 0.82em; color: var(--text-secondary, #64748b); margin: 0; line-height: 1.3;">
+                Ziehen Sie weniger genutzte Menü-Knöpfe an ihren <strong>⋮⋮ Griffen</strong> hier hinein, um sie auszublenden. Ziehen Sie sie wieder heraus, um sie zu aktivieren!
+            </p>
+
+            <!-- Container for stored toolbar items -->
+            <div id="tools-pool-container" style="min-height: 100px; max-height: 380px; overflow-y: auto; border: 2px dashed var(--border-color, #cbd5e1); border-radius: 8px; padding: 12px; display: flex; flex-wrap: wrap; gap: 8px; align-content: flex-start; background: var(--zebra-even, #f8fafc); transition: all 0.2s ease;">
+                <!-- Stored toolbar buttons will flow here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Draggable Live-Rapportliste Window -->
+    <div id="rapportliste-window" class="hidden" style="position: fixed; top: 120px; right: 80px; width: 440px; max-height: 85vh; background: var(--bg-container, #ffffff); border: 2px solid var(--primary-color, #0078d7); border-radius: 10px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); z-index: 999999; flex-direction: column; overflow: hidden; display: none;">
+        <!-- Draggable Title Bar -->
+        <div id="rapportliste-header" style="background: var(--primary-color, #0078d7); color: #ffffff; padding: 10px 14px; cursor: move; user-select: none; display: flex; justify-content: space-between; align-items: center; font-weight: bold; font-size: 0.95em;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <span>📋</span> <span>Live Rapportliste & Material-Übersicht</span>
+            </div>
+            <div style="display: flex; gap: 6px; align-items: center;">
+                <button id="btn-close-rapportliste" style="background: rgba(255,255,255,0.2); border: none; color: #fff; width: 24px; height: 24px; border-radius: 4px; font-size: 1.1em; cursor: pointer; display: flex; align-items: center; justify-content: center;" title="Fenster schließen">&times;</button>
+            </div>
+        </div>
+
+        <div style="padding: 14px; display: flex; flex-direction: column; gap: 14px; flex: 1; overflow-y: auto;">
+            <div class="summary-card" id="project-summary" style="margin-top: 0; box-shadow: none; padding: 0; border: none;">
+                <h4 style="color: #475569; margin-top: 0; margin-bottom: 10px; border-bottom: 1px solid #cbd5e1; padding-bottom: 5px; font-weight: 700;">Heizkreisverteiler & Verteilerkästen</h4>
+                <ul id="rapport-verteiler" style="list-style-type: none; padding-left: 0; margin-bottom: 20px; font-size: 1.05em; line-height: 1.5;">
+                    <li><em>Keine Verteiler</em></li>
+                </ul>
+
+                <h4 style="color: #475569; margin-bottom: 10px; border-bottom: 1px solid #cbd5e1; padding-bottom: 5px; font-weight: 700;">Material & Flächen-Zusammenfassung</h4>
+                <div class="summary-grid" style="display: flex; flex-direction: column; gap: 10px;">
+                    <div class="summary-item" style="padding: 10px; background: var(--bg-surface, #f8fafc); border: 1px solid #e2e8f0; border-radius: 6px; display: flex; justify-content: space-between; align-items: center;">
+                        <span class="summary-label" style="font-weight: 600; color: #334155;">Gesamtfläche (Rz + Iz):</span>
+                        <div><span class="summary-value" id="sum-area" style="font-weight: 700; color: #0284c7; font-size: 1.1em;">0.00</span> m²</div>
+                    </div>
+                    <div class="summary-item" style="padding: 10px; background: var(--bg-surface, #f8fafc); border: 1px solid #e2e8f0; border-radius: 6px; display: flex; justify-content: space-between; align-items: center;">
+                        <span class="summary-label" style="font-weight: 600; color: #334155;">Gesamtrohrlänge:</span>
+                        <div><span class="summary-value" id="sum-pipe" style="font-weight: 700; color: #0284c7; font-size: 1.1em;">0.00</span> m</div>
+                    </div>
+                    <div class="summary-item" style="padding: 10px; background: var(--bg-surface, #f8fafc); border: 1px solid #e2e8f0; border-radius: 6px; display: flex; justify-content: space-between; align-items: center;">
+                        <span class="summary-label" style="font-weight: 600; color: #334155;">Verlegeschiene:</span>
+                        <div><span class="summary-value" id="sum-schiene" style="font-weight: 700; color: #0284c7; font-size: 1.1em;">0.00</span> lfm</div>
+                    </div>
+                    <div class="summary-item" style="padding: 10px; background: var(--bg-surface, #f8fafc); border: 1px solid #e2e8f0; border-radius: 6px; display: flex; justify-content: space-between; align-items: center;">
+                        <span class="summary-label" style="font-weight: 600; color: #334155;">Befestigungsklips:</span>
+                        <div><span class="summary-value" id="sum-klips" style="font-weight: 700; color: #0284c7; font-size: 1.1em;">0</span> Stk</div>
+                    </div>
+                    <div class="summary-item" style="padding: 10px; background: var(--bg-surface, #f8fafc); border: 1px solid #e2e8f0; border-radius: 6px; display: flex; justify-content: space-between; align-items: center;">
+                        <span class="summary-label" style="font-weight: 600; color: #334155;">Fugen-Schutzschläuche:</span>
+                        <div><span class="summary-value" id="sum-fugen" style="font-weight: 700; color: #0284c7; font-size: 1.1em;">0</span> Stk</div>
+                    </div>
+                    <div class="summary-item" style="padding: 10px; background: var(--bg-surface, #f8fafc); border: 1px solid #e2e8f0; border-radius: 6px; display: flex; justify-content: space-between; align-items: center;">
+                        <span class="summary-label" style="font-weight: 600; color: #334155;">Stellantriebe:</span>
+                        <div><span class="summary-value" id="sum-antriebe" style="font-weight: 700; color: #0284c7; font-size: 1.1em;">0</span> Stk</div>
+                    </div>
+                    <div class="summary-item" style="padding: 10px; background: var(--bg-surface, #f8fafc); border: 1px solid #e2e8f0; border-radius: 6px; display: flex; justify-content: space-between; align-items: center;">
+                        <span class="summary-label" style="font-weight: 600; color: #334155;">Raumthermostate:</span>
+                        <div><span class="summary-value" id="sum-thermostate" style="font-weight: 700; color: #0284c7; font-size: 1.1em;">0</span> Stk</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tooltip Element -->
+    <div id="custom-tooltip" class="custom-tooltip"></div>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="fbhv_database.js?v=305"></script>
+    <script src="default_toolbar_layout.js?v=305"></script>
+    <script src="script.js?v=305"></script>
+</body>
+
+</html>
