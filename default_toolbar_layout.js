@@ -1,6 +1,6 @@
 ﻿// FBH Materialplaner - Standard Menue-Layout Konfiguration
 window.DEFAULT_TOOLBAR_LAYOUT = {
-    "updatedAt":  1787172850249,
+    "updatedAt":  1788026644479,
     "rows":  [
                  {
                      "collapsed":  false,
@@ -15,11 +15,11 @@ window.DEFAULT_TOOLBAR_LAYOUT = {
                                    },
                                    {
                                        "id":  "btn-toggle-tooltips",
-                                       "left":  1510
+                                       "left":  1360
                                    },
                                    {
                                        "id":  "btn-open-tools",
-                                       "left":  1630
+                                       "left":  1480
                                    }
                                ]
                  },
@@ -52,23 +52,23 @@ window.DEFAULT_TOOLBAR_LAYOUT = {
                                    },
                                    {
                                        "id":  "btn-open-cad-pool",
-                                       "left":  970
+                                       "left":  950
                                    },
                                    {
                                        "id":  "btn-verteilerkasten-config",
-                                       "left":  1100
+                                       "left":  1060
                                    },
                                    {
                                        "id":  "btn-open-verteiler-overview",
-                                       "left":  1250
+                                       "left":  1190
                                    },
                                    {
                                        "id":  "btn-open-rapportliste",
-                                       "left":  1440
+                                       "left":  1360
                                    },
                                    {
                                        "id":  "btn-print-report",
-                                       "left":  1620
+                                       "left":  1490
                                    }
                                ]
                  },
@@ -146,7 +146,7 @@ window.DEFAULT_TOOLBAR_LAYOUT = {
                                                                "input-fbhv":  "8px",
                                                                "input-floor":  "8px",
                                                                "delete-floor":  "8px",
-                                                               "badge-active":  "1143px"
+                                                               "badge-active":  "1058px"
                                                            }
                                            },
                              "row2-left":  {
@@ -162,7 +162,7 @@ window.DEFAULT_TOOLBAR_LAYOUT = {
                                                                "ansch-set-group":  "0px",
                                                                "anschl-group":  "8px",
                                                                "kasten-select":  "8px",
-                                                               "kasten-dims":  "420px"
+                                                               "kasten-dims":  "95px"
                                                            }
                                            },
                              "row2-right":  {
@@ -176,8 +176,8 @@ window.DEFAULT_TOOLBAR_LAYOUT = {
                          },
     "columnWidths":  {
                          "col_rz":  45,
-                         "col_action":  76,
-                         "col_room_name":  293,
+                         "col_action":  30,
+                         "col_room_name":  394,
                          "col_va_rz":  75,
                          "col_area_rz":  76,
                          "col_va_iz":  70,
@@ -189,7 +189,8 @@ window.DEFAULT_TOOLBAR_LAYOUT = {
                          "col_fugen":  63,
                          "col_connection":  75,
                          "col_total_len":  113,
-                         "col_rings":  157,
-                         "col_expand":  368
+                         "col_rings":  99,
+                         "col_expand":  363,
+                         "_updatedAt":  1788026639940
                      }
 };

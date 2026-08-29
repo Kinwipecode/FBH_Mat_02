@@ -835,6 +835,20 @@ const FBHV_DATABASE = {
     ],
 
     /**
+     * Berechnet den erforderlichen Kasten-Index exakt anhand der Verteiler-Länge (L)
+     */
+    calculateRequiredIndex: function(len) {
+        if (!len || len <= 0) return 'A';
+        if (len <= 500) return 'A';
+        if (len <= 600) return 'AA / B';
+        if (len <= 750) return 'B';
+        if (len <= 900) return 'C';
+        if (len <= 1000) return 'D';
+        if (len <= 1200) return 'E';
+        return 'E';
+    },
+
+    /**
      * Ermittelt die Kasten-Empfehlung und passende Schrankmodelle
      */
     getRecommendation: function(distributorType, connectionSetId, rings, allowedCabinetKeys) {
@@ -850,8 +864,8 @@ const FBHV_DATABASE = {
         
         if (!entry) return null;
         
-        const requiredIndex = entry.index;
         const manifoldLength = entry.len;
+        const requiredIndex = entry.index || this.calculateRequiredIndex(manifoldLength);
         const minWidth = this.indexWidthMap[requiredIndex] || 500;
         
         const matchingCabinets = [];

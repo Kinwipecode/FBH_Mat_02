@@ -2093,7 +2093,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <tr>
                 <td>
                     <h1 class="header-title">FBH Material-Report</h1>
-                    <div style="font-size: 8.5pt; color: #64748b; margin-top: 3px;">Erstellt mit FBH Material Rechner v1.0</div>
+                    <div style="font-size: 8.5pt; color: #64748b; margin-top: 3px;">Erstellt mit FBH Material Rechner v2.0</div>
                 </td>
                 <td class="header-meta">
                     Objekt: <strong>${objektBezVal}</strong><br>
@@ -2917,6 +2917,316 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     makeElementDraggable(cadPoolHeader, cadPoolWindow);
+
+    // --- PDF Viewer Floating Draggable & Resizable Window System ---
+    const pdfViewerWindow = document.getElementById('pdf-viewer-window');
+    const pdfViewerHeader = document.getElementById('pdf-viewer-header');
+    const pdfViewerBody = document.getElementById('pdf-viewer-body');
+    const pdfViewerObject = document.getElementById('pdf-viewer-object');
+    const pdfViewerEmbed = document.getElementById('pdf-viewer-embed');
+    const pdfCanvasContainer = document.getElementById('pdf-canvas-container');
+    const btnClosePdfViewerX = document.getElementById('btn-close-pdf-viewer-x');
+    const btnPdfZoomIn = document.getElementById('btn-pdf-zoom-in');
+    const btnPdfZoomOut = document.getElementById('btn-pdf-zoom-out');
+    const btnPdfZoomReset = document.getElementById('btn-pdf-zoom-reset');
+    const btnPdfFitWidth = document.getElementById('btn-pdf-fit-width');
+    const pdfZoomText = document.getElementById('pdf-zoom-text');
+    const pdfPageCountText = document.getElementById('pdf-page-count-text');
+    const cbPdfWheelZoom = document.getElementById('cb-pdf-wheel-zoom');
+    const pdfResizeHandle = document.getElementById('pdf-viewer-resize-handle');
+
+    let pdfLoaded = false;
+    let cachedPdfDoc = null;
+    let currentPdfScale = 1.25; // Base scale = 100%
+
+    function updateZoomDisplay() {
+        if (pdfZoomText) {
+            const pct = Math.round((currentPdfScale / 1.25) * 100);
+            pdfZoomText.textContent = `${pct}%`;
+        }
+    }
+
+    function renderAllPdfPages(onComplete) {
+        if (!cachedPdfDoc || !pdfCanvasContainer) return;
+
+        updateZoomDisplay();
+        pdfCanvasContainer.innerHTML = '';
+
+        let pagesRendered = 0;
+        const totalPages = cachedPdfDoc.numPages;
+
+        const renderPage = (pageNum) => {
+            if (pageNum > totalPages) {
+                if (typeof onComplete === 'function') onComplete();
+                return;
+            }
+            cachedPdfDoc.getPage(pageNum).then((page) => {
+                const viewport = page.getViewport({ scale: currentPdfScale });
+                const canvas = document.createElement('canvas');
+                const context = canvas.getContext('2d');
+                canvas.height = viewport.height;
+                canvas.width = viewport.width;
+                canvas.style.cssText = 'box-shadow: 0 4px 15px rgba(0,0,0,0.5); border-radius: 4px; background: #ffffff; margin-bottom: 12px; display: block;';
+                
+                pdfCanvasContainer.appendChild(canvas);
+                
+                page.render({ canvasContext: context, viewport: viewport }).promise.then(() => {
+                    pagesRendered++;
+                    if (pagesRendered === 1 && typeof onComplete === 'function') {
+                        onComplete();
+                    }
+                    renderPage(pageNum + 1);
+                });
+            });
+        };
+
+        renderPage(1);
+    }
+
+    function zoomAtPoint(zoomFactor, clientX, clientY) {
+        if (!pdfViewerBody || !cachedPdfDoc) return;
+
+        const oldScale = currentPdfScale;
+        let newScale = Math.min(4.0, Math.max(0.4, oldScale * zoomFactor));
+        if (Math.abs(newScale - oldScale) < 0.001) return;
+
+        const rect = pdfViewerBody.getBoundingClientRect();
+        const mouseX = clientX - rect.left;
+        const mouseY = clientY - rect.top;
+
+        // Current scroll positions
+        const scrollLeft = pdfViewerBody.scrollLeft;
+        const scrollTop = pdfViewerBody.scrollTop;
+
+        // Mouse position in unscaled content coordinates
+        const contentX = (scrollLeft + mouseX) / oldScale;
+        const contentY = (scrollTop + mouseY) / oldScale;
+
+        currentPdfScale = newScale;
+
+        renderAllPdfPages(() => {
+            // Adjust scroll position to keep the mouse focus stationary
+            pdfViewerBody.scrollLeft = (contentX * newScale) - mouseX;
+            pdfViewerBody.scrollTop = (contentY * newScale) - mouseY;
+        });
+    }
+
+    function setZoom(newScale) {
+        currentPdfScale = Math.min(4.0, Math.max(0.4, newScale));
+        if (cachedPdfDoc) {
+            renderAllPdfPages();
+        }
+    }
+
+    if (btnPdfZoomIn) {
+        btnPdfZoomIn.addEventListener('click', (e) => {
+            e.preventDefault();
+            setZoom(currentPdfScale + 0.25);
+        });
+    }
+
+    if (btnPdfZoomOut) {
+        btnPdfZoomOut.addEventListener('click', (e) => {
+            e.preventDefault();
+            setZoom(currentPdfScale - 0.25);
+        });
+    }
+
+    if (btnPdfZoomReset) {
+        btnPdfZoomReset.addEventListener('click', (e) => {
+            e.preventDefault();
+            setZoom(1.25); // Reset to 100%
+        });
+    }
+
+    if (btnPdfFitWidth) {
+        btnPdfFitWidth.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (pdfViewerWindow && cachedPdfDoc) {
+                const winWidth = pdfViewerWindow.clientWidth - 50;
+                const fitScale = (winWidth / 600) * 1.0;
+                setZoom(fitScale);
+            }
+        });
+    }
+
+    // Focal point wheel zoom on mouse location
+    if (pdfViewerBody) {
+        pdfViewerBody.addEventListener('wheel', (e) => {
+            const isWheelZoomActive = cbPdfWheelZoom ? cbPdfWheelZoom.checked : true;
+            if (e.ctrlKey || isWheelZoomActive) {
+                e.preventDefault();
+                e.stopPropagation();
+                if (typeof e.stopImmediatePropagation === 'function') e.stopImmediatePropagation();
+                const factor = e.deltaY < 0 ? 1.15 : (1 / 1.15);
+                zoomAtPoint(factor, e.clientX, e.clientY);
+            }
+        }, { passive: false, capture: true });
+
+        // Deaktiviert Seitennavigation per Maus/Tastatur während des Zooms bei gedrückter Strg-Taste
+        window.addEventListener('keydown', (e) => {
+            if (!pdfViewerWindow || pdfViewerWindow.classList.contains('hidden') || pdfViewerWindow.style.display === 'none') return;
+            if (e.ctrlKey) {
+                if (['ArrowLeft', 'ArrowRight', 'PageUp', 'PageDown', 'Home', 'End', 'BrowserBack', 'BrowserForward'].includes(e.key)) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+            }
+        }, { capture: true });
+
+        window.addEventListener('auxclick', (e) => {
+            if (!pdfViewerWindow || pdfViewerWindow.classList.contains('hidden') || pdfViewerWindow.style.display === 'none') return;
+            if (e.button === 3 || e.button === 4 || e.ctrlKey) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+        }, { capture: true });
+
+        // Drag-to-Pan (Hand Tool)
+        let isPanning = false;
+        let panStartX = 0, panStartY = 0;
+        let initialScrollLeft = 0, initialScrollTop = 0;
+
+        pdfViewerBody.style.cursor = 'grab';
+
+        pdfViewerBody.addEventListener('mousedown', (e) => {
+            if (e.target.tagName === 'BUTTON' || e.target.tagName === 'A' || e.target.tagName === 'INPUT') return;
+            isPanning = true;
+            pdfViewerBody.style.cursor = 'grabbing';
+            panStartX = e.clientX;
+            panStartY = e.clientY;
+            initialScrollLeft = pdfViewerBody.scrollLeft;
+            initialScrollTop = pdfViewerBody.scrollTop;
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (isPanning) {
+                const dx = e.clientX - panStartX;
+                const dy = e.clientY - panStartY;
+                pdfViewerBody.scrollLeft = initialScrollLeft - dx;
+                pdfViewerBody.scrollTop = initialScrollTop - dy;
+            }
+        });
+
+        document.addEventListener('mouseup', () => {
+            if (isPanning) {
+                isPanning = false;
+                pdfViewerBody.style.cursor = 'grab';
+            }
+        });
+    }
+
+    // Window Resizing via corner drag handle
+    if (pdfResizeHandle && pdfViewerWindow) {
+        let isResizing = false;
+        let startW = 0, startH = 0, startX = 0, startY = 0;
+
+        pdfResizeHandle.addEventListener('mousedown', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            isResizing = true;
+            startW = pdfViewerWindow.clientWidth;
+            startH = pdfViewerWindow.clientHeight;
+            startX = e.clientX;
+            startY = e.clientY;
+            document.body.style.userSelect = 'none';
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (isResizing) {
+                const newW = Math.max(480, startW + (e.clientX - startX));
+                const newH = Math.max(350, startH + (e.clientY - startY));
+                pdfViewerWindow.style.width = `${newW}px`;
+                pdfViewerWindow.style.height = `${newH}px`;
+            }
+        });
+
+        document.addEventListener('mouseup', () => {
+            if (isResizing) {
+                isResizing = false;
+                document.body.style.userSelect = '';
+            }
+        });
+    }
+
+    function fallbackToObjectEmbed(pdfUrl) {
+        if (pdfCanvasContainer) pdfCanvasContainer.style.display = 'none';
+        if (pdfViewerObject) {
+            pdfViewerObject.style.display = 'block';
+            pdfViewerObject.data = pdfUrl;
+        }
+        if (pdfViewerEmbed) {
+            pdfViewerEmbed.src = pdfUrl;
+        }
+        pdfLoaded = true;
+    }
+
+    function openPdfViewerModal() {
+        if (!pdfViewerWindow) return;
+
+        // Make window visible first
+        pdfViewerWindow.style.zIndex = '10000005';
+        pdfViewerWindow.classList.remove('hidden');
+        pdfViewerWindow.style.display = 'flex';
+
+        if (pdfLoaded) return;
+
+        const pdfUrl = 'FBHV_Kasten/FBH_Verteilerkaesten.pdf';
+
+        if (typeof pdfjsLib !== 'undefined') {
+            try {
+                pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+                if (pdfCanvasContainer) {
+                    pdfCanvasContainer.innerHTML = '<div style="color: #ffffff; padding: 25px; font-weight: bold; font-size: 1.05em;">⏳ Lade PDF-Grundlagendokument...</div>';
+                }
+                
+                pdfjsLib.getDocument(pdfUrl).promise.then((pdf) => {
+                    cachedPdfDoc = pdf;
+                    pdfLoaded = true;
+
+                    if (pdfPageCountText) {
+                        pdfPageCountText.textContent = `${pdf.numPages} ${pdf.numPages === 1 ? 'Seite' : 'Seiten'}`;
+                    }
+
+                    renderAllPdfPages();
+                }).catch((err) => {
+                    console.warn('PDF.js renderer failed or offline, switching to object fallback', err);
+                    fallbackToObjectEmbed(pdfUrl);
+                });
+            } catch (err) {
+                console.warn('PDF.js init error, switching to object fallback', err);
+                fallbackToObjectEmbed(pdfUrl);
+            }
+        } else {
+            setTimeout(() => {
+                fallbackToObjectEmbed(pdfUrl);
+            }, 100);
+        }
+    }
+
+    function closePdfViewerModal() {
+        if (!pdfViewerWindow) return;
+        pdfViewerWindow.classList.add('hidden');
+        pdfViewerWindow.style.display = 'none';
+    }
+
+    if (btnClosePdfViewerX) {
+        btnClosePdfViewerX.addEventListener('click', (e) => {
+            e.preventDefault();
+            closePdfViewerModal();
+        });
+    }
+
+    // Global listener for any PDF button
+    document.addEventListener('click', (e) => {
+        const btn = e.target.closest('#btn-open-pdf-viewer, .btn-open-pdf-viewer');
+        if (btn) {
+            e.preventDefault();
+            openPdfViewerModal();
+        }
+    });
+
+    makeElementDraggable(pdfViewerHeader, pdfViewerWindow);
 
     let lastCadPoolToggleTime = 0;
 
@@ -6985,21 +7295,21 @@ document.addEventListener('DOMContentLoaded', () => {
     function initColumnWidthsManager() {
         const DEFAULT_COLUMN_WIDTHS = {
             col_rz: 45,
-            col_action: 35,
-            col_room_name: 170,
-            col_va_rz: 70,
-            col_area_rz: 75,
+            col_action: 100,
+            col_room_name: 394,
+            col_va_rz: 75,
+            col_area_rz: 76,
             col_va_iz: 70,
             col_area_iz: 75,
             col_thermostat: 65,
             col_antrieb: 65,
             col_rz_iz: 65,
             col_target_pipe: 75,
-            col_fugen: 60,
+            col_fugen: 63,
             col_connection: 75,
-            col_total_len: 75,
-            col_rings: 85,
-            col_expand: 60
+            col_total_len: 113,
+            col_rings: 99,
+            col_expand: 368
         };
 
         const COLUMN_CONFIG = [
@@ -7022,41 +7332,65 @@ document.addEventListener('DOMContentLoaded', () => {
         ];
 
         function getStoredWidths() {
+            const codeLayout = window.DEFAULT_TOOLBAR_LAYOUT;
+            const codeWidths = (codeLayout && codeLayout.columnWidths) ? codeLayout.columnWidths : null;
+            const codeUpdatedAt = (codeLayout && codeLayout.updatedAt) ? codeLayout.updatedAt : 0;
+
             try {
-                const stored = localStorage.getItem('fbhColumnWidths');
-                if (stored) return Object.assign({}, DEFAULT_COLUMN_WIDTHS, JSON.parse(stored));
+                const storedStr = localStorage.getItem('fbhColumnWidths');
+                if (storedStr) {
+                    const stored = JSON.parse(storedStr);
+                    const storedUpdatedAt = stored._updatedAt || 0;
+
+                    // Wenn der Code (default_toolbar_layout.js) ein neueres Datum hat als der Speicher, lade die Code-Breiten!
+                    if (codeWidths && codeUpdatedAt > storedUpdatedAt) {
+                        const merged = Object.assign({}, DEFAULT_COLUMN_WIDTHS, codeWidths, { _updatedAt: codeUpdatedAt });
+                        try {
+                            localStorage.setItem('fbhColumnWidths', JSON.stringify(merged));
+                        } catch (e) {}
+                        return merged;
+                    }
+
+                    return Object.assign({}, DEFAULT_COLUMN_WIDTHS, stored);
+                }
             } catch (e) {
                 console.warn('Could not read fbhColumnWidths', e);
             }
-            if (window.DEFAULT_TOOLBAR_LAYOUT && window.DEFAULT_TOOLBAR_LAYOUT.columnWidths) {
-                return Object.assign({}, DEFAULT_COLUMN_WIDTHS, window.DEFAULT_TOOLBAR_LAYOUT.columnWidths);
+
+            if (codeWidths) {
+                return Object.assign({}, DEFAULT_COLUMN_WIDTHS, codeWidths);
             }
             return Object.assign({}, DEFAULT_COLUMN_WIDTHS);
         }
 
         function saveStoredWidths(widths) {
             try {
+                widths._updatedAt = Date.now();
                 localStorage.setItem('fbhColumnWidths', JSON.stringify(widths));
+
+                if (window.DEFAULT_TOOLBAR_LAYOUT) {
+                    window.DEFAULT_TOOLBAR_LAYOUT.columnWidths = Object.assign({}, widths);
+                    window.DEFAULT_TOOLBAR_LAYOUT.updatedAt = Date.now();
+                }
 
                 const savedLayoutStr = localStorage.getItem('fbhToolbarLayout');
                 if (savedLayoutStr) {
                     try {
                         let layout = JSON.parse(savedLayoutStr);
                         if (layout && typeof layout === 'object') {
-                            layout.columnWidths = widths;
+                            layout.columnWidths = Object.assign({}, widths);
                             layout.updatedAt = Date.now();
                             localStorage.setItem('fbhToolbarLayout', JSON.stringify(layout));
                         }
                     } catch (e) {}
                 }
 
-                // Also update columnWidths in current project data (fbhData) in localStorage
                 const savedFbhDataStr = localStorage.getItem('fbhData');
                 if (savedFbhDataStr) {
                     try {
                         let fbhData = JSON.parse(savedFbhDataStr);
                         if (fbhData && typeof fbhData === 'object') {
-                            fbhData.columnWidths = widths;
+                            fbhData.columnWidths = Object.assign({}, widths);
                             localStorage.setItem('fbhData', JSON.stringify(fbhData));
                         }
                     } catch (e) {}
@@ -7457,7 +7791,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initColumnWidthsManager();
 
     /* ==========================================================================
-       DATABASE CHECK MANAGER SYSTEM (DB-Check 1 bis 12 Ringe)
+       DATABASE CHECK MANAGER SYSTEM (DB-Check 2 bis 12 Ringe)
        ========================================================================== */
     function initDatabaseCheckManager() {
         const modal = document.getElementById('db-check-modal');
@@ -7482,6 +7816,32 @@ document.addEventListener('DOMContentLoaded', () => {
             const db = (typeof FBHV_DATABASE !== 'undefined') ? FBHV_DATABASE : (typeof window !== 'undefined' ? window.FBHV_DATABASE : null);
             if (!db) return;
 
+            const horToVerMap = {
+                'stramax_horiz': 'stramax_vert',
+                'anschluss_horiz': 'anschluss_vert',
+                'wmz_horiz': 'wmz_vert',
+                'wmz_horiz_mp': 'wmz_vert_mp',
+                'metalplast_wmz_horiz': 'wmz_vert_mp',
+                'oventrop_hycocon_horiz': 'oventrop_hycocon_vert',
+                'oventrop_cocon_horiz': 'oventrop_cocon_vert',
+                'danfoss_horiz': 'danfoss_vert',
+                'ta_compact_dp_horiz': 'ta_compact_dp_vert',
+                'ta_compact_p_horiz': 'ta_compact_p_vert'
+            };
+
+            const verToHorMap = {
+                'stramax_vert': 'stramax_horiz',
+                'anschluss_vert': 'anschluss_horiz',
+                'wmz_vert': 'wmz_horiz',
+                'wmz_vert_mp': 'wmz_horiz_mp',
+                'metalplast_wmz_vert': 'wmz_horiz_mp',
+                'oventrop_hycocon_vert': 'oventrop_hycocon_horiz',
+                'oventrop_cocon_vert': 'oventrop_cocon_horiz',
+                'danfoss_vert': 'danfoss_horiz',
+                'ta_compact_dp_vert': 'ta_compact_dp_horiz',
+                'ta_compact_p_vert': 'ta_compact_p_horiz'
+            };
+
             let vType, primaryConn, allowedCabs;
 
             if (isManualOverride) {
@@ -7501,10 +7861,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     primaryConn = document.getElementById('vconfig-primary-connection-hor')?.value || 
                                   document.getElementById('vconfig-primary-connection')?.value || 
                                   'anschluss_horiz';
+                    if (verToHorMap[primaryConn]) primaryConn = verToHorMap[primaryConn];
                 } else {
                     primaryConn = document.getElementById('vconfig-primary-connection-ver')?.value || 
                                   document.getElementById('vconfig-primary-connection')?.value || 
                                   'anschluss_vert';
+                    if (horToVerMap[primaryConn]) primaryConn = horToVerMap[primaryConn];
                 }
 
                 allowedCabs = typeof getSelectedCabinetTypesFromUI === 'function' ? getSelectedCabinetTypesFromUI() : [];
@@ -7534,14 +7896,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (!isManualOverride) {
                     summaryEl.innerHTML = `
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 8px;">
-                            <div style="font-weight: bold; color: var(--primary-color, #0078d7);">⚙️ Grundlagen für diese Auto-Berechnung:</div>
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <div style="font-weight: bold; color: var(--primary-color, #0078d7);">⚙️ Grundlagen für diese Auto-Berechnung:</div>
+                                <button type="button" class="btn-open-pdf-viewer" style="background: #ffffff; border: 1px solid #bae6fd; color: #0284c7; font-size: 0.8em; font-weight: bold; padding: 2px 8px; border-radius: 4px; cursor: pointer;" title="FBH_Verteilerkaesten.pdf anzeigen">
+                                    📄 PDF-Grundlage öffnen
+                                </button>
+                            </div>
                             <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 0.85em; color: #0284c7; background: #e0f2fe; padding: 4px 10px; border-radius: 6px; border: 1px solid #bae6fd; font-weight: bold;" title="Aktivieren, um die Ausgangslage (Verteiler, Anschluss, Schrank) frei für Tests anzupassen">
                                 <input type="checkbox" id="cb-db-check-override"> ✏️ Test-Parameter manuell anpassen
                             </label>
                         </div>
-                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 6px;">
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 6px;">
                             <div>• <strong>Verteiler-System:</strong> ${vTypeName}</div>
-                            <div>• <strong>Ausrichtung:</strong> ${currentOrientation === 'hor' ? '↔️ Horizontal (Kugelhahn seitlich)' : '↕️ Vertikal (Kugelhahn unten)'}</div>
                             <div>• <strong>Bevorzugtes Anschluss-Set:</strong> ${connName}</div>
                             <div>• <strong>Zugewiesene Schränke:</strong> ${cabListStr}</div>
                         </div>
@@ -7559,26 +7925,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     summaryEl.innerHTML = `
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 8px;">
-                            <div style="font-weight: bold; color: #d35400; display: flex; align-items: center; gap: 6px;">
-                                ⚙️ <strong>Manuelle Test-Ausgangslage:</strong> <span style="font-weight: normal; font-size: 0.88em; color: #64748b;">(Beliebig anpassen – wirkt nur für dieses Fenster)</span>
+                            <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                                <div style="font-weight: bold; color: #d35400; display: flex; align-items: center; gap: 6px;">
+                                    ⚙️ <strong>Manuelle Test-Ausgangslage:</strong> <span style="font-weight: normal; font-size: 0.88em; color: #64748b;">(Beliebig anpassen – wirkt nur für dieses Fenster)</span>
+                                </div>
+                                <button type="button" class="btn-open-pdf-viewer" style="background: #ffffff; border: 1px solid #ffe0b2; color: #d35400; font-size: 0.8em; font-weight: bold; padding: 2px 8px; border-radius: 4px; cursor: pointer;" title="FBH_Verteilerkaesten.pdf anzeigen">
+                                    📄 PDF-Grundlage öffnen
+                                </button>
                             </div>
                             <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 0.85em; color: #d35400; background: #fff3e0; padding: 4px 10px; border-radius: 6px; border: 1px solid #ffe0b2; font-weight: bold;">
                                 <input type="checkbox" id="cb-db-check-override" checked> ✏️ Test-Parameter aktiv (Manuell)
                             </label>
                         </div>
-                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 10px; background: #ffffff; padding: 10px 12px; border-radius: 6px; border: 1px solid #cbd5e1;">
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; background: #ffffff; padding: 10px 12px; border-radius: 6px; border: 1px solid #cbd5e1;">
                             <div>
                                 <label style="display: block; font-weight: bold; font-size: 0.82em; margin-bottom: 3px; color: #475569;">Verteiler-System:</label>
                                 <select id="db-check-ov-vtype" style="width: 100%; padding: 4px 8px; font-size: 0.88em; border-radius: 4px; border: 1px solid #cbd5e1; background: #fff; font-weight: bold; color: #0f172a;">
                                     <option value="metalplast" ${vType === 'metalplast' ? 'selected' : ''}>metalplast Verteiler (Inox)</option>
                                     <option value="stramax" ${vType === 'stramax' ? 'selected' : ''}>Stramax Verteiler (Messing)</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label style="display: block; font-weight: bold; font-size: 0.82em; margin-bottom: 3px; color: #475569;">Ausrichtung:</label>
-                                <select id="db-check-ov-orient" style="width: 100%; padding: 4px 8px; font-size: 0.88em; border-radius: 4px; border: 1px solid #cbd5e1; background: #fff; font-weight: bold; color: #0f172a;">
-                                    <option value="hor" ${currentOrientation === 'hor' ? 'selected' : ''}>↔️ Horizontal (Kugelhahn seitlich)</option>
-                                    <option value="ver" ${currentOrientation === 'ver' ? 'selected' : ''}>↕️ Vertikal (Kugelhahn unten)</option>
                                 </select>
                             </div>
                             <div>
@@ -7618,9 +7982,15 @@ document.addEventListener('DOMContentLoaded', () => {
                     const selOrient = document.getElementById('db-check-ov-orient');
                     if (selOrient) {
                         selOrient.addEventListener('change', (e) => {
-                            currentOrientation = e.target.value;
-                            manualOverrideState.orientation = e.target.value;
-                            renderDbCheckTable(currentOrientation);
+                            const newOrient = e.target.value;
+                            if (newOrient === 'ver' && horToVerMap[manualOverrideState.primaryConn]) {
+                                manualOverrideState.primaryConn = horToVerMap[manualOverrideState.primaryConn];
+                            } else if (newOrient === 'hor' && verToHorMap[manualOverrideState.primaryConn]) {
+                                manualOverrideState.primaryConn = verToHorMap[manualOverrideState.primaryConn];
+                            }
+                            currentOrientation = newOrient;
+                            manualOverrideState.orientation = newOrient;
+                            renderDbCheckTable(newOrient);
                         });
                     }
 
@@ -7661,9 +8031,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     <thead>
                         <tr style="background: var(--primary-color, #0078d7); color: #ffffff;">
                             <th style="padding: 8px 10px; border: 1px solid #cbd5e1; text-align: center; width: 70px;">Ringe</th>
+                            <th style="padding: 8px 10px; border: 1px solid #cbd5e1; text-align: center; width: 125px;">Index</th>
                             <th style="padding: 8px 10px; border: 1px solid #cbd5e1;">Anschluss-Set</th>
                             <th style="padding: 8px 10px; border: 1px solid #cbd5e1; text-align: right; width: 110px;">Verteiler L [mm]</th>
-                            <th style="padding: 8px 10px; border: 1px solid #cbd5e1; text-align: center; width: 90px;">Index</th>
                             <th style="padding: 8px 10px; border: 1px solid #cbd5e1;">Empfohlener Verteilerkasten</th>
                             <th style="padding: 8px 10px; border: 1px solid #cbd5e1; text-align: center; width: 160px;">Maße (B × H × T) [mm]</th>
                             <th style="padding: 8px 10px; border: 1px solid #cbd5e1; width: 100px;">Art. Nr.</th>
@@ -7672,7 +8042,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <tbody>
             `;
 
-            for (let rings = 1; rings <= 12; rings++) {
+            for (let rings = 2; rings <= 12; rings++) {
                 const rec = db.getRecommendation(vType, primaryConn, rings, allowedCabs);
                 const cab = (rec && rec.matchingCabinets && rec.matchingCabinets.length > 0) ? rec.matchingCabinets[0] : (rec ? rec.primaryCabinet : null);
 
@@ -7681,20 +8051,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     tableHtml += `
                         <tr style="${bgStyle}">
-                            <td style="padding: 7px 10px; border: 1px solid #cbd5e1; font-weight: bold; text-align: center; color: var(--primary-color, #0078d7);">${rings} Ring${rings > 1 ? 'e' : ''}</td>
-                            <td style="padding: 7px 10px; border: 1px solid #cbd5e1; font-weight: 600;">${rec.connectionSetName}</td>
-                            <td style="padding: 7px 10px; border: 1px solid #cbd5e1; text-align: right; font-weight: bold;">${rec.manifoldLength} mm</td>
-                            <td style="padding: 7px 10px; border: 1px solid #cbd5e1; text-align: center;"><span style="background: #e0f2fe; color: #0369a1; padding: 2px 8px; border-radius: 4px; font-weight: bold;">Index ${rec.requiredIndex}</span></td>
-                            <td style="padding: 7px 10px; border: 1px solid #cbd5e1; font-weight: 600;">${cab.name}</td>
-                            <td style="padding: 7px 10px; border: 1px solid #cbd5e1; text-align: center; font-weight: bold; color: #0f172a;">${cab.width} × ${cab.height} × ${cab.depth} mm</td>
-                            <td style="padding: 7px 10px; border: 1px solid #cbd5e1; font-family: monospace; font-weight: bold; color: #475569;">${cab.articleNo || '-'}</td>
+                            <td style="padding: 4px 10px; border: 1px solid #cbd5e1; font-weight: bold; text-align: center; color: var(--primary-color, #0078d7);">${rings} Ringe</td>
+                            <td style="padding: 4px 10px; border: 1px solid #cbd5e1; text-align: center;"><span style="background: #e0f2fe; color: #0369a1; padding: 2px 8px; border-radius: 4px; font-weight: bold; white-space: nowrap;">Index ${rec.requiredIndex}</span></td>
+                            <td style="padding: 4px 10px; border: 1px solid #cbd5e1; font-weight: 600;">${rec.connectionSetName}</td>
+                            <td style="padding: 4px 10px; border: 1px solid #cbd5e1; text-align: right; font-weight: bold;">${rec.manifoldLength} mm</td>
+                            <td style="padding: 4px 10px; border: 1px solid #cbd5e1; font-weight: 600;">${cab.name}</td>
+                            <td style="padding: 4px 10px; border: 1px solid #cbd5e1; text-align: center; font-weight: bold; color: #0f172a;">${cab.width} × ${cab.height} × ${cab.depth} mm</td>
+                            <td style="padding: 4px 10px; border: 1px solid #cbd5e1; font-family: monospace; font-weight: bold; color: #475569;">${cab.articleNo || '-'}</td>
                         </tr>
                     `;
                 } else {
                     tableHtml += `
                         <tr style="background: #fef2f2;">
-                            <td style="padding: 7px 10px; border: 1px solid #cbd5e1; font-weight: bold; text-align: center; color: #dc2626;">${rings} Ring${rings > 1 ? 'e' : ''}</td>
-                            <td colspan="6" style="padding: 7px 10px; border: 1px solid #cbd5e1; color: #dc2626; font-style: italic;">Keine passende Kasten-Kombination gefunden</td>
+                            <td style="padding: 4px 10px; border: 1px solid #cbd5e1; font-weight: bold; text-align: center; color: #dc2626;">${rings} Ringe</td>
+                            <td colspan="6" style="padding: 4px 10px; border: 1px solid #cbd5e1; color: #dc2626; font-style: italic;">Keine passende Kasten-Kombination gefunden</td>
                         </tr>
                     `;
                 }
@@ -7725,6 +8095,64 @@ document.addEventListener('DOMContentLoaded', () => {
         if (tabHor) tabHor.addEventListener('click', () => renderDbCheckTable('hor'));
         if (tabVer) tabVer.addEventListener('click', () => renderDbCheckTable('ver'));
 
+        function cycleConnectionSet(isPrevious = false) {
+            isManualOverride = true;
+            if (!FBHV_DATABASE || !FBHV_DATABASE.connectionSets) return;
+
+            const availableSets = FBHV_DATABASE.connectionSets;
+            if (availableSets.length === 0) return;
+
+            let currentIndex = availableSets.findIndex(s => s.id === manualOverrideState.primaryConn);
+            if (currentIndex < 0) currentIndex = 0;
+
+            let nextIndex;
+            if (isPrevious) {
+                // Shift + Klick => Vorheriges Set (nach oben)
+                nextIndex = (currentIndex - 1 + availableSets.length) % availableSets.length;
+            } else {
+                // Klick / Strg + Klick => Nächstes Set (nach unten)
+                nextIndex = (currentIndex + 1) % availableSets.length;
+            }
+
+            const nextSet = availableSets[nextIndex];
+            if (nextSet) {
+                manualOverrideState.primaryConn = nextSet.id;
+                renderDbCheckTable(currentOrientation);
+            }
+        }
+
+        // Schnellwechsel per Strg/Shift Klick oder Doppelklick in der Tabelle
+        if (modal) {
+            modal.addEventListener('mousedown', (e) => {
+                if (['BUTTON', 'A', 'INPUT'].includes(e.target.tagName)) return;
+
+                // Nur bei gedrückter Strg- oder Shift-Taste das native Dropdown abfangen
+                if (e.ctrlKey || e.shiftKey) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const isPrevious = e.shiftKey && !e.ctrlKey;
+                    cycleConnectionSet(isPrevious);
+                }
+            });
+
+            modal.addEventListener('dblclick', (e) => {
+                if (['BUTTON', 'A', 'INPUT'].includes(e.target.tagName)) return;
+
+                e.preventDefault();
+                e.stopPropagation();
+
+                if (e.target.id === 'db-check-ov-vtype') {
+                    isManualOverride = true;
+                    manualOverrideState.vType = (manualOverrideState.vType === 'stramax') ? 'metalplast' : 'stramax';
+                    renderDbCheckTable(currentOrientation);
+                    return;
+                }
+
+                const isPrevious = e.shiftKey && !e.ctrlKey;
+                cycleConnectionSet(isPrevious);
+            });
+        }
+
         if (btnPrint) {
             btnPrint.addEventListener('click', () => {
                 const container = document.getElementById('db-check-table-container');
@@ -7737,7 +8165,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <!DOCTYPE html>
                         <html>
                         <head>
-                            <title>FBH Materialplaner - Datenbank & Auslegungs-Check (1 bis 12 Ringe)</title>
+                            <title>FBH Materialplaner - Datenbank & Auslegungs-Check (2 bis 12 Ringe)</title>
                             <style>
                                 body { font-family: Arial, sans-serif; padding: 20px; color: #0f172a; }
                                 h2 { color: #0078d7; margin-top: 0; }
@@ -7748,7 +8176,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             </style>
                         </head>
                         <body>
-                            <h2>🔍 FBH Materialplaner - Datenbank-Auslegungs-Check (1 bis 12 Ringe)</h2>
+                            <h2>🔍 FBH Materialplaner - Datenbank-Auslegungs-Check (2 bis 12 Ringe)</h2>
                             <div class="summary-box">\${summary ? summary.innerHTML : ''}</div>
                             \${container.innerHTML}
                             <script>window.print();<\/script>

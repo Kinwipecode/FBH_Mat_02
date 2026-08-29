@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="data:,">
     <link rel="stylesheet" href="style.css?v=300">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <style>
 /* CSS Custom Properties / Theme Variables */
 :root {
@@ -993,7 +994,7 @@ body.menu-edit-mode .header-top-bar.fh-drag-row {
             <div class="header-top-bar" style="display: flex; align-items: center; justify-content: space-between; width: 100%; gap: 10px; flex-wrap: wrap; padding-bottom: 4px;">
 
                 <div style="display: flex; align-items: center; gap: 10px; flex: 1;">
-                    <span class="badge-v1" style="font-size: 0.85em; color: var(--text-secondary, #64748b); opacity: 0.85; font-weight: 700; background: var(--bg-container-alt, #e2e8f0); padding: 3px 8px; border-radius: 4px; border: 1px solid var(--border-color, #cbd5e1); flex-shrink: 0;" title="Programmversion">v1.0</span>
+                    <span class="badge-v2" style="font-size: 0.85em; color: var(--text-secondary, #64748b); opacity: 0.85; font-weight: 700; background: var(--bg-container-alt, #e2e8f0); padding: 3px 8px; border-radius: 4px; border: 1px solid var(--border-color, #cbd5e1); flex-shrink: 0;" title="Programmversion">v2.0</span>
                     <input type="text" id="objekt-bez" placeholder="Objektbezeichnung..." title="Objektbezeichnung (Haupttitel des Projekts)">
                 </div>
                 <div style="display: flex; align-items: center; gap: 8px;">
@@ -2127,24 +2128,24 @@ body.menu-edit-mode .header-top-bar.fh-drag-row {
         </div>
     </div>
 
-    <!-- Modal Window: Database Check (DB-Check 1 bis 12 Ringe) -->
+    <!-- Modal Window: Database Check (DB-Check 2 bis 12 Ringe) -->
     <div id="db-check-modal" class="modal-overlay hidden" style="z-index: 1000000;">
-        <div class="modal-card" style="max-width: 980px; width: 95%; max-height: 90vh; display: flex; flex-direction: column;">
-            <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 12px; border-bottom: 1px solid var(--border-color, #cbd5e1);">
+        <div class="modal-card" style="max-width: 1180px; width: 96%; max-height: 95vh; display: flex; flex-direction: column; padding: 16px 20px;">
+            <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 8px; border-bottom: 1px solid var(--border-color, #cbd5e1);">
                 <h3 style="margin: 0; display: flex; align-items: center; gap: 8px; font-size: 1.15em; color: var(--text-main, #0f172a);">
-                    <span>🔍</span> Datenbank & Auslegungs-Check (1 bis 12 Ringe)
+                    <span>🔍</span> Datenbank & Auslegungs-Check (2 bis 12 Ringe)
                 </h3>
                 <button type="button" class="btn-close-modal" id="btn-close-db-check-x" style="background: none; border: none; font-size: 1.3em; cursor: pointer; color: #64748b;">✕</button>
             </div>
 
-            <div class="modal-body" style="overflow-y: auto; padding: 15px 0; flex: 1;">
-                <div id="db-check-config-summary" style="font-size: 0.88em; color: var(--text-main, #0f172a); margin-bottom: 15px; background: var(--bg-container-alt, #f8fafc); padding: 12px 16px; border-radius: 8px; border: 1px solid var(--border-color, #e2e8f0); line-height: 1.5;">
+            <div class="modal-body" style="overflow-y: auto; padding: 8px 0; flex: 1;">
+                <div id="db-check-config-summary" style="font-size: 0.88em; color: var(--text-main, #0f172a); margin-bottom: 8px; background: var(--bg-container-alt, #f8fafc); padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border-color, #e2e8f0); line-height: 1.4;">
                     <!-- Summary injected here -->
                 </div>
 
-                <div style="display: flex; gap: 10px; margin-bottom: 15px; border-bottom: 2px solid var(--border-color, #e2e8f0); padding-bottom: 6px;">
-                    <button type="button" id="tab-db-check-hor" class="btn-secondary active" style="font-weight: bold; padding: 6px 16px; cursor: pointer;">↔️ Horizontale Auslegung (Hor)</button>
-                    <button type="button" id="tab-db-check-ver" class="btn-secondary" style="font-weight: bold; padding: 6px 16px; cursor: pointer;">↕️ Vertikale Auslegung (Ver)</button>
+                <div style="display: flex; gap: 10px; margin-bottom: 8px; border-bottom: 2px solid var(--border-color, #e2e8f0); padding-bottom: 4px;">
+                    <button type="button" id="tab-db-check-hor" class="btn-secondary active" style="font-weight: bold; padding: 5px 14px; cursor: pointer;">↔️ Horizontale Auslegung (Hor)</button>
+                    <button type="button" id="tab-db-check-ver" class="btn-secondary" style="font-weight: bold; padding: 5px 14px; cursor: pointer;">↕️ Vertikale Auslegung (Ver)</button>
                 </div>
 
                 <div id="db-check-table-container" style="overflow-x: auto;">
@@ -2152,15 +2153,62 @@ body.menu-edit-mode .header-top-bar.fh-drag-row {
                 </div>
             </div>
 
-            <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center; padding-top: 12px; border-top: 1px solid var(--border-color, #cbd5e1); margin-top: 10px;">
-                <button type="button" id="btn-print-db-check" class="btn-secondary" style="font-size: 0.85em; padding: 6px 14px; cursor: pointer;" title="Auslegungstabelle in neuem Fenster anzeigen / drucken">
-                    🖨️ Auslegungstabelle drucken / PDF
-                </button>
+            <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center; padding-top: 8px; border-top: 1px solid var(--border-color, #cbd5e1); margin-top: 4px;">
+                <div style="display: flex; gap: 8px;">
+                    <button type="button" id="btn-print-db-check" class="btn-secondary" style="font-size: 0.85em; padding: 6px 14px; cursor: pointer;" title="Auslegungstabelle in neuem Fenster anzeigen / drucken">
+                        🖨️ Auslegungstabelle drucken / PDF
+                    </button>
+                    <button type="button" id="btn-open-pdf-viewer" class="btn-secondary btn-open-pdf-viewer" style="font-size: 0.85em; padding: 6px 14px; cursor: pointer; color: #0284c7; background: #e0f2fe; border: 1px solid #bae6fd; font-weight: bold;" title="Grundlagen-PDF (FBH_Verteilerkaesten.pdf) im verschiebbaren Fenster öffnen">
+                        📄 PDF-Grundlage öffnen (FBH_Verteilerkaesten.pdf)
+                    </button>
+                </div>
                 <button type="button" id="btn-close-db-check" class="btn-primary" style="font-size: 0.85em; padding: 6px 18px; cursor: pointer;">
                     ✔ Schließen
                 </button>
             </div>
         </div>
+    </div>
+
+    <!-- Floating Draggable PDF Viewer Window (FBH_Verteilerkaesten.pdf) -->
+    <div id="pdf-viewer-window" class="hidden" style="position: fixed; top: 50px; left: calc(50% - 460px); width: 920px; height: 86vh; min-width: 480px; min-height: 360px; max-width: 98vw; max-height: 96vh; resize: both; background: var(--bg-container, #ffffff); border: 2px solid var(--primary-color, #0078d7); border-radius: 10px; box-shadow: 0 12px 35px rgba(0,0,0,0.4); z-index: 10000005; flex-direction: column; overflow: hidden; display: none;">
+        <!-- Draggable Title Bar -->
+        <div id="pdf-viewer-header" style="background: var(--primary-color, #0078d7); color: #ffffff; padding: 8px 14px; cursor: move; user-select: none; display: flex; justify-content: space-between; align-items: center; font-weight: bold; font-size: 0.95em; flex-shrink: 0;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <span>📄</span> <span>FBH Verteilerkästen Grundlagendokument (FBH_Verteilerkaesten.pdf)</span>
+            </div>
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <a href="FBHV_Kasten/FBH_Verteilerkaesten.pdf" target="_blank" style="color: #ffffff; text-decoration: underline; font-size: 0.85em; font-weight: bold;" title="PDF in neuem Tab/Fenster des Browsers öffnen">↗️ In neuem Tab öffnen</a>
+                <button type="button" id="btn-close-pdf-viewer-x" style="background: none; border: none; font-size: 1.3em; cursor: pointer; color: #ffffff; font-weight: bold; line-height: 1;" title="Schließen">✕</button>
+            </div>
+        </div>
+
+        <!-- PDF Zoom & Navigation Toolbar -->
+        <div id="pdf-viewer-toolbar" style="background: #334155; color: #ffffff; padding: 6px 14px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #475569; font-size: 0.88em; user-select: none; flex-shrink: 0; flex-wrap: wrap; gap: 6px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <button type="button" id="btn-pdf-zoom-out" style="background: #475569; color: #fff; border: 1px solid #64748b; padding: 3px 10px; border-radius: 4px; cursor: pointer; font-weight: bold;" title="Verkleinern (Zoom -)">🔍 -</button>
+                <span id="pdf-zoom-text" style="font-weight: bold; min-width: 50px; text-align: center; color: #e2e8f0; font-size: 0.95em;">100%</span>
+                <button type="button" id="btn-pdf-zoom-in" style="background: #475569; color: #fff; border: 1px solid #64748b; padding: 3px 10px; border-radius: 4px; cursor: pointer; font-weight: bold;" title="Vergrößern (Zoom +)">🔍 +</button>
+                <button type="button" id="btn-pdf-zoom-reset" style="background: #475569; color: #fff; border: 1px solid #64748b; padding: 3px 10px; border-radius: 4px; cursor: pointer; font-size: 0.88em; margin-left: 4px;" title="Auf 100% zurücksetzen">100%</button>
+                <button type="button" id="btn-pdf-fit-width" style="background: #475569; color: #fff; border: 1px solid #64748b; padding: 3px 10px; border-radius: 4px; cursor: pointer; font-size: 0.88em;" title="An Fensterbreite anpassen">↔️ Breite anpassen</button>
+            </div>
+            <div style="display: flex; align-items: center; gap: 12px; font-size: 0.85em; color: #94a3b8;">
+                <label style="display: flex; align-items: center; gap: 5px; cursor: pointer; color: #e2e8f0; font-weight: bold;" title="Mausrad direkt zum Zoomen am Mauszeiger verwenden">
+                    <input type="checkbox" id="cb-pdf-wheel-zoom" checked style="cursor: pointer;"> 🖱️ Mausrad-Fokuszoom
+                </label>
+                <div><span id="pdf-page-count-text">PDF-Dokument</span></div>
+            </div>
+        </div>
+
+        <!-- PDF Viewer Body with Canvas Scroll Container and Object/Embed Fallback -->
+        <div id="pdf-viewer-body" style="flex: 1; width: 100%; height: 100%; overflow: auto; background: #525659; position: relative;">
+            <div id="pdf-canvas-container" style="display: flex; flex-direction: column; align-items: center; gap: 15px; padding: 15px 0;"></div>
+            <object id="pdf-viewer-object" data="" type="application/pdf" style="width: 100%; height: 100%; border: none; display: none;">
+                <embed id="pdf-viewer-embed" src="" type="application/pdf" style="width: 100%; height: 100%; border: none;"></embed>
+            </object>
+        </div>
+
+        <!-- Resizable Corner Handle -->
+        <div id="pdf-viewer-resize-handle" style="position: absolute; bottom: 0; right: 0; width: 18px; height: 18px; cursor: se-resize; z-index: 100; background: linear-gradient(135deg, transparent 50%, #0078d7 50%); border-bottom-right-radius: 8px;" title="An der Ecke ziehen, um das Fenster zu vergrößern/verkleinern"></div>
     </div>
 
     <!-- Floating Draggable CAD Rooms Pool Window -->
