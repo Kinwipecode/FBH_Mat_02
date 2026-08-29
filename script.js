@@ -1,4 +1,234 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // --- Modern Toast & Custom Dialog System ---
+    function getOrCreateToastContainer() {
+        let container = document.getElementById('toast-container');
+        if (!container) {
+            container = document.createElement('div');
+            container.id = 'toast-container';
+            document.body.appendChild(container);
+        }
+        return container;
+    }
+
+    function escapeHtml(str) {
+        if (typeof str !== 'string') return str;
+        return str
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+
+    function showToast(message, type = 'info', title = null, duration = 5000) {
+        if (!message) return;
+        
+        let msgStr = String(message).trim();
+        
+        if (type === 'info' || !type) {
+            if (/^(erfolg|erfolgreich|gespeichert|geladen|importiert)/i.test(msgStr)) {
+                type = 'success';
+            } else if (/^(fehler|error|ungültig|gescheitert)/i.test(msgStr)) {
+                type = 'error';
+            } else if (/^(bitte|keine|warnung|achtung)/i.test(msgStr)) {
+                type = 'warning';
+            }
+        }
+        
+        let icon = 'ℹ️';
+        let defaultTitle = 'Information';
+        if (type === 'success') {
+            icon = '✅';
+            defaultTitle = 'Erfolg';
+        } else if (type === 'error') {
+            icon = '❌';
+            defaultTitle = 'Fehler';
+        } else if (type === 'warning') {
+            icon = '⚠️';
+            defaultTitle = 'Hinweis';
+        }
+
+        if (msgStr.startsWith('Erfolg!')) {
+            msgStr = msgStr.replace(/^Erfolg!\s*/i, '');
+            if (!title) title = 'Erfolg';
+        } else if (msgStr.startsWith('Fehler!')) {
+            msgStr = msgStr.replace(/^Fehler!\s*/i, '');
+            if (!title) title = 'Fehler';
+        }
+
+        const toastTitleText = title || defaultTitle;
+        const container = getOrCreateToastContainer();
+
+        const toast = document.createElement('div');
+        toast.className = `toast-notification toast-${type}`;
+        
+        toast.innerHTML = `
+            <div class="toast-icon">${icon}</div>
+            <div class="toast-body">
+                <div class="toast-title">${escapeHtml(toastTitleText)}</div>
+                <div class="toast-message">${escapeHtml(msgStr)}</div>
+            </div>
+            <button class="toast-close" title="Schließen">&times;</button>
+            <div class="toast-progress"></div>
+        `;
+
+        const closeBtn = toast.querySelector('.toast-close');
+        const progressBar = toast.querySelector('.toast-progress');
+
+        let isDismissed = false;
+        function dismissToast() {
+            if (isDismissed) return;
+            isDismissed = true;
+            toast.classList.remove('toast-visible');
+            setTimeout(() => {
+                if (toast.parentNode) {
+                    toast.parentNode.removeChild(toast);
+                }
+            }, 350);
+        }
+
+        closeBtn.addEventListener('click', dismissToast);
+
+        container.appendChild(toast);
+
+        requestAnimationFrame(() => {
+            toast.classList.add('toast-visible');
+            if (progressBar && duration > 0) {
+                progressBar.style.transitionDuration = `${duration}ms`;
+                progressBar.style.transform = 'scaleX(0)';
+            }
+        });
+
+        if (duration > 0) {
+            setTimeout(dismissToast, duration);
+        }
+
+        return toast;
+    }
+
+    function showCustomConfirm(message, title = 'Bestätigung erforderlich', confirmText = 'Bestätigen', cancelText = 'Abbrechen', isDanger = false) {
+        return new Promise((resolve) => {
+            const overlay = document.createElement('div');
+            overlay.className = 'custom-dialog-overlay';
+
+            const btnClass = isDanger ? 'custom-dialog-btn-danger' : 'custom-dialog-btn-primary';
+            const icon = isDanger ? '🗑️' : '❓';
+
+            overlay.innerHTML = `
+                <div class="custom-dialog-box">
+                    <div class="custom-dialog-header">
+                        <div class="custom-dialog-icon">${icon}</div>
+                        <h3 class="custom-dialog-title">${escapeHtml(title)}</h3>
+                    </div>
+                    <p class="custom-dialog-message">${escapeHtml(message)}</p>
+                    <div class="custom-dialog-actions">
+                        <button class="custom-dialog-btn custom-dialog-btn-secondary btn-cancel">${escapeHtml(cancelText)}</button>
+                        <button class="custom-dialog-btn ${btnClass} btn-confirm">${escapeHtml(confirmText)}</button>
+                    </div>
+                </div>
+            `;
+
+            document.body.appendChild(overlay);
+
+            const btnConfirm = overlay.querySelector('.btn-confirm');
+            const btnCancel = overlay.querySelector('.btn-cancel');
+
+            function cleanup(result) {
+                overlay.classList.remove('visible');
+                setTimeout(() => {
+                    if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
+                }, 250);
+                window.removeEventListener('keydown', handleKeyDown);
+                resolve(result);
+            }
+
+            function handleKeyDown(e) {
+                if (e.key === 'Escape') {
+                    cleanup(false);
+                } else if (e.key === 'Enter') {
+                    cleanup(true);
+                }
+            }
+
+            btnConfirm.addEventListener('click', () => cleanup(true));
+            btnCancel.addEventListener('click', () => cleanup(false));
+            overlay.addEventListener('click', (e) => {
+                if (e.target === overlay) cleanup(false);
+            });
+
+            window.addEventListener('keydown', handleKeyDown);
+
+            requestAnimationFrame(() => {
+                overlay.classList.add('visible');
+                btnConfirm.focus();
+            });
+        });
+    }
+
+    function showCustomPrompt(message, defaultValue = '', title = 'Eingabe erforderlich', confirmText = 'OK', cancelText = 'Abbrechen') {
+        return new Promise((resolve) => {
+            const overlay = document.createElement('div');
+            overlay.className = 'custom-dialog-overlay';
+
+            overlay.innerHTML = `
+                <div class="custom-dialog-box">
+                    <div class="custom-dialog-header">
+                        <div class="custom-dialog-icon">✏️</div>
+                        <h3 class="custom-dialog-title">${escapeHtml(title)}</h3>
+                    </div>
+                    <p class="custom-dialog-message">${escapeHtml(message)}</p>
+                    <input type="text" class="custom-dialog-input" value="${escapeHtml(defaultValue)}">
+                    <div class="custom-dialog-actions">
+                        <button class="custom-dialog-btn custom-dialog-btn-secondary btn-cancel">${escapeHtml(cancelText)}</button>
+                        <button class="custom-dialog-btn custom-dialog-btn-primary btn-confirm">${escapeHtml(confirmText)}</button>
+                    </div>
+                </div>
+            `;
+
+            document.body.appendChild(overlay);
+
+            const input = overlay.querySelector('.custom-dialog-input');
+            const btnConfirm = overlay.querySelector('.btn-confirm');
+            const btnCancel = overlay.querySelector('.btn-cancel');
+
+            function cleanup(result) {
+                overlay.classList.remove('visible');
+                setTimeout(() => {
+                    if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
+                }, 250);
+                window.removeEventListener('keydown', handleKeyDown);
+                resolve(result);
+            }
+
+            function handleKeyDown(e) {
+                if (e.key === 'Escape') {
+                    cleanup(null);
+                } else if (e.key === 'Enter') {
+                    cleanup(input.value);
+                }
+            }
+
+            btnConfirm.addEventListener('click', () => cleanup(input.value));
+            btnCancel.addEventListener('click', () => cleanup(null));
+            overlay.addEventListener('click', (e) => {
+                if (e.target === overlay) cleanup(null);
+            });
+
+            window.addEventListener('keydown', handleKeyDown);
+
+            requestAnimationFrame(() => {
+                overlay.classList.add('visible');
+                input.focus();
+                input.select();
+            });
+        });
+    }
+
+    // Override browser native alert with modern Toast notifications
+    window.alert = function(msg) {
+        showToast(msg);
+    };
+
     // --- Dynamic Sticky Header Height ---
     const stickyHeader = document.querySelector('.sticky-header');
     if (stickyHeader) {
@@ -2256,15 +2486,22 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (btnClearCache) {
-        btnClearCache.addEventListener('click', (e) => {
+        btnClearCache.addEventListener('click', async (e) => {
             if (e.target.closest('.drag-handle')) return;
-            if (confirm("Möchten Sie wirklich alles löschen? Ein neues, leeres Projekt wird angelegt.")) {
+            const confirmed = await showCustomConfirm(
+                "Möchten Sie wirklich alles löschen? Ein neues, leeres Projekt wird angelegt.",
+                "Neues Projekt",
+                "Alles löschen",
+                "Abbrechen",
+                true
+            );
+            if (confirmed) {
                 localStorage.removeItem('fbhData');
                 document.getElementById('objekt-bez').value = "";
                 const existingFloors = document.querySelectorAll('tbody.floor-group');
                 existingFloors.forEach(f => f.remove());
                 floorCounter = 0;
-                cadRoomPool.forEach(rm => rm.assignedFloor = null);
+                cadRoomPool = [];
                 if (typeof renderCadPoolList === 'function') {
                     renderCadPoolList();
                 }
@@ -3858,8 +4095,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (btnClearCadPool) {
-        btnClearCadPool.addEventListener('click', () => {
-            if (confirm("Möchten Sie wirklich alle gespeicherten Räume aus dem CAD-Pool löschen?")) {
+        btnClearCadPool.addEventListener('click', async () => {
+            const confirmed = await showCustomConfirm(
+                "Möchten Sie wirklich alle gespeicherten Räume aus dem CAD-Pool löschen?",
+                "CAD-Pool leeren",
+                "CAD-Pool löschen",
+                "Abbrechen",
+                true
+            );
+            if (confirmed) {
                 cadRoomPool = [];
                 renderCadPoolList();
                 debouncedSave();
@@ -7227,7 +7471,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             if (!selText) {
-                selText = prompt("Kein Text markiert. Bitte Text zum Stempeln eingeben:");
+                selText = await showCustomPrompt("Kein Text markiert. Bitte Text zum Stempeln eingeben:", "", "Text stempeln");
                 if (selText) selText = selText.trim();
             }
 
