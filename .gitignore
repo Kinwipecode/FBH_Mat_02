@@ -1,5 +1,23 @@
 # Backup folders
+Backup/
 Backup_*/
+
+# Interne Entwickler-Notizen (nicht für GitHub relevant)
+*_notes.md
+
+# Lokale Start-Skripte (nur für lokale Nutzung)
+Start_FBH_Mat.bat
+Apply_Menu_Layout.bat
+Apply_Menu_Layout.ps1
+
+# Projektspezifische CAD-Exporte (enthalten echte Raumdaten)
+Aus_CAD/
+
+# Herstellerdokumente: FBHV_Kasten/FBH_Verteilerkaesten.pdf bleibt absichtlich im Repo
+# (wird in der App als Grundlagen-PDF benötigt)
+
+# Exportierte Projektdateien (enthalten Nutzerdaten)
+FBH_*.json
 
 # OS generated files
 .DS_Store
