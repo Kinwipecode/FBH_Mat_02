@@ -1186,13 +1186,13 @@ document.addEventListener('DOMContentLoaded', () => {
         if (btn) {
             btn.classList.toggle('active', isVerteilerMoveMode);
             if (isVerteilerMoveMode) {
-                btn.innerHTML = '<span class="drag-handle">⋮⋮</span> ↕️ Vert. move (Aktiv)';
+                btn.innerHTML = '<span class="drag-handle">⋮⋮</span> ↑↓ Vert. (Aktiv)';
                 btn.style.backgroundColor = '#10b981';
                 btn.style.color = '#ffffff';
                 btn.style.borderColor = '#059669';
-                showMenuBoundaryToast('↕️ Verteiler-Verschiebemodus AKTIV! Verwenden Sie ↑ / ↓, um den aktiven Verteiler nach oben oder unten zu verschieben.');
+                showMenuBoundaryToast('↑↓ Verteiler-Verschiebemodus AKTIV! Verwenden Sie ↑ / ↓, um den aktiven Verteiler nach oben oder unten zu verschieben.');
             } else {
-                btn.innerHTML = '<span class="drag-handle">⋮⋮</span> ↕️ Vert. move';
+                btn.innerHTML = '<span class="drag-handle">⋮⋮</span> ↑↓ Vert.';
                 btn.style.backgroundColor = '';
                 btn.style.color = '';
                 btn.style.borderColor = '';
@@ -1899,7 +1899,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                     <th style="width: 7%;">Fugen<br><span style="font-size: 7.5pt; font-weight: normal; color: #64748b;">Anzahl</span></th>
                                     <th style="width: 9%;">Rohr ges.<br><span style="font-size: 7.5pt; font-weight: normal; color: #64748b;">Meter</span></th>
                                     <th style="width: 9%;">Ringe<br><span style="font-size: 7.5pt; font-weight: normal; color: #64748b;">Anzahl</span></th>
-                                    <th style="width: 7%;">Erweit.</th>
+                                    <th style="width: 7%;">Zus. Ring</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -2323,7 +2323,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <tr>
                 <td>
                     <h1 class="header-title">FBH Material-Report</h1>
-                    <div style="font-size: 8.5pt; color: #64748b; margin-top: 3px;">Erstellt mit FBH Material Rechner v2.0</div>
+                    <div style="font-size: 8.5pt; color: #64748b; margin-top: 3px;">Erstellt mit FBH Material Rechner v3.0</div>
                 </td>
                 <td class="header-meta">
                     Objekt: <strong>${objektBezVal}</strong><br>
@@ -2489,11 +2489,11 @@ document.addEventListener('DOMContentLoaded', () => {
         btnClearCache.addEventListener('click', async (e) => {
             if (e.target.closest('.drag-handle')) return;
             const confirmed = await showCustomConfirm(
-                "Möchten Sie wirklich alles löschen? Ein neues, leeres Projekt wird angelegt.",
-                "Neues Projekt",
-                "Alles löschen",
+                "Sie legen ein neues Projekt an.\n\n❓ WARUM DIESES FENSTER ERSCHEINT:\nDamit alle Ihre neuen Ergebnisse, Berichte und CAD-Daten direkt am richtigen Ort auf Ihrer Festplatte gespeichert werden, fordert die Anwendung Sie nun auf, Ihren Ziel-Projektordner festzulegen.\n\n👉 WAS ZU TUN IST:\n1. Klicken Sie unten auf '📁 Projektordner wählen'.\n2. Es öffnet sich der Dateibrowser – wählen Sie Ihren gewünschten Zielordner (z. B. g:\\FBH Mat\\FBH_Projekte) oder erstellen Sie einen neuen Ordner.",
+                "🆕 Neues Projekt – Ordnerauswahl erforderlich",
+                "📁 Projektordner wählen",
                 "Abbrechen",
-                true
+                false
             );
             if (confirmed) {
                 localStorage.removeItem('fbhData');
@@ -2514,6 +2514,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     calculateGlobalSum();
                     if (!isLoading) debouncedSave();
                 }
+
+                // Automatically trigger the directory selection browser dialog (equivalent to clicking Bild 1)
+                await selectProjectDirectory();
             }
         });
     }
@@ -2619,19 +2622,59 @@ document.addEventListener('DOMContentLoaded', () => {
             if (headerFolderBadge) {
                 headerFolderBadge.title = `Aktueller Zielordner: ${fullPath} (Klicken zum Ändern)`;
             }
-
-            if (btnSaveToFolder) btnSaveToFolder.style.display = 'inline-block';
-            if (btnLoadFromFolder) btnLoadFromFolder.style.display = 'inline-block';
         } else {
             let defaultPath = localStorage.getItem('fbhFullPath') || 'g:\\FBH Mat\\FBH_Projekte';
 
             if (headerFolderName) {
                 headerFolderName.textContent = defaultPath;
             }
-
-            if (btnSaveToFolder) btnSaveToFolder.style.display = 'none';
-            if (btnLoadFromFolder) btnLoadFromFolder.style.display = 'none';
         }
+        updateActiveProjectFileDisplay();
+    }
+
+    function updateActiveProjectFileDisplay(customFileName = null) {
+        const headerProjectFileName = document.getElementById('header-project-filename');
+        if (!headerProjectFileName) return;
+
+        if (customFileName) {
+            let clean = customFileName.trim();
+            if (!clean.toLowerCase().endsWith('.json')) clean += '.json';
+            headerProjectFileName.textContent = clean;
+            return;
+        }
+
+        const objInput = document.getElementById('objekt-bez');
+        let objName = (objInput ? objInput.value : '').trim() || 'Projekt';
+        objName = objName.replace(/[^a-zA-Z0-9_\-äöüÄÖÜß ]/g, '_').replace(/ /g, '_');
+        const fileName = objName.toLowerCase().startsWith('fbh_') 
+            ? `${objName}.json` 
+            : `FBH_${objName}.json`;
+            
+        headerProjectFileName.textContent = fileName;
+    }
+
+    const objBezInput = document.getElementById('objekt-bez');
+    if (objBezInput) {
+        ['input', 'change'].forEach(evt => {
+            objBezInput.addEventListener(evt, () => {
+                updateActiveProjectFileDisplay();
+            });
+        });
+    }
+
+    const btnActiveProjectFile = document.getElementById('btn-active-project-file');
+    if (btnActiveProjectFile) {
+        btnActiveProjectFile.addEventListener('click', async (e) => {
+            if (e.target.closest('.drag-handle')) return;
+            if (!projectDirectoryHandle) {
+                await selectProjectDirectory();
+                if (!projectDirectoryHandle) return;
+            }
+            if (folderFilesModal) {
+                folderFilesModal.classList.remove('hidden');
+                refreshFolderFilesList();
+            }
+        });
     }
 
     // Header folder badge click event
@@ -2680,13 +2723,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Function: Save current project to selected folder
     async function saveProjectToFolder() {
-        debouncedSave.flush();
+        if (typeof calculateGlobalSum === 'function') calculateGlobalSum();
+        if (typeof saveData === 'function') saveData();
+        if (debouncedSave && typeof debouncedSave.flush === 'function') debouncedSave.flush();
+
         const savedData = localStorage.getItem('fbhData');
         if (!savedData) {
             alert('Keine Daten zum Speichern vorhanden.');
             return;
         }
         if (!projectDirectoryHandle) {
+            const confirmed = await showCustomConfirm(
+                "Sie möchten Ihr Projekt auf der Festplatte sichern.\n\n❓ WARUM DIESES FENSTER ERSCHEINT:\nDamit Ihre Projektdaten, Berechnungen und Berichte direkt am richtigen Ort auf Ihrer Festplatte gespeichert werden, fordert die Anwendung Sie nun auf, Ihren Ziel-Projektordner festzulegen.\n\n👉 WAS ZU TUN IST:\n1. Klicken Sie unten auf '📁 Projektordner wählen'.\n2. Es öffnet sich der Dateibrowser – wählen Sie Ihren gewünschten Zielordner (z. B. g:\\FBH Mat\\FBH_Projekte) oder erstellen Sie einen neuen Ordner.",
+                "💾 Projekt sichern – Ordnerauswahl erforderlich",
+                "📁 Projektordner wählen",
+                "Abbrechen",
+                false
+            );
+
+            if (!confirmed) return;
+
             await selectProjectDirectory();
             if (!projectDirectoryHandle) return;
         }
@@ -2698,22 +2754,31 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
             let objName = document.getElementById('objekt-bez').value || 'Projekt';
-            objName = objName.replace(/[^a-zA-Z0-9_\-]/g, '_');
-            const fileName = `FBH_${objName}.json`;
+            objName = objName.trim().replace(/[^a-zA-Z0-9_\-äöüÄÖÜß ]/g, '_').replace(/ /g, '_');
+            const fileName = objName.toLowerCase().startsWith('fbh_') 
+                ? `${objName}.json` 
+                : `FBH_${objName}.json`;
 
             const fileHandle = await projectDirectoryHandle.getFileHandle(fileName, { create: true });
             const writable = await fileHandle.createWritable();
             await writable.write(savedData);
             await writable.close();
 
-            // Visual feedback
-            const origText = btnSaveToFolder.textContent;
-            btnSaveToFolder.textContent = '✔ Geklappt!';
-            btnSaveToFolder.style.backgroundColor = 'var(--accent-green)';
-            setTimeout(() => {
-                btnSaveToFolder.textContent = origText;
-                btnSaveToFolder.style.backgroundColor = '';
-            }, 2000);
+            // Visual feedback on button
+            if (btnSaveToFolder) {
+                const origHtml = btnSaveToFolder.innerHTML;
+                btnSaveToFolder.innerHTML = '<span class="drag-handle">⋮⋮</span> ✔ Gesichert!';
+                btnSaveToFolder.style.backgroundColor = '#10b981';
+                btnSaveToFolder.style.color = '#ffffff';
+                setTimeout(() => {
+                    btnSaveToFolder.innerHTML = origHtml;
+                    btnSaveToFolder.style.backgroundColor = '';
+                    btnSaveToFolder.style.color = '';
+                }, 2000);
+            }
+
+            // Visual Toast notification
+            showToast(`✔ Projekt in Datei "${fileName}" gesichert!`, 'success', 'Projekt gesichert', 3500);
 
         } catch (err) {
             console.error("Fehler beim Speichern im Ordner:", err);
@@ -2770,8 +2835,40 @@ document.addEventListener('DOMContentLoaded', () => {
                         <span class="file-name">📄 ${file.name}</span>
                         <span class="file-meta">Geändert: ${dateStr} &bull; ${sizeStr}</span>
                     </div>
-                    <button class="btn-primary btn-load-file-entry" style="font-size: 0.8em; padding: 4px 10px;">Laden</button>
+                    <div class="file-actions" style="display: flex; gap: 6px; align-items: center;">
+                        <button class="btn-secondary btn-delete-file-entry" style="font-size: 0.85em; padding: 4px 8px; background: #fee2e2; border: 1px solid #fca5a5; color: #dc2626; border-radius: 4px; cursor: pointer;" title="Datei '${file.name}' aus Ordner löschen">🗑️</button>
+                        <button class="btn-primary btn-load-file-entry" style="font-size: 0.8em; padding: 4px 10px;">Laden</button>
+                    </div>
                 `;
+
+                const btnDelete = item.querySelector('.btn-delete-file-entry');
+                if (btnDelete) {
+                    btnDelete.addEventListener('click', async (e) => {
+                        e.stopPropagation();
+                        const confirmed = await showCustomConfirm(
+                            `Möchten Sie die Projektdatei "${file.name}" wirklich endgültig aus dem Ordner löschen?`,
+                            "Projektdatei löschen",
+                            "Datei löschen",
+                            "Abbrechen",
+                            true
+                        );
+                        if (confirmed) {
+                            try {
+                                const hasPermission = await verifyDirPermission(projectDirectoryHandle, true);
+                                if (!hasPermission) {
+                                    alert('Keine Berechtigung zum Löschen im Zielordner.');
+                                    return;
+                                }
+                                await projectDirectoryHandle.removeEntry(file.name);
+                                showToast(`✔ Datei "${file.name}" wurde aus dem Ordner gelöscht.`, 'info', 'Datei gelöscht', 3000);
+                                await refreshFolderFilesList();
+                            } catch (err) {
+                                console.error("Fehler beim Löschen der Datei:", err);
+                                alert("Fehler beim Löschen der Datei: " + err.message);
+                            }
+                        }
+                    });
+                }
 
                 item.querySelector('.btn-load-file-entry').addEventListener('click', async (e) => {
                     e.stopPropagation();
@@ -2833,8 +2930,12 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     if (btnLoadFromFolder) {
-        btnLoadFromFolder.addEventListener('click', (e) => {
+        btnLoadFromFolder.addEventListener('click', async (e) => {
             if (e.target.closest('.drag-handle')) return;
+            if (!projectDirectoryHandle) {
+                await selectProjectDirectory();
+                if (!projectDirectoryHandle) return;
+            }
             if (folderFilesModal) {
                 folderFilesModal.classList.remove('hidden');
                 refreshFolderFilesList();
@@ -2854,6 +2955,98 @@ document.addEventListener('DOMContentLoaded', () => {
         btnFolderFilesChangeDir.addEventListener('click', async () => {
             if (folderFilesModal) folderFilesModal.classList.add('hidden');
             await selectProjectDirectory();
+        });
+    }
+    async function createNewProjectFileInFolder(projectName) {
+        if (!projectDirectoryHandle) {
+            alert('Kein Zielordner ausgewählt.');
+            return;
+        }
+        let cleanName = (projectName || 'Neues_Projekt').trim();
+        cleanName = cleanName.replace(/[^a-zA-Z0-9_\-äöüÄÖÜß ]/g, '_');
+        if (!cleanName) cleanName = 'Neues_Projekt';
+
+        let fileBaseName = cleanName.replace(/ /g, '_');
+        const fileName = fileBaseName.toLowerCase().startsWith('fbh_') 
+            ? `${fileBaseName}.json` 
+            : `FBH_${fileBaseName}.json`;
+
+        const confirmed = await showCustomConfirm(
+            `Möchten Sie das neue Projekt "${projectName || cleanName}" jetzt übernehmen und als aktiven Arbeitsbereich laden?\n\nDatei im Ordner: ${fileName}`,
+            "Projekt übernehmen",
+            "Projekt übernehmen (Enter ↵)",
+            "Abbrechen",
+            false
+        );
+
+        if (!confirmed) return;
+
+        try {
+            const hasPermission = await verifyDirPermission(projectDirectoryHandle, true);
+            if (!hasPermission) {
+                alert('Keine Schreibberechtigung für den Zielordner.');
+                return;
+            }
+
+            const initialData = {
+                version: "3.0",
+                objektBez: projectName || cleanName,
+                floors: [],
+                createdAt: new Date().toISOString()
+            };
+
+            const fileHandle = await projectDirectoryHandle.getFileHandle(fileName, { create: true });
+            const writable = await fileHandle.createWritable();
+            await writable.write(JSON.stringify(initialData, null, 2));
+            await writable.close();
+
+            localStorage.removeItem('fbhData');
+            document.getElementById('objekt-bez').value = projectName || cleanName;
+            const existingFloors = document.querySelectorAll('tbody.floor-group');
+            existingFloors.forEach(f => f.remove());
+            floorCounter = 0;
+            cadRoomPool = [];
+            if (typeof renderCadPoolList === 'function') renderCadPoolList();
+
+            if (btnAddFloor) {
+                btnAddFloor.click();
+            } else {
+                floorCounter++;
+                const fb = addNewFloor(floorCounter);
+                addRoomToFloor(fb);
+                calculateGlobalSum();
+                if (!isLoading) debouncedSave();
+            }
+
+            debouncedSave.flush();
+            await refreshFolderFilesList();
+            const inputNewFile = document.getElementById('input-new-project-filename');
+            if (inputNewFile) inputNewFile.value = '';
+
+            if (folderFilesModal) folderFilesModal.classList.add('hidden');
+            showToast(`✔ Projekt "${fileName}" wurde erfolgreich übernommen und geladen!`, 'success', 'Projekt übernommen', 4000);
+
+        } catch (err) {
+            console.error("Fehler beim Erstellen der neuen Datei im Ordner:", err);
+            alert("Fehler beim Erstellen der Datei: " + err.message);
+        }
+    }
+
+    const btnConfirmCreateNewFile = document.getElementById('btn-confirm-create-new-file');
+    const inputNewProjectFilename = document.getElementById('input-new-project-filename');
+
+    if (btnConfirmCreateNewFile && inputNewProjectFilename) {
+        btnConfirmCreateNewFile.addEventListener('click', async () => {
+            const val = inputNewProjectFilename.value.trim();
+            await createNewProjectFileInFolder(val);
+        });
+
+        inputNewProjectFilename.addEventListener('keydown', async (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                const val = inputNewProjectFilename.value.trim();
+                await createNewProjectFileInFolder(val);
+            }
         });
     }
     if (folderFilesModal) {
@@ -4457,6 +4650,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (isMenuEditMode) {
                 document.body.classList.add('menu-edit-mode');
+                if (typeof updateCoordinateRuler === 'function') updateCoordinateRuler();
                 if (btnToggle) {
                     btnToggle.innerHTML = '✔ Bearbeitung beenden';
                     btnToggle.style.backgroundColor = '#10b981';
@@ -4477,12 +4671,16 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (typeof setupFloorHeaderDrag === 'function') setupFloorHeaderDrag(fb);
                 });
 
-                document.querySelectorAll('.fh-draggable-item').forEach(item => {
+                document.querySelectorAll('.toolbar-item, .fh-draggable-item').forEach(item => {
                     item.draggable = true;
                 });
 
+                const firstItem = document.querySelector('.toolbar-item');
+                if (firstItem && typeof selectMenuItemForKeyboard === 'function') selectMenuItemForKeyboard(firstItem);
+
             } else {
                 document.body.classList.remove('menu-edit-mode');
+                if (typeof clearMenuItemSelection === 'function') clearMenuItemSelection();
                 if (btnToggle) {
                     btnToggle.innerHTML = '✏️ Menüs bearbeiten';
                     btnToggle.style.backgroundColor = '';
@@ -4491,7 +4689,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 if (actionsDiv) actionsDiv.style.display = 'none';
 
-                document.querySelectorAll('.fh-draggable-item').forEach(item => {
+                const modalWidths = document.getElementById('column-widths-modal');
+                if (modalWidths) modalWidths.classList.add('hidden');
+                const btnWidths = document.getElementById('btn-column-widths');
+                if (btnWidths) {
+                    btnWidths.classList.remove('active');
+                    btnWidths.style.backgroundColor = '';
+                    btnWidths.style.color = '';
+                }
+                document.body.classList.remove('column-resize-mode');
+
+                document.querySelectorAll('.toolbar-item, .fh-draggable-item').forEach(item => {
                     item.draggable = false;
                 });
             }
@@ -4578,10 +4786,49 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
-        const GRID_SECTOR_SIZE = 10; // Fine 10px invisible sectors
+        const GRID_SECTOR_SIZE = 5; // Fine 5px grid sector units
 
         function snapToSector(posX) {
             return Math.round(posX / GRID_SECTOR_SIZE) * GRID_SECTOR_SIZE;
+        }
+
+        function updateCoordinateRuler() {
+            const ruler = document.getElementById('toolbar-coordinate-ruler');
+            if (!ruler) return;
+            ruler.innerHTML = '';
+            const maxPx = 2000;
+            const stepPx = 50;
+            for (let x = 0; x <= maxPx; x += stepPx) {
+                const tick = document.createElement('div');
+                const isMajor = (x % 100 === 0);
+                tick.className = 'toolbar-ruler-tick' + (isMajor ? ' major-tick' : '');
+                tick.style.left = x + 'px';
+                tick.textContent = isMajor ? `${x}px` : '|';
+                ruler.appendChild(tick);
+            }
+        }
+
+        function updateCoordinateBadge(item) {
+            const badge = document.getElementById('menu-coordinate-badge');
+            if (!badge) return;
+            if (!item || !document.body.classList.contains('menu-edit-mode')) {
+                badge.innerHTML = '📍 Pos: X = -- (Grid: --)';
+                return;
+            }
+            if (item.classList.contains('toolbar-item')) {
+                const leftVal = parseInt(item.style.left, 10) || 10;
+                const sectorVal = Math.round(leftVal / GRID_SECTOR_SIZE);
+                const row = item.closest('.toolbar-row');
+                const rowIdx = row ? (parseInt(row.dataset.rowIndex, 10) + 1) : '?';
+                let labelText = (item.innerText || item.getAttribute('title') || 'Knopf').replace(/[⋮⋮\n\r]/g, ' ').trim();
+                if (labelText.length > 18) labelText = labelText.substring(0, 16) + '…';
+                badge.innerHTML = `📍 Zeile ${rowIdx} | <strong>${labelText}</strong>: X=${leftVal}px (Grid: ${sectorVal})`;
+            } else if (item.classList.contains('fh-draggable-item')) {
+                const marginVal = parseInt(item.style.marginLeft, 10) || 0;
+                let labelText = (item.innerText || item.getAttribute('title') || 'Element').replace(/[⋮⋮\n\r]/g, ' ').trim();
+                if (labelText.length > 18) labelText = labelText.substring(0, 16) + '…';
+                badge.innerHTML = `📍 Verteiler-Header | <strong>${labelText}</strong>: Margin=${marginVal}px`;
+            }
         }
 
         let boundaryToastTimeout = null;
@@ -4625,19 +4872,21 @@ document.addEventListener('DOMContentLoaded', () => {
             }, 3000);
         }
 
-        function resolveDropOverlapByPushingRight(targetRow, itemToPlace, proposedLeft) {
+        function resolveDropOverlapByPushingRight(targetRow, itemToPlace, proposedLeft, showToastOnBoundary = true) {
             if (!targetRow || !itemToPlace) return;
-            const itemWidth = itemToPlace.offsetWidth || 110;
             const minLeft = 10;
+            const itemWidth = itemToPlace.offsetWidth || 110;
             const rowWidth = targetRow.clientWidth || 1200;
             const maxLeft = Math.max(minLeft, rowWidth - itemWidth - 25);
 
+            // 1. Initial-Prüfung: Begrenzt die angeforderte left-Position auf min/max Grenzen & snapped auf Sektor
             let hitRightEdge = false;
             if (proposedLeft > maxLeft) {
                 hitRightEdge = true;
             }
 
-            let leftVal = Math.max(minLeft, Math.min(maxLeft, snapToSector(proposedLeft)));
+            let snappedLeft = snapToSector(proposedLeft);
+            let leftVal = Math.max(minLeft, Math.min(maxLeft, snappedLeft));
             itemToPlace.style.left = leftVal + 'px';
             itemToPlace.dataset.sector = Math.round(leftVal / GRID_SECTOR_SIZE);
 
@@ -4648,37 +4897,36 @@ document.addEventListener('DOMContentLoaded', () => {
             const items = Array.from(targetRow.querySelectorAll('.toolbar-item'))
                 .map(el => ({
                     el: el,
-                    left: parseInt(el.style.left, 10) || 0,
+                    left: parseInt(el.style.left, 10) || minLeft,
                     width: el.offsetWidth || 110
                 }))
                 .sort((a, b) => a.left - b.left);
 
-            for (let i = 0; i < items.length; i++) {
+            if (items.length <= 1) {
+                updateCoordinateBadge(itemToPlace);
+                return;
+            }
+
+            // 2. Pass 1 (Links-nach-Rechts): Überlappt ein Knopf seinen linken Nachbarn, wird er kaskadierend auf Sektor-Raster nach rechts geschoben.
+            for (let i = 1; i < items.length; i++) {
+                const previous = items[i - 1];
                 const current = items[i];
-                if (i > 0) {
-                    const previous = items[i - 1];
-                    const minAllowedLeft = snapToSector(previous.left + previous.width + 10);
-                    if (current.left < minAllowedLeft) {
-                        current.left = minAllowedLeft;
-                        current.el.style.left = current.left + 'px';
-                        current.el.dataset.sector = Math.round(current.left / GRID_SECTOR_SIZE);
-                    }
-                } else {
-                    if (current.left < minLeft) {
-                        current.left = minLeft;
-                        current.el.style.left = current.left + 'px';
-                        current.el.dataset.sector = Math.round(current.left / GRID_SECTOR_SIZE);
-                    }
+                const minAllowedLeft = snapToSector(previous.left + previous.width + 10);
+                if (current.left < minAllowedLeft) {
+                    current.left = minAllowedLeft;
+                    current.el.style.left = current.left + 'px';
+                    current.el.dataset.sector = Math.round(current.left / GRID_SECTOR_SIZE);
                 }
             }
 
+            // 3. Pass 2 (Rechts-nach-Links): Ragt ein Knopf am rechten Zeilenende heraus, wird er nach links korrigiert und schiebt bei Bedarf Nachbarn ein.
             for (let i = items.length - 1; i >= 0; i--) {
                 const current = items[i];
                 const currentWidth = current.el.offsetWidth || 110;
-                const currentMaxLeft = Math.max(minLeft, rowWidth - currentWidth - 25);
+                const currentMaxLeft = snapToSector(Math.max(minLeft, rowWidth - currentWidth - 25));
 
                 if (current.left > currentMaxLeft) {
-                    current.left = snapToSector(currentMaxLeft);
+                    current.left = currentMaxLeft;
                     current.el.style.left = current.left + 'px';
                     current.el.dataset.sector = Math.round(current.left / GRID_SECTOR_SIZE);
                     hitRightEdge = true;
@@ -4695,8 +4943,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
 
-            if (hitRightEdge) {
-                showMenuBoundaryToast('⚠️ Rechter Rand erreicht! Element gestoppt. Die Menübreite wird nicht automatisch verändert.');
+            updateCoordinateBadge(itemToPlace);
+
+            if (hitRightEdge && showToastOnBoundary) {
+                showMenuBoundaryToast('⚠️ Rechter Rand erreicht! Das Element wurde am Rand eingepasst.');
             }
         }
 
@@ -4713,10 +4963,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 return {
                     collapsed: container.classList.contains('collapsed'),
                     items: Array.from(container.querySelectorAll('.toolbar-item'))
-                        .map(el => ({
-                            id: el.dataset.btnId,
-                            left: parseInt(el.style.left, 10) || 15
-                        }))
+                        .map(el => {
+                            const leftVal = snapToSector(parseInt(el.style.left, 10) || 15);
+                            const sectorVal = Math.round(leftVal / GRID_SECTOR_SIZE);
+                            el.dataset.sector = sectorVal;
+                            return {
+                                id: el.dataset.btnId,
+                                left: leftVal,
+                                sector: sectorVal
+                            };
+                        })
                         .filter(item => Boolean(item.id))
                 };
             });
@@ -4797,12 +5053,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (Array.isArray(rowItems)) {
                     rowItems.forEach((itemInfo, itemIdx) => {
-                        let id, left;
+                        let id, left, sector;
                         if (typeof itemInfo === 'string') {
                             id = itemInfo;
                         } else if (itemInfo && typeof itemInfo === 'object') {
                             id = itemInfo.id;
                             left = itemInfo.left;
+                            sector = itemInfo.sector;
                         }
 
                         if (id && allItemsMap[id]) {
@@ -4810,7 +5067,12 @@ document.addEventListener('DOMContentLoaded', () => {
                             if (typeof left !== 'number' || isNaN(left)) {
                                 left = 15 + itemIdx * 140;
                             }
+                            left = snapToSector(left);
+                            if (typeof sector !== 'number' || isNaN(sector)) {
+                                sector = Math.round(left / GRID_SECTOR_SIZE);
+                            }
                             el.style.left = left + 'px';
+                            el.dataset.sector = sector;
                             el.style.position = 'absolute';
                             row.appendChild(el);
                             placedIds.add(id);
@@ -4917,36 +5179,38 @@ document.addEventListener('DOMContentLoaded', () => {
         let initialLeft = '15px';
         let wasDropped = false;
 
+        // Mouse-based drag state for toolbar row items (replaces HTML5 drag API)
+        let mbDragItem = null;
+        let mbDragOffsetX = 0;
+        let mbDragCurrentRow = null;
+        let mbDragInitialRow = null;
+        let mbDragInitialLeft = '15px';
+
         function attachItemDragListeners() {
+            // Toolbar row items now use mouse-based drag (see global mousemove/mouseup below).
+            // HTML5 drag is only kept for pool-item -> row transfers.
             document.querySelectorAll('.toolbar-item').forEach(item => {
                 if (item.dataset.dragInitialized) return;
-                item.dataset.dragInitialized = "true";
+                item.dataset.dragInitialized = 'true';
 
-                // Ensure buttons are standard clickable elements by default
-                item.draggable = false;
+                const inPool = () => !!item.closest('#tools-pool-container');
 
-                item.addEventListener('mousedown', (e) => {
-                    if (isMenuEditMode && e.target.closest('.drag-handle')) {
-                        item.draggable = true;
-                    } else {
-                        item.draggable = false;
-                    }
-                });
+                item.draggable = false;  // Off by default; pool items enable on mousedown
 
                 item.addEventListener('mouseup', () => {
                     item.draggable = false;
                 });
 
+                // HTML5 drag: only used when item is in the tools pool
                 item.addEventListener('dragstart', (e) => {
-                    if (!isMenuEditMode) {
+                    if (!isMenuEditMode || !inPool()) {
                         e.preventDefault();
                         return false;
                     }
                     draggedItem = item;
-                    initialRow = item.closest('.toolbar-row') || item.closest('#tools-pool-container');
+                    initialRow = item.closest('#tools-pool-container');
                     initialLeft = item.style.left || '15px';
                     wasDropped = false;
-
                     item.classList.add('dragging');
                     const rect = item.getBoundingClientRect();
                     dragOffsetX = e.clientX - rect.left;
@@ -4956,30 +5220,18 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 });
 
-                item.addEventListener('dragend', (e) => {
+                item.addEventListener('dragend', () => {
                     item.draggable = false;
-
-                    if (draggedItem) {
-                        if (!wasDropped) {
-                            // Revert if drop didn't succeed
-                            if (initialRow) {
-                                if (initialRow.id === 'tools-pool-container') {
-                                    draggedItem.style.position = '';
-                                    draggedItem.style.left = '';
-                                    draggedItem.style.top = '';
-                                } else {
-                                    draggedItem.style.position = 'absolute';
-                                    draggedItem.style.left = initialLeft;
-                                }
-                                initialRow.appendChild(draggedItem);
-                            }
-                        }
-
-                        draggedItem.classList.remove('dragging');
-                        draggedItem = null;
-                        initialRow = null;
-                        wasDropped = false;
+                    if (draggedItem && !wasDropped && initialRow) {
+                        draggedItem.style.position = '';
+                        draggedItem.style.left = '';
+                        draggedItem.style.top = '';
+                        initialRow.appendChild(draggedItem);
                     }
+                    if (draggedItem) draggedItem.classList.remove('dragging');
+                    draggedItem = null;
+                    initialRow = null;
+                    wasDropped = false;
                     document.querySelectorAll('.toolbar-row').forEach(r => r.classList.remove('drag-over'));
                     saveLayout();
                 });
@@ -4995,6 +5247,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 e.preventDefault();
                 if (e.dataTransfer) e.dataTransfer.dropEffect = 'move';
                 rowContainer.classList.add('drag-over');
+
+                if (draggedItem) {
+                    // Während des Ziehens: nur den gezogenen Knopf frei bewegen.
+                    // Alle anderen Knöpfe bleiben an ihrer Stelle (kein cascading).
+                    // Erst beim drop werden Kollisionen aufgelöst.
+                    if (draggedItem.parentNode !== rowContainer) {
+                        draggedItem.style.position = 'absolute';
+                        rowContainer.appendChild(draggedItem);
+                    }
+                    const rect = rowContainer.getBoundingClientRect();
+                    const rowWidth = rowContainer.clientWidth || 1200;
+                    const itemWidth = draggedItem.offsetWidth || 110;
+                    let posX = e.clientX - rect.left - (dragOffsetX || 20);
+                    posX = Math.max(10, Math.min(rowWidth - itemWidth - 25, posX));
+                    draggedItem.style.left = posX + 'px';
+                }
             };
 
             rowContainer.addEventListener('dragenter', handleDragOver);
@@ -5013,11 +5281,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 rowContainer.classList.remove('drag-over');
 
                 if (draggedItem) {
-                    draggedItem.style.position = 'absolute'; // Force absolute positioning when dropped on toolbar row
+                    draggedItem.style.position = 'absolute';
                     const rect = rowContainer.getBoundingClientRect();
                     let posX = e.clientX - rect.left - (dragOffsetX || 20);
 
-                    resolveDropOverlapByPushingRight(rowContainer, draggedItem, posX);
+                    resolveDropOverlapByPushingRight(rowContainer, draggedItem, posX, true);
                     wasDropped = true;
                 }
                 saveLayout();
@@ -5067,42 +5335,27 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!item) return;
             document.querySelectorAll('.selected-menu-item').forEach(i => i.classList.remove('selected-menu-item'));
             item.classList.add('selected-menu-item');
+            if (typeof updateCoordinateBadge === 'function') updateCoordinateBadge(item);
         }
 
         function clearMenuItemSelection() {
             document.querySelectorAll('.selected-menu-item').forEach(i => i.classList.remove('selected-menu-item'));
+            if (typeof updateCoordinateBadge === 'function') updateCoordinateBadge(null);
         }
 
         function nudgeMenuItem(item, deltaX) {
             if (!item) return;
             if (item.classList.contains('toolbar-item')) {
-                const currentLeft = parseInt(item.style.left, 10) || 15;
-                const newLeft = Math.max(10, currentLeft + deltaX);
+                const rawLeft = parseInt(item.style.left, 10);
+                const currentLeft = isNaN(rawLeft) ? (item.offsetLeft || 15) : rawLeft;
+                const newLeft = snapToSector(Math.max(10, currentLeft + deltaX));
                 const row = item.closest('.toolbar-row');
 
-                if (deltaX < 0) {
-                    if (row) {
-                        const otherItems = Array.from(row.querySelectorAll('.toolbar-item'))
-                            .filter(i => i !== item)
-                            .map(el => ({ el, left: parseInt(el.style.left, 10) || 0, width: el.offsetWidth || 110 }))
-                            .sort((a, b) => a.left - b.left);
-
-                        const leftNeighbors = otherItems.filter(i => i.left < currentLeft);
-                        let minAllowedLeft = 10;
-                        if (leftNeighbors.length > 0) {
-                            const prev = leftNeighbors[leftNeighbors.length - 1];
-                            minAllowedLeft = prev.left + prev.width + 5;
-                        }
-                        item.style.left = Math.max(minAllowedLeft, newLeft) + 'px';
-                    } else {
-                        item.style.left = newLeft + 'px';
-                    }
+                if (row) {
+                    resolveDropOverlapByPushingRight(row, item, newLeft, true);
                 } else {
-                    if (row) {
-                        resolveDropOverlapByPushingRight(row, item, newLeft);
-                    } else {
-                        item.style.left = newLeft + 'px';
-                    }
+                    item.style.left = newLeft + 'px';
+                    item.dataset.sector = Math.round(newLeft / GRID_SECTOR_SIZE);
                 }
                 saveLayout();
             } else if (item.classList.contains('fh-draggable-item')) {
@@ -5169,7 +5422,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (targetIndex >= 0 && targetIndex < allRows.length) {
                     const targetRow = allRows[targetIndex];
-                    const currentLeft = parseInt(item.style.left, 10) || 15;
+                    const rawLeft = parseInt(item.style.left, 10);
+                    const currentLeft = isNaN(rawLeft) ? (item.offsetLeft || 15) : rawLeft;
                     resolveDropOverlapByPushingRight(targetRow, item, currentLeft);
                     saveLayout();
                 }
@@ -5209,24 +5463,158 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 selectMenuItemForKeyboard(menuItem);
             } else {
-                clearMenuItemSelection();
+                const isToolbarContainer = e.target.closest('.toolbar-row, .fh-drag-row, #tools-pool-container, #toolbar-rows-container');
+                if (!isToolbarContainer) {
+                    clearMenuItemSelection();
+                }
             }
         }, true);
 
-        // Block mousedown, change, and input actions on buttons/controls during menu edit mode
-        ['mousedown', 'change', 'input'].forEach(evtType => {
+        // Capturing mousedown: initiates mouse-drag for ALL .toolbar-item elements (in rows OR in tools pool)
+        document.addEventListener('mousedown', (e) => {
+            if (!document.body.classList.contains('menu-edit-mode')) return;
+            if (e.target.closest('#btn-toggle-menu-edit, #menu-edit-actions')) return;
+
+            const item = e.target.closest('.toolbar-item');
+            if (item && e.button === 0) {
+                e.preventDefault();
+                e.stopPropagation();
+                e.stopImmediatePropagation();
+
+                const rect = item.getBoundingClientRect();
+                mbDragItem = item;
+                mbDragOffsetX = e.clientX - rect.left;
+                mbDragCurrentRow = item.closest('.toolbar-row') || item.closest('#tools-pool-container');
+                mbDragInitialRow = mbDragCurrentRow;
+                mbDragInitialLeft = item.style.left || '15px';
+
+                item.classList.add('dragging');
+                item.style.zIndex = '10000';
+                selectMenuItemForKeyboard(item);
+                return;
+            }
+
+            const fhItem = e.target.closest('.fh-draggable-item');
+            if (fhItem) {
+                e.stopPropagation();
+            }
+        }, true);
+
+        // Block change and input actions on toolbar items during menu edit mode
+        ['change', 'input'].forEach(evtType => {
             document.addEventListener(evtType, (e) => {
                 if (!document.body.classList.contains('menu-edit-mode')) return;
                 if (e.target.closest('#btn-toggle-menu-edit, #menu-edit-actions')) return;
                 const item = e.target.closest('.toolbar-item, .fh-draggable-item');
                 if (item) {
-                    if (evtType !== 'mousedown') {
-                        e.preventDefault();
-                    }
+                    e.preventDefault();
                     e.stopPropagation();
-                    e.stopImmediatePropagation();
                 }
             }, true);
+        });
+
+        // Global mousemove: freely move the toolbar item under the cursor (into rows or over tools pool)
+        document.addEventListener('mousemove', (e) => {
+            if (!mbDragItem || !document.body.classList.contains('menu-edit-mode')) return;
+
+            const poolContainer = document.getElementById('tools-pool-container');
+            const poolRect = poolContainer ? poolContainer.getBoundingClientRect() : null;
+
+            const isOverPool = poolRect && (
+                e.clientX >= poolRect.left && e.clientX <= poolRect.right &&
+                e.clientY >= poolRect.top && e.clientY <= poolRect.bottom
+            );
+
+            if (poolContainer) {
+                if (isOverPool) {
+                    poolContainer.style.borderColor = 'var(--primary-color, #0078d7)';
+                    poolContainer.style.backgroundColor = 'rgba(0, 120, 215, 0.08)';
+                } else {
+                    poolContainer.style.borderColor = '';
+                    poolContainer.style.backgroundColor = '';
+                }
+            }
+
+            if (isOverPool) {
+                return;
+            }
+
+            // Find which toolbar-row the cursor is currently in (by Y bounding rect)
+            let targetRow = null;
+            const allRows = document.querySelectorAll('#toolbar-rows-container .toolbar-row');
+            for (const row of allRows) {
+                const rect = row.getBoundingClientRect();
+                if (e.clientY >= rect.top - 15 && e.clientY <= rect.bottom + 15) {
+                    targetRow = row;
+                    break;
+                }
+            }
+
+            if (!targetRow) return;
+
+            // Move item to new row if cursor crossed a row boundary
+            if (mbDragItem.parentNode !== targetRow) {
+                mbDragCurrentRow = targetRow;
+                mbDragItem.style.position = 'absolute';
+                targetRow.appendChild(mbDragItem);
+            }
+
+            const rowRect = targetRow.getBoundingClientRect();
+            const rowWidth = targetRow.clientWidth || 1200;
+            const itemWidth = mbDragItem.offsetWidth || 110;
+            let posX = e.clientX - rowRect.left - mbDragOffsetX;
+            posX = snapToSector(Math.max(10, Math.min(rowWidth - itemWidth - 25, posX)));
+            mbDragItem.style.position = 'absolute';
+            mbDragItem.style.left = posX + 'px';
+            mbDragItem.dataset.sector = Math.round(posX / GRID_SECTOR_SIZE);
+            if (typeof updateCoordinateBadge === 'function') updateCoordinateBadge(mbDragItem);
+        });
+
+        // Global mouseup: resolve collisions at drop position (in toolbar row or tools pool), save layout
+        document.addEventListener('mouseup', (e) => {
+            if (!mbDragItem) return;
+            const item = mbDragItem;
+            mbDragItem = null;
+
+            item.classList.remove('dragging');
+            item.style.zIndex = '';
+
+            const poolContainer = document.getElementById('tools-pool-container');
+            if (poolContainer) {
+                poolContainer.style.borderColor = '';
+                poolContainer.style.backgroundColor = '';
+            }
+
+            const poolRect = poolContainer ? poolContainer.getBoundingClientRect() : null;
+            const droppedInPool = poolRect && (
+                e.clientX >= poolRect.left && e.clientX <= poolRect.right &&
+                e.clientY >= poolRect.top && e.clientY <= poolRect.bottom
+            );
+
+            if (droppedInPool && poolContainer) {
+                // Drop item into Tools Pool (ausblenden / in Pool verschieben)
+                item.style.position = '';
+                item.style.left = '';
+                item.style.top = '';
+                poolContainer.appendChild(item);
+                saveLayout();
+            } else {
+                const row = item.closest('.toolbar-row');
+                if (row) {
+                    const currentLeft = parseInt(item.style.left, 10) || 10;
+                    resolveDropOverlapByPushingRight(row, item, currentLeft, true);
+                    saveLayout();
+                } else if (mbDragInitialRow) {
+                    mbDragInitialRow.appendChild(item);
+                    item.style.position = 'absolute';
+                    item.style.left = mbDragInitialLeft;
+                    saveLayout();
+                }
+            }
+
+            mbDragCurrentRow = null;
+            mbDragInitialRow = null;
+            document.querySelectorAll('.toolbar-row').forEach(r => r.classList.remove('drag-over'));
         });
 
         /** Ctrl + Arrow Key Selection Switcher System */
@@ -5298,9 +5686,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (!document.body.classList.contains('menu-edit-mode')) return;
 
-            const activeTag = document.activeElement ? document.activeElement.tagName : '';
-            if (['INPUT', 'TEXTAREA', 'SELECT'].includes(activeTag) && !document.activeElement.classList.contains('toolbar-item')) {
-                return;
+            const activeEl = document.activeElement;
+            const activeTag = activeEl ? activeEl.tagName : '';
+            if (['INPUT', 'TEXTAREA', 'SELECT'].includes(activeTag)) {
+                const parentItem = activeEl.closest('.toolbar-item, .fh-draggable-item');
+                if (parentItem && document.body.classList.contains('menu-edit-mode')) {
+                    activeEl.blur();
+                    selectMenuItemForKeyboard(parentItem);
+                } else {
+                    return;
+                }
             }
 
             if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key)) {
@@ -5311,13 +5706,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     return;
                 }
 
-                // Releasing Ctrl -> Move/nudge selected item with Arrow keys!
-                const selectedItem = document.querySelector('.selected-menu-item');
+                // Move/nudge selected item with Arrow keys!
+                let selectedItem = document.querySelector('.selected-menu-item');
                 if (!selectedItem) {
-                    const firstItem = document.querySelector('body.menu-edit-mode .toolbar-item, body.menu-edit-mode .fh-draggable-item');
-                    if (firstItem) selectMenuItemForKeyboard(firstItem);
-                    return;
+                    selectedItem = document.querySelector('body.menu-edit-mode .toolbar-item, body.menu-edit-mode .fh-draggable-item');
+                    if (selectedItem) selectMenuItemForKeyboard(selectedItem);
                 }
+
+                if (!selectedItem) return;
 
                 const isShift = e.shiftKey;
                 const step = isShift ? 25 : 5; // 5px clearly visible step, 25px with Shift!
@@ -6690,18 +7086,35 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const cellVerteiler = floorBody.querySelector('.floor-sum-verteiler');
         const cellErweit = floorBody.querySelector('.floor-sum-erweit');
+        const cellInfoInput = floorBody.querySelector('.input-floor-info');
+        const AUTO_INFO_TEXT = "Grösse Vert. Kasten prüfen";
+
         if (cellVerteiler) {
             cellVerteiler.dataset.rings = totalRings; // Store the numerical value in data attribute for calculations
             if (totalRings === 0) {
                 cellVerteiler.textContent = "0";
                 if (cellErweit) cellErweit.textContent = "";
+                if (cellInfoInput && (cellInfoInput.value === AUTO_INFO_TEXT || cellInfoInput.dataset.autoSet === "true")) {
+                    cellInfoInput.value = "";
+                    cellInfoInput.dataset.autoSet = "false";
+                }
             } else if (totalRings <= 12) {
                 cellVerteiler.textContent = `${totalRings}`;
                 if (cellErweit) cellErweit.textContent = "";
+                if (cellInfoInput && (cellInfoInput.value === AUTO_INFO_TEXT || cellInfoInput.dataset.autoSet === "true")) {
+                    cellInfoInput.value = "";
+                    cellInfoInput.dataset.autoSet = "false";
+                }
             } else {
                 const extra = totalRings - 12;
                 cellVerteiler.textContent = "12";
                 if (cellErweit) cellErweit.textContent = `+ ${extra}`;
+                if (cellInfoInput) {
+                    if (!cellInfoInput.value || cellInfoInput.value === AUTO_INFO_TEXT || cellInfoInput.dataset.autoSet === "true") {
+                        cellInfoInput.value = AUTO_INFO_TEXT;
+                        cellInfoInput.dataset.autoSet = "true";
+                    }
+                }
             }
         }
 
@@ -7432,7 +7845,7 @@ document.addEventListener('DOMContentLoaded', () => {
             btn.style.background = '';
             btn.style.color = '';
             btn.style.borderColor = '';
-            btn.innerHTML = `<span class="drag-handle">⋮⋮</span> 📋 Text stempeln`;
+            btn.innerHTML = `<span class="drag-handle">⋮⋮</span> 📋 Text Multi.`;
         }
 
         hideMultiPasteToast();
@@ -7553,6 +7966,8 @@ document.addEventListener('DOMContentLoaded', () => {
             col_connection: 75,
             col_total_len: 113,
             col_rings: 99,
+            col_zus_ring: 120,
+            col_extra: 248,
             col_expand: 368
         };
 
@@ -7572,7 +7987,8 @@ document.addEventListener('DOMContentLoaded', () => {
             { key: 'col_connection', label: 'Anbindung [m]', index: 13, min: 40, max: 250 },
             { key: 'col_total_len', label: 'Gesamtlänge [m]', index: 14, min: 40, max: 250 },
             { key: 'col_rings', label: 'Ringe [Stk]', index: 15, min: 50, max: 250 },
-            { key: 'col_expand', label: 'Rechter Rand (Erweiterung)', index: 16, min: 30, max: 600 }
+            { key: 'col_zus_ring', label: 'Zus. Ring', index: 16, min: 30, max: 600 },
+            { key: 'col_extra', label: 'Info (Textfeld)', index: 17, min: 30, max: 600 }
         ];
 
         function getStoredWidths() {
@@ -7982,14 +8398,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (btnOpen) {
             btnOpen.addEventListener('click', (e) => {
-                if (document.body.classList.contains('menu-edit-mode')) return;
                 e.preventDefault();
                 const isActive = btnOpen.classList.toggle('active');
                 if (isActive) {
                     document.body.classList.add('column-resize-mode');
+                    btnOpen.style.backgroundColor = '#16a34a';
+                    btnOpen.style.color = '#ffffff';
                     openColumnWidthsPopup();
                 } else {
                     document.body.classList.remove('column-resize-mode');
+                    btnOpen.style.backgroundColor = '';
+                    btnOpen.style.color = '';
                     if (modal) modal.classList.add('hidden');
                 }
             });
@@ -7997,7 +8416,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const closeModal = () => {
             if (modal) modal.classList.add('hidden');
-            if (btnOpen) btnOpen.classList.remove('active');
+            if (btnOpen) {
+                btnOpen.classList.remove('active');
+                btnOpen.style.backgroundColor = '';
+                btnOpen.style.color = '';
+            }
             document.body.classList.remove('column-resize-mode');
         };
 
@@ -8694,6 +9117,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function loadData(data) {
         isLoading = true;
         document.getElementById('objekt-bez').value = data.objektBez || "";
+        updateActiveProjectFileDisplay();
         cadRoomPool = Array.isArray(data.cadPool) ? data.cadPool : [];
         if (typeof renderCadPoolList === 'function') renderCadPoolList();
 

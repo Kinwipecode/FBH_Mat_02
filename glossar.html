@@ -3,160 +3,820 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Glossar - FBH Material Rechner</title>
+    <title>Benutzerhandbuch & Knopf-Anleitung - FBH Material Rechner</title>
     <link rel="stylesheet" href="style.css">
     <style>
-        .glossar-container {
-            padding: 30px 50px;
-            margin-top: 40px;
-            margin-bottom: 40px;
+        body {
+            background-color: #f8fafc;
+            color: #0f172a;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 0;
         }
-        .glossar-container h1 {
-            color: #0078d7;
-            border-bottom: 2px solid #0078d7;
-            padding-bottom: 15px;
-            margin-bottom: 25px;
+
+        .guide-container {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 0 20px 60px 20px;
         }
-        .glossar-container p {
-            font-size: 1.1em;
-            line-height: 1.6;
+
+        .guide-header {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: #ffffff;
+            padding: 35px 40px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2);
             margin-bottom: 30px;
         }
-        .glossar-table {
+
+        .guide-header h1 {
+            margin: 0 0 10px 0;
+            font-size: 2.1em;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            color: #ffffff;
+            border: none;
+            padding: 0;
+        }
+
+        .guide-header p {
+            margin: 0;
+            font-size: 1.05em;
+            color: #94a3b8;
+            line-height: 1.6;
+        }
+
+        /* Search & Filter Bar */
+        .search-box-container {
+            position: sticky;
+            top: 20px;
+            z-index: 100;
+            margin-bottom: 30px;
+        }
+
+        .search-input-wrapper {
+            position: relative;
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.15);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .search-input {
             width: 100%;
-            border-collapse: collapse;
-            box-shadow: 0 1px 5px rgba(0,0,0,0.1);
+            padding: 16px 20px 16px 50px;
+            font-size: 1.05em;
+            border: 2px solid #0078d7;
+            border-radius: 12px;
+            outline: none;
+            box-sizing: border-box;
+            background: #ffffff;
+            color: #0f172a;
+            font-weight: 500;
+            transition: all 0.2s ease;
         }
-        .glossar-table th, .glossar-table td {
-            border: 1px solid #ddd;
-            padding: 15px;
-            text-align: left;
-            vertical-align: top;
+
+        .search-input:focus {
+            box-shadow: 0 0 0 4px rgba(0, 120, 215, 0.25);
         }
-        .glossar-table th {
-            background-color: #f9f9f9;
-            font-weight: 600;
-            width: 250px;
-            color: #333;
+
+        .search-icon {
+            position: absolute;
+            left: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.2em;
+            color: #0078d7;
+            pointer-events: none;
         }
-        .glossar-table tr:nth-child(even) {
-            background-color: #fcfcfc;
+
+        /* Category Section Header */
+        .category-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 40px 0 20px 0;
+            padding-bottom: 10px;
+            border-bottom: 2.5px solid #0078d7;
         }
-        .glossar-table tr:hover {
-            background-color: #f0f8ff;
+
+        .category-header h2 {
+            margin: 0;
+            font-size: 1.4em;
+            color: #0f172a;
         }
-        .back-link {
-            display: inline-block;
-            margin-top: 40px;
+
+        .category-badge {
+            background: #e0f2fe;
+            color: #0369a1;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: 700;
+        }
+
+        /* Button Cards Grid */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+        }
+
+        .btn-card {
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            position: relative;
+        }
+
+        .btn-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.1);
+            border-color: #0078d7;
+        }
+
+        .btn-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            border-bottom: 1px solid #f1f5f9;
+            padding-bottom: 12px;
+        }
+
+        .btn-visual-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 12px;
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 0.9em;
+            font-weight: 700;
+            color: #0f172a;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+            user-select: none;
+        }
+
+        .btn-visual-pill.btn-green {
+            background: #10b981;
+            color: #ffffff;
+            border-color: #059669;
+        }
+
+        .btn-visual-pill.btn-red {
+            background: #fee2e2;
+            color: #dc2626;
+            border-color: #fca5a5;
+        }
+
+        .btn-visual-pill.btn-blue {
+            background: #e0f2fe;
+            color: #0369a1;
+            border-color: #bae6fd;
+        }
+
+        .btn-tag {
+            font-size: 0.75em;
+            font-weight: 700;
+            color: #64748b;
+            background: #f1f5f9;
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+
+        .btn-card-body p {
+            margin: 0;
+            font-size: 0.93em;
+            color: #334155;
+            line-height: 1.55;
+        }
+
+        .btn-card-tip {
+            font-size: 0.83em;
+            background: #f8fafc;
+            border-left: 3px solid #0078d7;
+            padding: 8px 12px;
+            border-radius: 0 6px 6px 0;
+            color: #475569;
+            margin-top: 4px;
+        }
+
+        /* Developer Extension Section */
+        .dev-section {
+            background: #0f172a;
+            color: #f8fafc;
+            border-radius: 16px;
+            padding: 35px 40px;
+            margin-top: 60px;
+            box-shadow: 0 15px 30px -5px rgba(0, 0, 0, 0.3);
+        }
+
+        .dev-section h2 {
+            margin-top: 0;
+            color: #38bdf8;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 1px solid #334155;
+            padding-bottom: 12px;
+        }
+
+        .dev-section p {
+            color: #cbd5e1;
+            line-height: 1.6;
+        }
+
+        .code-snippet {
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            padding: 16px;
+            font-family: monospace;
+            font-size: 0.88em;
+            color: #f1f5f9;
+            overflow-x: auto;
+            white-space: pre;
+        }
+
+        .back-nav {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 30px;
             padding: 12px 24px;
             background-color: #0078d7;
             color: white;
             text-decoration: none;
-            border-radius: 4px;
+            border-radius: 8px;
             font-weight: bold;
-            font-size: 1.1em;
-            transition: background-color 0.2s;
+            font-size: 1.0em;
+            transition: background-color 0.2s, transform 0.15s;
         }
-        .back-link:hover {
+
+        .back-nav:hover {
             background-color: #005a9e;
+            transform: translateY(-1px);
+        }
+
+        .no-results {
+            display: none;
+            text-align: center;
+            padding: 40px;
+            background: #ffffff;
+            border-radius: 12px;
+            border: 1px dashed #cbd5e1;
+            color: #64748b;
+            font-size: 1.1em;
         }
     </style>
 </head>
 <body>
-    <div class="app-container glossar-container">
-        <h1>Glossar & Erläuterungen</h1>
-        <p>Hier finden Sie eine Übersicht und Erklärung aller Bezeichnungen, Abkürzungen und Funktionen, die im FBH (Fußbodenheizung) Material Rechner verwendet werden. Ideal für Nutzer, die das Tool zum ersten Mal verwenden.</p>
-        
-        <table class="glossar-table">
-            <tbody>
-                <tr>
-                    <th>Objektbez.</th>
-                    <td><strong>Objektbezeichnung.</strong> Der Name, die Projektnummer oder die Adresse des Bauprojekts / Gebäudes.</td>
-                </tr>
-                <tr>
-                    <th>Vert+</th>
-                    <td>Mit diesem Button fügen Sie der Tabelle eine komplett neue Ebene bzw. ein neues Geschoss hinzu (z. B. Erdgeschoss, Obergeschoss). Für jedes Geschoss wird eine eigene Gruppe mit zugehörigem Heizkreisverteiler angelegt.</td>
-                </tr>
-                <tr>
-                    <th>Bez. FBHV</th>
-                    <td><strong>Bezeichnung des Fußbodenheizungsverteilers.</strong> Jeder Verteilerkreis bekommt hier einen Namen (z. B. "Heizkreisverteiler EG").</td>
-                </tr>
-                <tr>
-                    <th>Ebene/Geschoss</th>
-                    <td>Gibt an, in welchem Geschoss sich der Heizkreisverteiler befindet (z. B. EG, OG, KG).</td>
-                </tr>
-                <tr>
-                    <th>Raum+ (Raum hinzufügen)</th>
-                    <td>Fügt dem jeweiligen Geschoss einen neuen Raum als neue Tabellenzeile hinzu.</td>
-                </tr>
-                <tr>
-                    <th>Raum Bez.</th>
-                    <td><strong>Raumbezeichnung.</strong> Der Name des Raumes (z. B. Wohnzimmer, Bad, Küche, Flur).</td>
-                </tr>
-                <tr>
-                    <th>Verlege Abst. Rz [cm]</th>
-                    <td><strong>Verlegeabstand in der Randzone.</strong> Der Abstand der Heizrohre zueinander in Bereichen mit höherem Wärmebedarf, typischerweise direkt vor großen Fensterflächen oder Außenwänden (oft enger verlegt, z.B. 10 cm).</td>
-                </tr>
-                <tr>
-                    <th>Rz Fläche [m²]</th>
-                    <td>Die Fläche der Randzone in Quadratmetern.</td>
-                </tr>
-                <tr>
-                    <th>Verlege Abst. Iz [cm]</th>
-                    <td><strong>Verlegeabstand in der Innenzone.</strong> Der reguläre Abstand der Heizrohre im restlichen Raum, wo der Wärmebedarf normal ist (oft weiter verlegt, z.B. 15 cm oder 20 cm).</td>
-                </tr>
-                <tr>
-                    <th>Iz Fläche [m²]</th>
-                    <td>Die Fläche der Innenzone in Quadratmetern.</td>
-                </tr>
-                <tr>
-                    <th>Raum-Thermostat</th>
-                    <td>Gibt an, ob der jeweilige Raum über ein eigenes Raumthermostat zur Einzelraumregelung verfügt. Wenn angehakt, wird dieses Thermostat in die Summe des Verteilers eingerechnet.</td>
-                </tr>
-                <tr>
-                    <th>Antrieb</th>
-                    <td>Gibt an, ob für diesen Raum Stellantriebe am Verteiler vorgesehen sind (standardmäßig aktiv). Wenn der Haken gesetzt ist, wird für jeden berechneten Heizkreis (Ring) des Raumes automatisch ein Antrieb in die Stückliste aufgenommen.</td>
-                </tr>
-                <tr>
-                    <th>Rz + Iz</th>
-                    <td>Wenn dieses Häkchen gesetzt ist, werden Randzone und Innenzone <strong>zusammen</strong> an denselben Heizkreis (Zuleitung) angeschlossen. Ist es nicht gesetzt, werden beide Zonen separat vom Verteiler angefahren (benötigen eigene Zuleitungen).</td>
-                </tr>
-                <tr>
-                    <th>Ziel Ringlänge [m]</th>
-                    <td>Die gewünschte oder maximal zulässige Rohrlänge für einen einzelnen Heizkreis (Ring). Oft werden Werte um 100m bis 120m gewählt, damit der Druckverlust und die Temperaturspreizung nicht zu groß werden.</td>
-                </tr>
-                <tr>
-                    <th>Anz. Dehnungs-Fugen [Stk]</th>
-                    <td>Anzahl der Dehnungsfugen im Estrich, die von den Heizrohren in diesem Raum gekreuzt werden. Relevant für die Planung von Schutzrohren.</td>
-                </tr>
-                <tr>
-                    <th>Distanz Raum zu FBHV</th>
-                    <td>Die einfache Entfernung (Länge der Zuleitung) vom Raum bis zum Fußbodenheizungsverteiler. Der Rechner multipliziert diesen Wert automatisch mit 2 (für Vor- und Rücklauf), um die benötigte Rohrlänge für die Anbindung zu ermitteln.</td>
-                </tr>
-                <tr>
-                    <th>Summe Ringlänge [m]</th>
-                    <td>Die berechnete <strong>Gesamtlänge der benötigten Rohre</strong> für diesen Raum. Diese Summe beinhaltet die Rohrleitungen für die Randzone, die Innenzone sowie die Zuleitungen vom Verteiler zum Raum (Vor- und Rücklauf).</td>
-                </tr>
-                <tr>
-                    <th>Anz. Ringe [Stk]</th>
-                    <td>Die berechnete <strong>Anzahl der Heizkreise (Ringe)</strong> für diesen Raum. Dies ergibt sich aus der Gesamtlänge geteilt durch die "Ziel Ringlänge". Ist die Gesamtlänge größer als die Ziel Ringlänge, wird der Raum auf mehrere Kreise aufgeteilt.</td>
-                </tr>
-                <tr>
-                    <th>Σ RT</th>
-                    <td>Summe der benötigten <strong>Raumthermostate</strong> für das gesamte Geschoss bzw. den jeweiligen Verteiler.</td>
-                </tr>
-                <tr>
-                    <th>Σ Antr.</th>
-                    <td>Summe der benötigten <strong>Stellantriebe</strong> für das gesamte Geschoss bzw. den jeweiligen Verteiler.</td>
-                </tr>
-                <tr>
-                    <th>Σ (Heizkreise)</th>
-                    <td>Summe der berechneten <strong>Heizkreise (Ringe)</strong> für das gesamte Geschoss. Dies gibt an, wie viele Anschlüsse am Verteiler benötigt werden.</td>
-                </tr>
-            </tbody>
-        </table>
 
-        <a href="index.html" class="back-link">Zurück zum Rechner</a>
+    <div class="guide-container">
+        <!-- Header -->
+        <div class="guide-header">
+            <h1>📖 FBH Material Rechner – Visual Button Guide</h1>
+            <p>Interaktive Knopf-Anleitung mit allen Menü-Icons, Funktionen und Praxistipps. Ideal für neue Nutzer, um sich sofort im Menü zu orientieren!</p>
+        </div>
+
+        <!-- Live Search Bar -->
+        <div class="search-box-container">
+            <div class="search-input-wrapper">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="guide-search-input" class="search-input" placeholder="Knopf, Icon oder Funktion suchen (z. B. CAD, Drucken, Pos. Auto, Parameter)..." autocomplete="off">
+            </div>
+        </div>
+
+        <!-- No Results Message -->
+        <div id="no-results" class="no-results">
+            🔍 Keine passenden Knöpfe oder Funktionen gefunden. Versuche einen anderen Suchbegriff!
+        </div>
+
+        <!-- CATEGORY 1: Menü-Bearbeitung & Layout -->
+        <div class="category-block" data-category="bearbeitung">
+            <div class="category-header">
+                <h2>✏️ Menü-Bearbeitung & Layout-Steuerung</h2>
+                <span class="category-badge">7 Knöpfe</span>
+            </div>
+            <div class="cards-grid">
+
+                <div class="btn-card" data-keywords="menüs bearbeiten bearbeitung toggle layout verschieben pfeiltasten edit editmode">
+                    <div class="btn-card-header">
+                        <span class="btn-visual-pill btn-green">✏️ Menüs bearbeiten</span>
+                        <span class="btn-tag">Zentrale Steuerung</span>
+                    </div>
+                    <div class="btn-card-body">
+                        <p><strong>Zentraler Umschalter für das Menü-Layout.</strong> Schaltet den Bearbeitungsmodus für alle Menübereiche ein oder aus.</p>
+                        <div class="btn-card-tip">
+                            💡 <strong>Tipp:</strong> Bei aktivem Modus können Knöpfe frei per Drag & Drop gezogen oder mit den <strong>Pfeiltasten (← → ↑ ↓)</strong> in 5px-Schritten exakt verschoben werden.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="btn-card" data-keywords="layout speichern menu_layout.json json export sichern">
+                    <div class="btn-card-header">
+                        <span class="btn-visual-pill">💾 Layout speichern</span>
+                        <span class="btn-tag">Menü-Bearbeitung</span>
+                    </div>
+                    <div class="btn-card-body">
+                        <p>Speichert die aktuelle Knopf-Anordnung und Zeilenstruktur in die Konfigurationsdatei <code>menu_layout.json</code>.</p>
+                        <div class="btn-card-tip">
+                            💡 <strong>Verwendung:</strong> Nutzen Sie diesen Knopf nach dem Anpassen des Menüs, um Ihre persönliche Knopf-Anordnung als Datei zu sichern.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="btn-card" data-keywords="layout laden menu_layout.json json import wiederherstellen">
+                    <div class="btn-card-header">
+                        <span class="btn-visual-pill">📂 Layout laden</span>
+                        <span class="btn-tag">Menü-Bearbeitung</span>
+                    </div>
+                    <div class="btn-card-body">
+                        <p>Lädt eine zuvor gespeicherte <code>menu_layout.json</code> Datei ein und stellt die Knopf-Anordnung sofort im Browser wieder her.</p>
+                    </div>
+                </div>
+
+                <div class="btn-card" data-keywords="code-sync apply_menu_layout.bat fbh_layout_sync_manager.exe executable desktop tool">
+                    <div class="btn-card-header">
+                        <span class="btn-visual-pill btn-blue">⚡ Code-Sync App (.exe)</span>
+                        <span class="btn-tag">Windows App (.exe)</span>
+                    </div>
+                    <div class="btn-card-body">
+                        <p>Öffnet die eigenständige Windows-App <code>FBH_Layout_Sync_Manager.exe</code>. Bietet einen Dateibrowser (<code>📂 Durchsuchen...</code>) zur Auswahl beliebiger <code>menu_layout.json</code> Pfade und merkt sich den zuletzt gewählten Pfad automatisch!</p>
+                    </div>
+                </div>
+
+                <div class="btn-card" data-keywords="zeile hinzufügen zeilen row add">
+                    <div class="btn-card-header">
+                        <span class="btn-visual-pill">➕ Zeile hinzufügen</span>
+                        <span class="btn-tag">Menü-Zeilen</span>
+                    </div>
+                    <div class="btn-card-body">
+                        <p>Erzeugt eine neue leere Menüzeile in der Haupt-Toolbar, in die Knöpfe frei einsortiert werden können.</p>
+                    </div>
+                </div>
+
+                <div class="btn-card" data-keywords="anordnung zurücksetzen reset standard layout default">
+                    <div class="btn-card-header">
+                        <span class="btn-visual-pill">🔄 Anordnung zurücksetzen</span>
+                        <span class="btn-tag">Standard</span>
+                    </div>
+                    <div class="btn-card-body">
+                        <p>Setzt die gesamte Knopf-Anordnung und alle Menüzeilen sofort auf den ursprünglichen Werkszustand zurück.</p>
+                    </div>
+                </div>
+
+                <div class="btn-card" data-keywords="spaltenbreiten breite verteiler breiten anpassen excel">
+                    <div class="btn-card-header">
+                        <span class="btn-visual-pill">📏 Spaltenbreiten</span>
+                        <span class="btn-tag">Tabellen-Design</span>
+                    </div>
+                    <div class="btn-card-body">
+                        <p>Öffnet den Konfigurator zur individuellen Anpassung der Tabellen-Spaltenbreiten im Verteiler (wie in Microsoft Excel).</p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- CATEGORY 2: Haupt-Toolbar & Filter -->
+        <div class="category-block" data-category="toolbar">
+            <div class="category-header">
+                <h2>🛠️ Haupt-Toolbar & Filter-Knöpfe</h2>
+                <span class="category-badge">6 Knöpfe</span>
+            </div>
+            <div class="cards-grid">
+
+                <div class="btn-card" data-keywords="hilfe glossar handbuch anleitung info">
+                    <div class="btn-card-header">
+                        <span class="btn-visual-pill btn-blue">ℹ️ Hilfe</span>
+                        <span class="btn-tag">Dokumentation</span>
+                    </div>
+                    <div class="btn-card-body">
+                        <p>Öffnet diese interaktive Knopf-Anleitung & das Fach-Glossar in einem neuen Browser-Tab.</p>
+                    </div>
+                </div>
+
+                <div class="btn-card" data-keywords="info tooltip tooltips ausschalten einschalten bezeichnung">
+                    <div class="btn-card-header">
+                        <span class="btn-visual-pill">💡 Info: Aus / Ein</span>
+                        <span class="btn-tag">Hilfe-System</span>
+                    </div>
+                    <div class="btn-card-body">
+                        <p>Aktiviert oder deaktiviert die schwebenden Tooltip-Erklärungen im gesamten Rechner.</p>
+                    </div>
+                </div>
+
+                <div class="btn-card" data-keywords="zielordner ordner pfad speichern ordnerwahl fbh_projekte">
+                    <div class="btn-card-header">
+                        <span class="btn-visual-pill">📁 Zielordner</span>
+                        <span class="btn-tag">Ordner-Verwaltung</span>
+                    </div>
+                    <div class="btn-card-body">
+                        <p>Zeigt den aktuellen Projekt-Speicherordner an. Ein Klick ermöglicht das Auswählen eines neuen Zielordners auf der Festplatte.</p>
+                    </div>
+                </div>
+
+                <div class="btn-card" data-keywords="geschoss filtern suche eg og kg geschossname filter">
+                    <div class="btn-card-header">
+                        <span class="btn-visual-pill">🔍 Geschoss filtern...</span>
+                        <span class="btn-tag">Such-Filter</span>
+                    </div>
+                    <div class="btn-card-body">
+                        <p>Filtert die gesamte Tabelle in Echtzeit nach Geschossnamen (z. B. "EG" oder "Obergeschoss").</p>
+                    </div>
+                </div>
+
+                <div class="btn-card" data-keywords="verteiler filtern fbhv filter suche verteilername">
+                    <div class="btn-card-header">
+                        <span class="btn-visual-pill">🔍 Verteiler / FBHV filtern...</span>
+                        <span class="btn-tag">Such-Filter</span>
+                    </div>
+                    <div class="btn-card-body">
+                        <p>Filtert die Tabelle nach bestimmten Heizkreisverteilern (z. B. "HKV 1").</p>
+                    </div>
+                </div>
+
+                <div class="btn-card" data-keywords="tools pool verwalten ausblenden verlocken">
+                    <div class="btn-card-header">
+                        <span class="btn-visual-pill">🛠️ Tools</span>
+                        <span class="btn-tag">Werkzeug-Pool</span>
+                    </div>
+                    <div class="btn-card-body">
+                        <p>Öffnet das Tools-Fenster, um unbenutzte Menü-Knöpfe zu verwahren oder wieder in die Menüleisten einzusortieren.</p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- CATEGORY 3: Berechnungs- & Konfigurations-Knöpfe -->
+        <div class="category-block" data-category="berechnung">
+            <div class="category-header">
+                <h2>⚙️ Berechnungs-, Berichts- & Projekt-Knöpfe</h2>
+                <span class="category-badge">10 Knöpfe</span>
+            </div>
+            <div class="cards-grid">
+
+                <div class="btn-card" data-keywords="neu löschen neu starten leeren projekt neu zielordner ordnerauswahl">
+                    <div class="btn-card-header">
+                        <span class="btn-visual-pill btn-red">🗑️ Neu</span>
+                        <span class="btn-tag">Projekt-Neustart</span>
+                    </div>
+                    <div class="btn-card-body">
+                        <p>Startet ein neues Projekt. Zeigt ein erklärendes Info-Fenster an und öffnet anschließend automatisch den Datei-Browser zur Auswahl oder Erstellung Ihres Ziel-Projektordners.</p>
+                        <div class="btn-card-tip">
+                            💡 <strong>Tipp:</strong> So sind alle Ihre Berichte, Ergebnisse und CAD-Daten von Beginn an sicher auf der Festplatte verknüpft.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="btn-card" data-keywords="projekt aus ordner laden import zielordner datei öffnen">
+                    <div class="btn-card-header">
+                        <span class="btn-visual-pill">📂 Projekt</span>
+                        <span class="btn-tag">Ordner-Import</span>
+                    </div>
+                    <div class="btn-card-body">
+                        <p>Öffnet die Dateiliste des gewählten Zielordners, um gespeicherte Projekte direkt auszuwählen, einzulesen oder neue Projektdateien anzulegen.</p>
+                    </div>
+                </div>
+
+                <div class="btn-card" data-keywords="projekt in ordner speichern sichern ordner speicherung">
+                    <div class="btn-card-header">
+                        <span class="btn-visual-pill">💾 Projekt</span>
+                        <span class="btn-tag">Ordner-Export</span>
+                    </div>
+                    <div class="btn-card-body">
+                        <p>Speichert den aktuellen Projektstand direkt als <code>.json</code>-Datei im verknüpften Zielordner ab.</p>
+                    </div>
+                </div>
+
+                <div class="btn-card" data-keywords="import aus cad excel cd raumliste importieren">
+                    <div class="btn-card-header">
+                        <span class="btn-visual-pill">📊 Import aus CAD</span>
+                        <span class="btn-tag">CAD-Schnittstelle</span>
+                    </div>
+                    <div class="btn-card-body">
+                        <p>Importiert Raumdaten, Flächen und Bezeichnungen aus Excel-Exporten von CAD-/Gebäudeplanungsprogrammen.</p>
+                    </div>
+                </div>
+
+                <div class="btn-card" data-keywords="cad-pool pool räume drag drop zuweisen">
+                    <div class="btn-card-header">
+                        <span class="btn-visual-pill">📋 CAD-Pool</span>
+                        <span class="btn-tag">CAD-Pool</span>
+                    </div>
+                    <div class="btn-card-body">
+                        <p>Zeigt alle importierten CAD-Räume im Pool-Fenster an, damit sie bequem per Drag & Drop in Verteiler gezogen werden können.</p>
+                    </div>
+                </div>
+
+                <div class="btn-card" data-keywords="parameter einstellungen rohr va standard werte material">
+                    <div class="btn-card-header">
+                        <span class="btn-visual-pill">⚙️ Parameter</span>
+                        <span class="btn-tag">Berechnungs-Setup</span>
+                    </div>
+                    <div class="btn-card-body">
+                        <p>Öffnet die Projekt-Einstellungen für Rohrtypen, Aufpreise, Standard-Zielringlängen und Berechnungsfaktoren.</p>
+                    </div>
+                </div>
+
+                <div class="btn-card" data-keywords="design farbe theme dunkel hell farbschema">
+                    <div class="btn-card-header">
+                        <span class="btn-visual-pill">🎨 Design</span>
+                        <span class="btn-tag">Optik</span>
+                    </div>
+                    <div class="btn-card-body">
+                        <p>Wechselt das Erscheinungsbild der Anwendung zwischen verschiedenen Farb-Themes (z.B. Modern Blue, Dark Mode, High Contrast).</p>
+                    </div>
+                </div>
+
+                <div class="btn-card" data-keywords="drucken pdf report druckausgabe bericht druckdialog">
+                    <div class="btn-card-header">
+                        <span class="btn-visual-pill">🖨️ Drucken</span>
+                        <span class="btn-tag">PDF / Druck</span>
+                    </div>
+                    <div class="btn-card-body">
+                        <p>Erstellt einen sauberen PDF-Druckbericht oder öffnet den Browser-Druckdialog für Bauakten und Angebote.</p>
+                    </div>
+                </div>
+
+                <div class="btn-card" data-keywords="fbhv-konfig fbhv konfiguration schrank kasten optionen">
+                    <div class="btn-card-header">
+                        <span class="btn-visual-pill">📦 FBHV-Konfig</span>
+                        <span class="btn-tag">Schrank-Setup</span>
+                    </div>
+                    <div class="btn-card-body">
+                        <p>Konfiguriert die für das Projekt zugelassenen Verteilerkasten-Typen und Einbauvarianten.</p>
+                    </div>
+                </div>
+
+                <div class="btn-card" data-keywords="verteiler-übersicht übersicht verteiler alle auslegung summen">
+                    <div class="btn-card-header">
+                        <span class="btn-visual-pill">📊 Verteiler-Übersicht</span>
+                        <span class="btn-tag">Gesamtschau</span>
+                    </div>
+                    <div class="btn-card-body">
+                        <p>Zeigt eine zusammenfassende Übersicht aller Heizkreisverteiler, deren Abmessungen und Heizkreiszahlen auf einen Blick.</p>
+                    </div>
+                </div>
+
+                <div class="btn-card" data-keywords="rapportliste rapport material zusammenfassung stücklisteliste">
+                    <div class="btn-card-header">
+                        <span class="btn-visual-pill">📋 Rapportliste</span>
+                        <span class="btn-tag">Materialliste</span>
+                    </div>
+                    <div class="btn-card-body">
+                        <p>Öffnet die vollständige Material-Rapportliste (Rohrmeter, Stellantriebe, Thermostate, Schränke, Anschlüsse).</p>
+                    </div>
+                </div>
+
+                <div class="btn-card" data-keywords="db-check datenbank auslegung heizkreise prüfung">
+                    <div class="btn-card-header">
+                        <span class="btn-visual-pill">🔍 DB-Check</span>
+                        <span class="btn-tag">Datenbank-Prüfung</span>
+                    </div>
+                    <div class="btn-card-body">
+                        <p>Prüft die Auslegung für 1 bis 12 Heizkreise anhand der hinterlegten Datenbankregeln.</p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- CATEGORY 4: Verteiler- & Schnellausführung -->
+        <div class="category-block" data-category="verteiler">
+            <div class="category-header">
+                <h2>✍️ Verteiler- & Schnell-Aktionen</h2>
+                <span class="category-badge">7 Knöpfe</span>
+            </div>
+            <div class="cards-grid">
+
+                <div class="btn-card" data-keywords="vert+ ebene hinzufügen geschoss neu vert">
+                    <div class="btn-card-header">
+                        <span class="btn-visual-pill">Vert+</span>
+                        <span class="btn-tag">Verteiler-Aktion</span>
+                    </div>
+                    <div class="btn-card-body">
+                        <p>Fügt dem Rechner eine neue komplette Ebene bzw. einen neuen Heizkreisverteiler hinzu.</p>
+                    </div>
+                </div>
+
+                <div class="btn-card" data-keywords="raum+ raum hinzufügen zeile raum">
+                    <div class="btn-card-header">
+                        <span class="btn-visual-pill">Raum+</span>
+                        <span class="btn-tag">Raum-Aktion</span>
+                    </div>
+                    <div class="btn-card-body">
+                        <p>Fügt dem aktuell aktiven Verteiler einen neuen Raum als Tabellenzeile hinzu.</p>
+                    </div>
+                </div>
+
+                <div class="btn-card" data-keywords="text multi stempel kopieren stempeln multi-paste">
+                    <div class="btn-card-header">
+                        <span class="btn-visual-pill">📋 Text Multi.</span>
+                        <span class="btn-tag">Multi-Stempel</span>
+                    </div>
+                    <div class="btn-card-body">
+                        <p>Kopiert einen markierten Text und erlaubt das mehrfache Stempeln in beliebige Eingabefelder per Mausklick (Esc = Beenden).</p>
+                    </div>
+                </div>
+
+                <div class="btn-card" data-keywords="pos. nr. position nummer löschen leeren clear">
+                    <div class="btn-card-header">
+                        <span class="btn-visual-pill">🗑️ Pos. Nr.</span>
+                        <span class="btn-tag">Nummerierung</span>
+                    </div>
+                    <div class="btn-card-body">
+                        <p>Löscht oder leert die Positionsnummern aller aktiven Verteiler.</p>
+                    </div>
+                </div>
+
+                <div class="btn-card" data-keywords="pos. auto nummerierung automatisch fortlaufend">
+                    <div class="btn-card-header">
+                        <span class="btn-visual-pill">🚗 Pos. Auto</span>
+                        <span class="btn-tag">Auto-Nummerierung</span>
+                    </div>
+                    <div class="btn-card-body">
+                        <p>Vergibt fortlaufende Positionsnummern automatisch von oben nach unten über alle aktiven Verteiler.</p>
+                    </div>
+                </div>
+
+                <div class="btn-card" data-keywords="copy vert duplizieren kopieren verteiler duplikat">
+                    <div class="btn-card-header">
+                        <span class="btn-visual-pill">Copy Vert.</span>
+                        <span class="btn-tag">Duplizieren</span>
+                    </div>
+                    <div class="btn-card-body">
+                        <p>Dupliziert den aktuell gewählten Verteiler samt allen enthaltenen Räumen und Einstellungen.</p>
+                    </div>
+                </div>
+
+                <div class="btn-card" data-keywords="↑↓ vert. verschieben oben unten pfeiltasten verteiler">
+                    <div class="btn-card-header">
+                        <span class="btn-visual-pill">↑↓ Vert.</span>
+                        <span class="btn-tag">Sortierung</span>
+                    </div>
+                    <div class="btn-card-body">
+                        <p>Aktiviert den Verteiler-Verschiebemodus, um Verteiler per Pfeiltasten (↑ / ↓) in der Reihenfolge zu verschieben.</p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- CATEGORY 5: Verteiler-Header Elemente -->
+        <div class="category-block" data-category="header-elements">
+            <div class="category-header">
+                <h2>🏢 Verteiler-Kopfzeile (Steuerungselemente)</h2>
+                <span class="category-badge">6 Elemente</span>
+            </div>
+            <div class="cards-grid">
+
+                <div class="btn-card" data-keywords="einklappen ausklappen pfeil toggle geschoss">
+                    <div class="btn-card-header">
+                        <span class="btn-visual-pill">▼</span>
+                        <span class="btn-tag">Verteiler-Header</span>
+                    </div>
+                    <div class="btn-card-body">
+                        <p>Klappt die Räume des Verteilers ein oder aus, um die Ansicht kompakt zu halten.</p>
+                    </div>
+                </div>
+
+                <div class="btn-card" data-keywords="geschoss löschen verteiler entfernen trash">
+                    <div class="btn-card-header">
+                        <span class="btn-visual-pill">🗑️</span>
+                        <span class="btn-tag">Verteiler-Header</span>
+                    </div>
+                    <div class="btn-card-body">
+                        <p>Löscht das jeweilige Geschoss inklusive aller zugehörigen Räume aus dem Projekt.</p>
+                    </div>
+                </div>
+
+                <div class="btn-card" data-keywords="sync synchronisation markierung gruppe ctrl klick">
+                    <div class="btn-card-header">
+                        <span class="btn-visual-pill">☐ Sync</span>
+                        <span class="btn-tag">Gruppen-Sync</span>
+                    </div>
+                    <div class="btn-card-body">
+                        <p>Fügt den Verteiler zur Sync-Gruppe hinzu. Änderungen an Vorlauf, Bez. oder Ebene werden sofort auf alle Sync-Verteiler übertragen.</p>
+                    </div>
+                </div>
+
+                <div class="btn-card" data-keywords="anschluss hor ver horizontal vertikal anschlussrichtung">
+                    <div class="btn-card-header">
+                        <span class="btn-visual-pill">Anschl.: ☑ Hor ☐ Ver</span>
+                        <span class="btn-tag">Orientierung</span>
+                    </div>
+                    <div class="btn-card-body">
+                        <p>Bestimmt, ob der Rohranschluss am Heizkreisverteiler horizontal (seitlich) oder vertikal (von unten/oben) erfolgt.</p>
+                    </div>
+                </div>
+
+                <div class="btn-card" data-keywords="verteilerkasten kasten schrank typ auswahl">
+                    <div class="btn-card-header">
+                        <span class="btn-visual-pill">🚗 Auto (Empfehlung)</span>
+                        <span class="btn-tag">Schrank-Wahl</span>
+                    </div>
+                    <div class="btn-card-body">
+                        <p>Wählt den gewünschten Verteilerkastentyp (Unterputz, Aufputz, EPS, Klapptür etc.) oder lässt ihn automatisch berechnen.</p>
+                    </div>
+                </div>
+
+                <div class="btn-card" data-keywords="kasten abmessungen maß breite höhe tiefe">
+                    <div class="btn-card-header">
+                        <span class="btn-visual-pill">Verteilerkasten: B × H × T</span>
+                        <span class="btn-tag">Maß-Info</span>
+                    </div>
+                    <div class="btn-card-body">
+                        <p>Zeigt die berechneten Abmessungen (Breite × Höhe × Tiefe in mm) des Schranks. Klick öffnet Detailinfos.</p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- DEVELOPER / MAINTAINER EXTENSION GUIDE -->
+        <div class="dev-section">
+            <h2>💡 Anleitung für Entwickler & Erweiterungen</h2>
+            <p>Diese Anleitung ist modular aufgebaut. Wenn neue Funktionen oder Knöpfe zur Anwendung hinzugefügt werden, können Sie diese in 3 einfachen Schritten hier ergänzen:</p>
+
+            <h4 style="color: #38bdf8; margin-bottom: 6px;">Schritt 1: Neue Knopf-Karte in HTML einfügen</h4>
+            <p>Fügen Sie einfach einen neuen <code>&lt;div class="btn-card" data-keywords="..."&gt;</code>-Block in die passende Kategorie in <code>glossar.html</code> ein:</p>
+
+            <div class="code-snippet">&lt;!-- Beispiel-Karte für einen neuen Knopf --&gt;
+&lt;div class="btn-card" data-keywords="mein-neuer-knopf mein-icon funktion"&gt;
+    &lt;div class="btn-card-header"&gt;
+        &lt;span class="btn-visual-pill"&gt;🚀 Mein Neuer Knopf&lt;/span&gt;
+        &lt;span class="btn-tag"&gt;Kategorie-Name&lt;/span&gt;
+    &lt;/div&gt;
+    &lt;div class="btn-card-body"&gt;
+        &lt;p&gt;&lt;strong&gt;Beschreibung:&lt;/strong&gt; Erklären Sie hier kurz und verständlich die Funktion des neuen Knopfes.&lt;/p&gt;
+        &lt;div class="btn-card-tip"&gt;
+            💡 &lt;strong&gt;Tipp:&lt;/strong&gt; Praktischer Anwendungshinweis für Nutzer.
+        &lt;/div&gt;
+    &lt;/div&gt;
+&lt;/div&gt;</div>
+
+            <h4 style="color: #38bdf8; margin-top: 20px; margin-bottom: 6px;">Schritt 2: Such-Keywords hinzufügen</h4>
+            <p>Tragen Sie im Attribut <code>data-keywords="..."</code> alle Begriffe, Icons und Abkürzungen ein, nach denen Nutzer im Suchfeld suchen könnten.</p>
+        </div>
+
+        <a href="index.html" class="back-nav">← Zurück zum Material-Rechner</a>
     </div>
+
+    <!-- Interactive Client-Side Search Filter Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const searchInput = document.getElementById('guide-search-input');
+            const cards = document.querySelectorAll('.btn-card');
+            const categoryBlocks = document.querySelectorAll('.category-block');
+            const noResultsMsg = document.getElementById('no-results');
+
+            if (!searchInput) return;
+
+            searchInput.addEventListener('input', (e) => {
+                const query = e.target.value.toLowerCase().trim();
+                let totalVisible = 0;
+
+                cards.forEach(card => {
+                    const textContent = card.textContent.toLowerCase();
+                    const keywords = (card.dataset.keywords || '').toLowerCase();
+                    const isMatch = textContent.includes(query) || keywords.includes(query);
+
+                    if (isMatch) {
+                        card.style.display = 'flex';
+                        totalVisible++;
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+
+                // Hide empty categories during search
+                categoryBlocks.forEach(block => {
+                    const visibleCardsInBlock = block.querySelectorAll('.btn-card[style*="display: flex"]').length;
+                    if (query !== '' && visibleCardsInBlock === 0) {
+                        block.style.display = 'none';
+                    } else {
+                        block.style.display = 'block';
+                    }
+                });
+
+                if (totalVisible === 0 && query !== '') {
+                    noResultsMsg.style.display = 'block';
+                } else {
+                    noResultsMsg.style.display = 'none';
+                }
+            });
+        });
+    </script>
 </body>
 </html>
