@@ -4115,11 +4115,66 @@ document.addEventListener('DOMContentLoaded', () => {
                 lbl.appendChild(imgCard);
             }
         });
+
+        initCabinetPhotoCards();
+    }
+
+    function initCabinetPhotoCards() {
+        const db = (typeof FBHV_DATABASE !== 'undefined') ? FBHV_DATABASE : (typeof window !== 'undefined' ? window.FBHV_DATABASE : null);
+
+        document.querySelectorAll('.cb-cabinet-type, .cb-vconfig-cabinet').forEach(cb => {
+            const lbl = cb.closest('label');
+            if (!lbl || lbl.dataset.photoInitialized === "true") return;
+            lbl.dataset.photoInitialized = "true";
+            lbl.classList.add('lbl-vconfig-conn');
+
+            const cabKey = cb.value;
+            const cabObj = db && db.cabinetModels ? db.cabinetModels[cabKey] : null;
+            const photoPath = cabObj ? cabObj.photo : null;
+
+            // Collect existing text nodes
+            const rawNodes = Array.from(lbl.childNodes).filter(node => node !== cb);
+
+            // Build Title Row
+            const titleRow = document.createElement('div');
+            titleRow.className = 'conn-title-row';
+            titleRow.appendChild(cb);
+
+            const textSpan = document.createElement('span');
+            rawNodes.forEach(node => textSpan.appendChild(node));
+            titleRow.appendChild(textSpan);
+
+            lbl.innerHTML = '';
+            lbl.appendChild(titleRow);
+
+            // Build Large Image Card UNDER the text
+            if (photoPath) {
+                const imgCard = document.createElement('div');
+                imgCard.className = 'conn-img-card';
+                imgCard.title = 'Klicken für Großansicht in Technischer Doku (2. Bildschirm)';
+
+                const img = document.createElement('img');
+                img.src = encodeURI(photoPath);
+                img.alt = cabObj ? cabObj.name : cabKey;
+
+                imgCard.appendChild(img);
+
+                // Clicking on image opens Tech Doku popup
+                imgCard.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const docId = 'photo_kasten_' + cabKey;
+                    window.open('tech_doku_popup.html?doc=' + docId, 'TechDoku', 'popup=yes,width=1300,height=850,resizable=yes');
+                });
+
+                lbl.appendChild(imgCard);
+            }
+        });
     }
 
     function openVconfigModal() {
         if (vconfigModal) {
             initConnPhotoButtons();
+            initCabinetPhotoCards();
             updateWmzConnectionState();
             vconfigModal.classList.remove('hidden');
         }
@@ -9742,6 +9797,19 @@ document.addEventListener('DOMContentLoaded', () => {
                             <img src="${encodeURI(setObj.photo)}" style="max-width:280px; max-height:190px; border-radius:6px; border:1px solid #334155; background:#ffffff; display:block; margin:0 auto; padding:4px; box-shadow:0 4px 12px rgba(0,0,0,0.5);">
                             <div style="font-size:0.78em; color:#94a3b8; margin-top:6px; text-align:center;">Klicken Sie auf 🖼️ für Großansicht in Technischer Doku</div>`;
                 }
+            }
+        }
+
+        // Cabinet model photo preview in tooltip
+        const cabCb = el.classList.contains('cb-cabinet-type') ? el : (el.tagName === 'LABEL' ? el.querySelector('.cb-cabinet-type') : null);
+        if (cabCb && cabCb.value) {
+            const cabKey = cabCb.value;
+            const db = (typeof FBHV_DATABASE !== 'undefined') ? FBHV_DATABASE : (typeof window !== 'undefined' ? window.FBHV_DATABASE : null);
+            const cabObj = db && db.cabinetModels ? db.cabinetModels[cabKey] : null;
+            if (cabObj && cabObj.photo) {
+                return `<div style="text-align:center; font-weight:bold; margin-bottom:6px; color:#38bdf8;">📦 ${cabObj.name}</div>
+                        <img src="${encodeURI(cabObj.photo)}" style="max-width:280px; max-height:190px; border-radius:6px; border:1px solid #334155; background:#ffffff; display:block; margin:0 auto; padding:4px; box-shadow:0 4px 12px rgba(0,0,0,0.5);">
+                        <div style="font-size:0.78em; color:#94a3b8; margin-top:6px; text-align:center;">Maßbild & Foto in Technischer Doku verfügbar</div>`;
             }
         }
 
