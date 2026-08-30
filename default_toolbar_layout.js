@@ -1,6 +1,6 @@
 // FBH Materialplaner - Standard Menue-Layout Konfiguration
 window.DEFAULT_TOOLBAR_LAYOUT = {
-  "updatedAt": 1788087051509,
+  "updatedAt": 1788116495141,
   "rows": [
     {
       "collapsed": false,
@@ -17,13 +17,13 @@ window.DEFAULT_TOOLBAR_LAYOUT = {
         },
         {
           "id": "btn-toggle-tooltips",
-          "left": 1525,
-          "sector": 305
+          "left": 1600,
+          "sector": 320
         },
         {
           "id": "btn-open-tools",
-          "left": 1645,
-          "sector": 329
+          "left": 1500,
+          "sector": 300
         },
         {
           "id": "btn-select-folder",
@@ -32,8 +32,8 @@ window.DEFAULT_TOOLBAR_LAYOUT = {
         },
         {
           "id": "btn-active-project-file",
-          "left": 1365,
-          "sector": 273
+          "left": 1000,
+          "sector": 200
         }
       ]
     },
@@ -67,8 +67,8 @@ window.DEFAULT_TOOLBAR_LAYOUT = {
         },
         {
           "id": "btn-open-verteiler-overview",
-          "left": 665,
-          "sector": 133
+          "left": 650,
+          "sector": 130
         },
         {
           "id": "btn-open-rapportliste",
@@ -81,14 +81,19 @@ window.DEFAULT_TOOLBAR_LAYOUT = {
           "sector": 307
         },
         {
-          "id": "btn-verteilerkasten-config",
-          "left": 535,
-          "sector": 107
-        },
-        {
           "id": "btn-help",
           "left": 1640,
           "sector": 328
+        },
+        {
+          "id": "btn-tech-doku-popup",
+          "left": 820,
+          "sector": 164
+        },
+        {
+          "id": "btn-settings",
+          "left": 535,
+          "sector": 107
         }
       ]
     },
@@ -137,7 +142,6 @@ window.DEFAULT_TOOLBAR_LAYOUT = {
     "btn-import-file",
     "btn-export-file",
     "btn-design",
-    "btn-settings",
     "btn-db-check"
   ],
   "floorHeaderOrder": {
@@ -209,6 +213,6 @@ window.DEFAULT_TOOLBAR_LAYOUT = {
     "col_zus_ring": 99,
     "col_extra": 275,
     "col_expand": 363,
-    "_updatedAt": 1788086383712
+    "_updatedAt": 1788087051509
   }
 };

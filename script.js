@@ -540,48 +540,67 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('fbhData', JSON.stringify(data));
     }, 500);
 
-    // Settings Live-Update
+    // Settings Live-Update & Project Propagation
     if (inputSettingSchiene) {
-        inputSettingSchiene.addEventListener('input', calculateGlobalSum);
+        ['input', 'change'].forEach(evt => {
+            inputSettingSchiene.addEventListener(evt, () => {
+                calculateGlobalSum();
+                if (!isLoading) debouncedSave();
+            });
+        });
     }
     if (inputSettingKlips) {
-        inputSettingKlips.addEventListener('input', calculateGlobalSum);
+        ['input', 'change'].forEach(evt => {
+            inputSettingKlips.addEventListener(evt, () => {
+                calculateGlobalSum();
+                if (!isLoading) debouncedSave();
+            });
+        });
     }
     if (inputSettingTarget) {
-        inputSettingTarget.addEventListener('input', () => {
-            const globalTarget = parseFloat(inputSettingTarget.value) || 100;
-            const roomRows = document.querySelectorAll('tr.room-row');
-            roomRows.forEach(row => {
-                const inputTarget = row.querySelector('.input-target');
-                if (inputTarget) {
-                    inputTarget.value = globalTarget;
-                    calculateRow(row);
-                }
+        ['input', 'change'].forEach(evt => {
+            inputSettingTarget.addEventListener(evt, () => {
+                const globalTarget = parseFloat(inputSettingTarget.value) || 100;
+                const roomRows = document.querySelectorAll('tr.room-row');
+                roomRows.forEach(row => {
+                    const inputTarget = row.querySelector('.input-target');
+                    if (inputTarget) {
+                        inputTarget.value = globalTarget;
+                        calculateRow(row);
+                    }
+                });
+                calculateGlobalSum();
+                if (!isLoading) debouncedSave();
             });
-            calculateGlobalSum();
         });
     }
     if (inputSettingMaxOver) {
-        inputSettingMaxOver.addEventListener('input', () => {
-            const roomRows = document.querySelectorAll('tr.room-row');
-            roomRows.forEach(row => {
-                calculateRow(row);
+        ['input', 'change'].forEach(evt => {
+            inputSettingMaxOver.addEventListener(evt, () => {
+                const roomRows = document.querySelectorAll('tr.room-row');
+                roomRows.forEach(row => {
+                    calculateRow(row);
+                });
+                calculateGlobalSum();
+                if (!isLoading) debouncedSave();
             });
-            calculateGlobalSum();
         });
     }
     if (inputSettingDist) {
-        inputSettingDist.addEventListener('input', () => {
-            const globalDist = parseFloat(inputSettingDist.value) || 0;
-            const roomRows = document.querySelectorAll('tr.room-row');
-            roomRows.forEach(row => {
-                const inputDist = row.querySelector('.input-dist');
-                if (inputDist) {
-                    inputDist.value = globalDist;
-                    calculateRow(row);
-                }
+        ['input', 'change'].forEach(evt => {
+            inputSettingDist.addEventListener(evt, () => {
+                const globalDist = parseFloat(inputSettingDist.value) || 0;
+                const roomRows = document.querySelectorAll('tr.room-row');
+                roomRows.forEach(row => {
+                    const inputDist = row.querySelector('.input-dist');
+                    if (inputDist) {
+                        inputDist.value = globalDist;
+                        calculateRow(row);
+                    }
+                });
+                calculateGlobalSum();
+                if (!isLoading) debouncedSave();
             });
-            calculateGlobalSum();
         });
     }
 
@@ -1261,24 +1280,55 @@ document.addEventListener('DOMContentLoaded', () => {
     if (btnSettings) {
         btnSettings.addEventListener('click', (e) => {
             if (e.target.closest('.drag-handle')) return;
+            initConnPhotoButtons();
             settingsModal.classList.remove('hidden');
         });
+    }
+
+    function applyAllGlobalSettingsToProject() {
+        const globalTarget = inputSettingTarget ? (parseFloat(inputSettingTarget.value) || 100) : 100;
+        const globalDist = inputSettingDist ? (parseFloat(inputSettingDist.value) || 0) : 10;
+        
+        const roomRows = document.querySelectorAll('tr.room-row');
+        roomRows.forEach(row => {
+            const inputTarget = row.querySelector('.input-target');
+            if (inputTarget) inputTarget.value = globalTarget;
+
+            const inputDist = row.querySelector('.input-dist');
+            if (inputDist) inputDist.value = globalDist;
+
+            calculateRow(row);
+        });
+
+        calculateGlobalSum();
+        if (!isLoading) debouncedSave();
+        if (typeof renderVerteilerOverviewList === 'function') {
+            renderVerteilerOverviewList();
+        }
     }
 
     if (btnSettingsClose) {
         btnSettingsClose.addEventListener('click', () => {
             settingsModal.classList.add('hidden');
-            const globalTarget = inputSettingTarget ? parseFloat(inputSettingTarget.value) || 100 : 100;
-            const roomRows = document.querySelectorAll('tr.room-row');
-            roomRows.forEach(row => {
-                const inputTarget = row.querySelector('.input-target');
-                if (inputTarget) {
-                    inputTarget.value = globalTarget;
-                    calculateRow(row);
-                }
-            });
-            calculateGlobalSum();
-            if (!isLoading) debouncedSave();
+            applyAllGlobalSettingsToProject();
+        });
+    }
+
+    const btnSettingsCloseX = document.getElementById('btn-settings-close-x');
+
+    if (btnSettingsCloseX) {
+        btnSettingsCloseX.addEventListener('click', () => {
+            if (btnSettingsClose) btnSettingsClose.click();
+            else if (settingsModal) settingsModal.classList.add('hidden');
+        });
+    }
+
+    if (settingsModal) {
+        settingsModal.addEventListener('click', (e) => {
+            if (e.target === settingsModal) {
+                if (btnSettingsClose) btnSettingsClose.click();
+                else settingsModal.classList.add('hidden');
+            }
         });
     }
 
@@ -3926,7 +3976,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- Verteilerkasten Konfigurator Modal Handlers ---
-    const btnVerteilerkastenConfig = document.getElementById('btn-verteilerkasten-config');
+        const btnVerteilerkastenConfig = document.getElementById('btn-verteilerkasten-config');
     const vconfigModal = document.getElementById('verteilerkasten-config-modal');
     const btnVconfigClose = document.getElementById('btn-vconfig-close');
     const btnVconfigCloseX = document.getElementById('btn-vconfig-close-x');
@@ -4016,8 +4066,60 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    function initConnPhotoButtons() {
+        const db = (typeof FBHV_DATABASE !== 'undefined') ? FBHV_DATABASE : (typeof window !== 'undefined' ? window.FBHV_DATABASE : null);
+
+        document.querySelectorAll('.lbl-vconfig-conn').forEach(lbl => {
+            if (lbl.dataset.photoInitialized === "true") return;
+            lbl.dataset.photoInitialized = "true";
+
+            const cb = lbl.querySelector('.cb-vconfig-conn');
+            if (!cb || !cb.value) return;
+            const connId = cb.value;
+            const setObj = db && db.connectionSets ? db.connectionSets.find(s => s.id === connId) : null;
+            const photoPath = setObj ? setObj.photo : null;
+
+            // Collect existing text nodes
+            const rawNodes = Array.from(lbl.childNodes).filter(node => node !== cb);
+            
+            // Build Title Row
+            const titleRow = document.createElement('div');
+            titleRow.className = 'conn-title-row';
+            titleRow.appendChild(cb);
+            
+            const textSpan = document.createElement('span');
+            rawNodes.forEach(node => textSpan.appendChild(node));
+            titleRow.appendChild(textSpan);
+
+            lbl.innerHTML = '';
+            lbl.appendChild(titleRow);
+
+            // Build Large Image Card UNDER the text
+            if (photoPath) {
+                const imgCard = document.createElement('div');
+                imgCard.className = 'conn-img-card';
+                imgCard.title = 'Klicken für Großansicht in Technischer Doku (2. Bildschirm)';
+                
+                const img = document.createElement('img');
+                img.src = encodeURI(photoPath);
+                img.alt = setObj ? setObj.name : connId;
+                
+                imgCard.appendChild(img);
+
+                // Clicking on image opens Tech Doku popup
+                imgCard.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    window.open('tech_doku_popup.html?doc=photo_' + connId, 'TechDoku', 'popup=yes,width=1300,height=850,resizable=yes');
+                });
+
+                lbl.appendChild(imgCard);
+            }
+        });
+    }
+
     function openVconfigModal() {
         if (vconfigModal) {
+            initConnPhotoButtons();
             updateWmzConnectionState();
             vconfigModal.classList.remove('hidden');
         }
@@ -4612,8 +4714,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         { "id": "btn-settings", "left": 15 },
                         { "id": "btn-design", "left": 160 },
                         { "id": "btn-print-report", "left": 280 },
-                        { "id": "btn-verteilerkasten-config", "left": 440 },
-                        { "id": "btn-open-rapportliste", "left": 600 },
+                        { "id": "btn-open-rapportliste", "left": 440 },
                         { "id": "btn-multi-paste", "left": 760 }
                     ]
                 },
@@ -6006,6 +6107,15 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    function clearMainTableFilters() {
+        const floorFilterInput = document.getElementById('main-floor-filter');
+        const fbhvFilterInput = document.getElementById('main-fbhv-filter');
+        if (floorFilterInput) floorFilterInput.value = '';
+        if (fbhvFilterInput) fbhvFilterInput.value = '';
+        applyMainTableFilters();
+    }
+    window.clearMainTableFilters = clearMainTableFilters;
+
     function applyMainTableFilters() {
         const floorFilterInput = document.getElementById('main-floor-filter');
         const fbhvFilterInput = document.getElementById('main-fbhv-filter');
@@ -6014,6 +6124,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const fbhvText = fbhvFilterInput ? fbhvFilterInput.value.toLowerCase().trim() : '';
         
         const floorBodies = document.querySelectorAll('tbody.floor-group');
+        let visibleCount = 0;
+
         floorBodies.forEach(fb => {
             const ebeneInput = fb.querySelector('.input-floor-name');
             const ebeneName = ebeneInput ? ebeneInput.value.toLowerCase() : '';
@@ -6026,10 +6138,34 @@ document.addEventListener('DOMContentLoaded', () => {
             
             if (matchesFloor && matchesFbhv) {
                 fb.style.display = ''; // Show floor
+                visibleCount++;
             } else {
                 fb.style.display = 'none'; // Hide floor
             }
         });
+
+        // Show notice banner if all floors are filtered out
+        let filterNotice = document.getElementById('main-table-filter-notice');
+        const contentBody = document.getElementById('content-body');
+
+        if (visibleCount === 0 && (floorText || fbhvText)) {
+            if (!filterNotice && contentBody) {
+                filterNotice = document.createElement('tr');
+                filterNotice.id = 'main-table-filter-notice';
+                filterNotice.innerHTML = `
+                    <td colspan="17" style="padding: 30px; text-align: center; background: #fff3cd; color: #856404; border: 2px dashed #ffeeba; border-radius: 8px; font-weight: 600; font-size: 1.05em;">
+                        🔍 Keine Verteiler / Geschosse entsprechen den aktuellen Filtern ("${escapeHtml(floorText || fbhvText)}").
+                        <br><br>
+                        <button type="button" onclick="clearMainTableFilters()" style="padding: 8px 18px; background: #856404; color: #ffffff; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 0.95em; box-shadow: 0 4px 10px rgba(0,0,0,0.15);">
+                            ✕ Filter zurücksetzen
+                        </button>
+                    </td>
+                `;
+                contentBody.appendChild(filterNotice);
+            }
+        } else if (filterNotice) {
+            filterNotice.remove();
+        }
     }
 
     // Bind event listeners for main table filters
@@ -9272,6 +9408,9 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const data = JSON.parse(savedData);
             loadData(data);
+            if (document.querySelectorAll('tbody.floor-group').length === 0) {
+                createDefaultFloorAndRooms();
+            }
         } catch (e) {
             console.error("Laden fehlgeschlagen", e);
             createDefaultFloorAndRooms();
@@ -9292,7 +9431,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function createDefaultFloorAndRooms() {
-        if (floorCounter === 0) {
+        if (document.querySelectorAll('tbody.floor-group').length === 0) {
             floorCounter++;
             const fb = addNewFloor(floorCounter);
             const floorNameInput = fb.querySelector('.input-floor-name');
@@ -9588,6 +9727,22 @@ document.addEventListener('DOMContentLoaded', () => {
     function getTooltipDescription(el) {
         if (el.hasAttribute('data-tooltip')) {
             return el.getAttribute('data-tooltip');
+        }
+
+        // Anschluss-Set photo preview in tooltip
+        const connLbl = el.classList.contains('lbl-vconfig-conn') ? el : el.closest('.lbl-vconfig-conn');
+        if (connLbl) {
+            const cb = connLbl.querySelector('.cb-vconfig-conn');
+            if (cb && cb.value) {
+                const connId = cb.value;
+                const db = (typeof FBHV_DATABASE !== 'undefined') ? FBHV_DATABASE : (typeof window !== 'undefined' ? window.FBHV_DATABASE : null);
+                const setObj = db && db.connectionSets ? db.connectionSets.find(s => s.id === connId) : null;
+                if (setObj && setObj.photo) {
+                    return `<div style="text-align:center; font-weight:bold; margin-bottom:6px; color:#38bdf8;">📸 ${setObj.name}</div>
+                            <img src="${encodeURI(setObj.photo)}" style="max-width:280px; max-height:190px; border-radius:6px; border:1px solid #334155; background:#ffffff; display:block; margin:0 auto; padding:4px; box-shadow:0 4px 12px rgba(0,0,0,0.5);">
+                            <div style="font-size:0.78em; color:#94a3b8; margin-top:6px; text-align:center;">Klicken Sie auf 🖼️ für Großansicht in Technischer Doku</div>`;
+                }
+            }
         }
 
         // Check ID

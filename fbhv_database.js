@@ -98,6 +98,7 @@ const FBHV_DATABASE = {
             name: 'metalplast Kugelhahnset',
             category: 'Grund-Sets',
             articles: ['51192.107', '51192.108'],
+            photo: 'Zus Doku/Anschluss_Sets/Fotos/metalplast_Kugelhahnset.png',
             footnote: 0,
             isWmz: false,
             metalplast: {
@@ -133,6 +134,7 @@ const FBHV_DATABASE = {
             name: 'metalplast Anschluss-Set WMZ horizontal',
             category: 'WMZ-Sets',
             articles: ['51192.140', '51192.142'],
+            photo: 'Zus Doku/Anschluss_Sets/Fotos/metalplast_Anschluss-Set_WMZ_horizontal.png',
             footnote: 0,
             isWmz: true,
             metalplast: {
@@ -168,6 +170,7 @@ const FBHV_DATABASE = {
             name: 'metalplast Anschluss-Set WMZ vertikal',
             category: 'WMZ-Sets',
             articles: ['51192.144', '51192.146'],
+            photo: 'Zus Doku/Anschluss_Sets/Fotos/metalplast_Anschluss-Set_WMZ_vertikal.png',
             footnote: 1,
             isWmz: true,
             metalplast: {
@@ -203,6 +206,7 @@ const FBHV_DATABASE = {
             name: 'Winkel zu metalplast Anschluss-Set WMZ vertikal',
             category: 'WMZ-Sets',
             articles: ['51192.130'],
+            photo: 'Zus Doku/Anschluss_Sets/Fotos/Winkel_zu_metalplast_Anschluss-Set_WMZ_vertikal.png',
             footnote: 0,
             isWmz: true,
             metalplast: {
@@ -240,6 +244,7 @@ const FBHV_DATABASE = {
             name: 'Anschluss-Set horizontal',
             category: 'Standard-Sets',
             articles: ['51192.073', '51192.074'],
+            photo: 'Zus Doku/Anschluss_Sets/Fotos/Anschluss-Set_horizontal.png',
             footnote: 0,
             isWmz: false,
             metalplast: {
@@ -275,6 +280,7 @@ const FBHV_DATABASE = {
             name: 'Anschluss-Set vertikal',
             category: 'Standard-Sets',
             articles: ['51192.070', '51192.071'],
+            photo: 'Zus Doku/Anschluss_Sets/Fotos/Anschluss-Set_vertikal.png',
             footnote: 0,
             isWmz: false,
             metalplast: {
@@ -310,6 +316,7 @@ const FBHV_DATABASE = {
             name: 'WMZ-Set horizontal',
             category: 'WMZ-Sets',
             articles: ['51192.061', '51192.062'],
+            photo: 'Zus Doku/Anschluss_Sets/Fotos/WMZ-Set_horizontal.png',
             footnote: 0,
             isWmz: true,
             metalplast: {
@@ -345,6 +352,7 @@ const FBHV_DATABASE = {
             name: 'WMZ-Set vertikal',
             category: 'WMZ-Sets',
             articles: ['51192.064', '51192.065'],
+            photo: 'Zus Doku/Anschluss_Sets/Fotos/WMZ-Set_vertikal.png',
             footnote: 2,
             isWmz: true,
             metalplast: {
@@ -382,6 +390,7 @@ const FBHV_DATABASE = {
             name: 'Stramax Garnitur horizontal',
             category: 'Stramax-Sets',
             articles: ['51191.101', '51191.102'],
+            photo: 'Zus Doku/Anschluss_Sets/Fotos/Stramax_Garnitur_horizontal.png',
             footnote: 0,
             isWmz: false,
             metalplast: {
@@ -417,6 +426,7 @@ const FBHV_DATABASE = {
             name: 'Stramax Garnitur vertikal',
             category: 'Stramax-Sets',
             articles: ['51191.105', '51191.106'],
+            photo: 'Zus Doku/Anschluss_Sets/Fotos/Stramax_Garnitur_vertikal.png',
             footnote: 2,
             isWmz: false,
             metalplast: {
@@ -452,6 +462,7 @@ const FBHV_DATABASE = {
             name: 'Stramax Versal 1 Garnitur',
             category: 'Stramax-Sets',
             articles: ['51191.117'],
+            photo: 'Zus Doku/Anschluss_Sets/Fotos/Stramax_Versal_1_Garnitur.png',
             footnote: 2,
             isWmz: false,
             metalplast: {
@@ -487,6 +498,7 @@ const FBHV_DATABASE = {
             name: 'Danfoss AB-PM Set horizontal',
             category: 'Danfoss-Sets',
             articles: ['00199.520', '00199.522', '00199.524', '00199.679'],
+            photo: 'Zus Doku/Anschluss_Sets/Fotos/Danfoss_AB-PM_Set_horizontal.png',
             footnote: 0,
             isWmz: false, // Ausnahmeregel: Differenzdruckventil enthalten, auch ohne WMZ nutzbar
             metalplast: {
@@ -522,6 +534,7 @@ const FBHV_DATABASE = {
             name: 'Danfoss AB-PM Set vertikal',
             category: 'Danfoss-Sets',
             articles: ['00199.526', '00199.528', '00199.530', '00199.679'],
+            photo: 'Zus Doku/Anschluss_Sets/Fotos/Danfoss_AB-PM_Set_vertikal.png',
             footnote: 2,
             isWmz: false, // Ausnahmeregel: Differenzdruckventil enthalten, auch ohne WMZ nutzbar
             metalplast: {
@@ -559,6 +572,7 @@ const FBHV_DATABASE = {
             name: 'oventrop Hycocon VTZ horizontal',
             category: 'Oventrop-Sets',
             articles: ['00227.111', '00227.113', '00227.118'],
+            photo: 'Zus Doku/Anschluss_Sets/Fotos/oventrop_Hycocon_VTZ_horizontal.png',
             footnote: 0,
             isWmz: true,
             metalplast: {
@@ -592,6 +606,7 @@ const FBHV_DATABASE = {
             name: 'oventrop Cocon QTZ / QDP horizontal',
             category: 'Oventrop-Sets',
             articles: ['00227.117', '00227.102', '00227.104', '00227.118'],
+            photo: 'Zus Doku/Anschluss_Sets/Fotos/oventrop_Cocon_QTZ_QDP_horizontal.png',
             footnote: 0,
             isWmz: true,
             metalplast: {
@@ -626,6 +641,7 @@ const FBHV_DATABASE = {
             name: 'oventrop Hycocon VTZ vertikal',
             category: 'Oventrop-Sets',
             articles: ['00227.110', '00227.112', '00227.118'],
+            photo: 'Zus Doku/Anschluss_Sets/Fotos/oventrop_Hycocon_VTZ_vertikal.png',
             footnote: 2,
             isWmz: true,
             metalplast: {
@@ -661,6 +677,7 @@ const FBHV_DATABASE = {
             name: 'oventrop Cocon QTZ / QDP vertikal',
             category: 'Oventrop-Sets',
             articles: ['00227.116', '00227.103', '00227.105', '00227.118'],
+            photo: 'Zus Doku/Anschluss_Sets/Fotos/oventrop_Cocon_QTZ_QDP_vertikal.png',
             footnote: 2,
             isWmz: true,
             metalplast: {
@@ -698,6 +715,7 @@ const FBHV_DATABASE = {
             name: 'TA-Compact-DP Set horizontal',
             category: 'TA-Compact-Sets',
             articles: ['00434.690', '00434.691', '00434.692', '04078.701'],
+            photo: 'Zus Doku/Anschluss_Sets/Fotos/TA-Compact-DP_Set_horizontal.png',
             footnote: 0,
             isWmz: true,
             metalplast: {
@@ -733,6 +751,7 @@ const FBHV_DATABASE = {
             name: 'TA-Compact-P Set horizontal',
             category: 'TA-Compact-Sets',
             articles: ['00434.680', '00434.681', '00434.682', '04078.701'],
+            photo: 'Zus Doku/Anschluss_Sets/Fotos/TA-Compact-P_Set_horizontal.png',
             footnote: 0,
             isWmz: true,
             metalplast: {
@@ -768,6 +787,7 @@ const FBHV_DATABASE = {
             name: 'TA-Compact-DP Set vertikal',
             category: 'TA-Compact-Sets',
             articles: ['00434.693', '00434.694', '00434.695', '04078.701'],
+            photo: 'Zus Doku/Anschluss_Sets/Fotos/TA-Compact-DP_Set_vertikal.png',
             footnote: 2,
             isWmz: true,
             metalplast: {
@@ -803,6 +823,7 @@ const FBHV_DATABASE = {
             name: 'TA-Compact-P Set vertikal',
             category: 'TA-Compact-Sets',
             articles: ['00434.683', '00434.684', '00434.685', '04078.701'],
+            photo: 'Zus Doku/Anschluss_Sets/Fotos/TA-Compact-P_Set_vertikal.png',
             footnote: 2,
             isWmz: true,
             metalplast: {

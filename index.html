@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="data:,">
-    <link rel="stylesheet" href="style.css?v=307">
+    <link rel="stylesheet" href="style.css?v=337">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <style>
 /* CSS Custom Properties / Theme Variables */
@@ -1073,14 +1073,14 @@ body.menu-edit-mode .header-top-bar.fh-drag-row {
                     <button id="btn-print-report" class="btn-tool toolbar-item" draggable="false" data-btn-id="btn-print-report" style="left: 280px;" title="PDF Report / Drucken über Druckdialog erstellen (Ziehen am Griff ⋮⋮ zum Verschieben)">
                         <span class="drag-handle">⋮⋮</span> 🖨️ Drucken
                     </button>
-                    <button id="btn-verteilerkasten-config" class="btn-tool toolbar-item" draggable="false" data-btn-id="btn-verteilerkasten-config" style="left: 440px;" title="Zugelassene Verteiler- & Kasten-Optionen für dieses Projekt konfigurieren">
-                        <span class="drag-handle">⋮⋮</span> 📦 FBHV-Konfig
-                    </button>
-                    <button id="btn-open-rapportliste" class="btn-tool toolbar-item" draggable="false" data-btn-id="btn-open-rapportliste" style="left: 600px;" title="Rapportliste & Material-Zusammenfassung als Fenster anzeigen">
+                    <button id="btn-open-rapportliste" class="btn-tool toolbar-item" draggable="false" data-btn-id="btn-open-rapportliste" style="left: 440px;" title="Rapportliste & Material-Zusammenfassung als Fenster anzeigen">
                         <span class="drag-handle">⋮⋮</span> 📋 Rapportliste
                     </button>
                     <button id="btn-multi-paste" class="btn-tool toolbar-item" draggable="false" data-btn-id="btn-multi-paste" style="left: 760px;" title="Markierten Text kopieren und per Klick in beliebige Textfelder stempeln (Esc = Beenden)">
                         <span class="drag-handle">⋮⋮</span> 📋 Text Multi.
+                    </button>
+                    <button id="btn-tech-doku-popup" class="btn-tool toolbar-item" draggable="false" data-btn-id="btn-tech-doku-popup" style="left: 920px; background: #0f766e; color: #ffffff; border-color: #0f766e; font-weight: bold;" title="Technische Dokumentation als eigenes Pop-up-Fenster öffnen (verschiebbar auf 2. Bildschirm)" onclick="window.open('tech_doku_popup.html','TechDoku','popup=yes,width=1300,height=850,resizable=yes')">
+                        <span class="drag-handle">⋮⋮</span> 🖥️ Doku-Fenster
                     </button>
                     <button id="btn-db-check" class="btn-tool toolbar-item" draggable="false" data-btn-id="btn-db-check" style="left: 1090px;" title="Datenbank-Auslegung für 1 bis 12 Heizkreise anhand der aktuellen Auto-Einstellungen prüfen">
                         <span class="drag-handle">⋮⋮</span> 🔍 DB-Check
@@ -1419,110 +1419,271 @@ body.menu-edit-mode .header-top-bar.fh-drag-row {
 
     <!-- Settings Modal -->
     <div id="settings-modal" class="modal-overlay hidden">
-        <div class="modal-box">
-            <h3>Material-Parameter</h3>
-            <p style="font-size: 0.9em; color: #666; margin-top: 0;">Diese Werte beeinflussen die Berechnung des Gesamtbedarfs.</p>
-            <div class="settings-form">
-                <div class="settings-group">
-                    <label for="setting-schiene">Verlegeschiene (lfm pro m² Fläche):</label>
-                    <input type="number" id="setting-schiene" step="0.1" value="1.0">
-                </div>
-                <div class="settings-group">
-                    <label for="setting-klips">Clips/Tackerklammer Abstand [m]:</label>
-                    <input type="number" id="setting-klips" step="0.1" value="0.5">
-                </div>
-                <div class="settings-group">
-                    <label for="setting-target">Ziel Ringlänge [m]:</label>
-                    <input type="number" id="setting-target" step="1" value="100">
-                </div>
-                <div class="settings-group">
-                    <label for="setting-max-over">Max. Überschreitung der Ziel Ringlänge [m]:</label>
-                    <input type="number" id="setting-max-over" step="1" value="0">
-                </div>
-                <div class="settings-group">
-                    <label for="setting-dist">Standard-Anbindungsleitung [m]:</label>
-                    <input type="number" id="setting-dist" step="1" value="10">
-                </div>
+        <div class="modal-box" style="max-width: 860px; text-align: left; max-height: 90vh; display: flex; flex-direction: column; padding: 20px 24px;">
+            <!-- Header Bar -->
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--primary-color, #0078d7); padding-bottom: 10px; margin-bottom: 15px; flex-shrink: 0;">
+                <h3 style="margin: 0; color: var(--primary-color, #0078d7); font-size: 1.25em;">⚙ Material- & Auslegungs-Parameter</h3>
+                <span id="btn-settings-close-x" style="cursor: pointer; font-size: 1.5em; font-weight: bold; color: #94a3b8; line-height: 1;" title="Schließen">&times;</span>
+            </div>
 
-                <hr style="border: 0; border-top: 1px solid var(--border-color, #e2e8f0); margin: 15px 0;">
-                <h4 style="margin: 0 0 10px 0; color: var(--primary-color, #0078d7); font-size: 1.05em;">📦 Verteiler & Verteilerkasten Auslegung</h4>
+            <p style="font-size: 0.9em; color: var(--text-secondary, #64748b); margin-top: 0; margin-bottom: 15px; line-height: 1.4; flex-shrink: 0;">
+                Diese Werte beeinflussen die Berechnung des Gesamtbedarfs sowie die automatische Auslegung der Verteiler, Schränke & Anschluss-Sets.
+            </p>
 
-                <div class="settings-group">
-                    <label for="setting-verteiler-type">Verteiler-Ausführung:</label>
-                    <select id="setting-verteiler-type" style="width: 100%; padding: 8px 10px; border-radius: 6px; border: 1px solid var(--border-color, #cbd5e1); font-size: 0.9em; background: var(--bg-container, #fff); color: var(--text-main, #0f172a);">
-                        <option value="metalplast">metalplast Inox-Verteiler 1" (Edelstahl)</option>
-                        <option value="stramax">Stramax Messing-Verteiler 1" (Messing)</option>
-                    </select>
-                </div>
-
-                <div class="settings-group">
-                    <label for="setting-connection-type">Anschlussgarnitur / Anschlussart:</label>
-                    <select id="setting-connection-type" style="width: 100%; padding: 8px 10px; border-radius: 6px; border: 1px solid var(--border-color, #cbd5e1); font-size: 0.9em; background: var(--bg-container, #fff); color: var(--text-main, #0f172a);">
-                        <optgroup label="Grund- & Standard-Sets">
-                            <option value="kugelhahnset">metalplast Kugelhahnset (51192.107/108)</option>
-                            <option value="anschluss_horiz" selected>Anschluss-Set horizontal (51192.073/074)</option>
-                            <option value="anschluss_vert">Anschluss-Set vertikal (51192.070/071)</option>
-                        </optgroup>
-                        <optgroup label="WMZ-Sets (Wärmezähler)">
-                            <option value="wmz_horiz">WMZ-Set horizontal (51192.061/062)</option>
-                            <option value="wmz_vert">WMZ-Set vertikal (51192.064/065)</option>
-                            <option value="wmz_horiz_mp">metalplast Anschluss-Set WMZ horizontal (51192.140/142)</option>
-                            <option value="wmz_vert_mp">metalplast Anschluss-Set WMZ vertikal (51192.144/146)</option>
-                            <option value="winkel_wmz_vert_mp">Winkel zu metalplast WMZ vertikal (51192.130)</option>
-                        </optgroup>
-                        <optgroup label="Stramax Garnituren">
-                            <option value="stramax_horiz">Stramax Garnitur horizontal (51191.101/102)</option>
-                            <option value="stramax_vert">Stramax Garnitur vertikal (51191.105/106)</option>
-                            <option value="stramax_versal1">Stramax Versal 1 Garnitur (51191.117)</option>
-                        </optgroup>
-                        <optgroup label="Danfoss AB-PM Sets">
-                            <option value="danfoss_horiz">Danfoss AB-PM Set horizontal (00199.520/522/524/679)</option>
-                            <option value="danfoss_vert">Danfoss AB-PM Set vertikal (00199.526/528/530/679)</option>
-                        </optgroup>
-                        <optgroup label="Oventrop Sets">
-                            <option value="oventrop_hycocon_horiz">oventrop Hycocon VTZ horizontal (00227.111/113/118)</option>
-                            <option value="oventrop_cocon_horiz">oventrop Cocon QTZ / QDP horizontal (00227.117/102/104/118)</option>
-                            <option value="oventrop_hycocon_vert">oventrop Hycocon VTZ vertikal (00227.110/112/118)</option>
-                            <option value="oventrop_cocon_vert">oventrop Cocon QTZ / QDP vertikal (00227.116/103/105/118)</option>
-                        </optgroup>
-                        <optgroup label="TA-Compact Sets">
-                            <option value="ta_compact_dp_horiz">TA-Compact-DP Set horizontal (00434.690..692)</option>
-                            <option value="ta_compact_p_horiz">TA-Compact-P Set horizontal (00434.680..682)</option>
-                            <option value="ta_compact_dp_vert">TA-Compact-DP Set vertikal (00434.693..695)</option>
-                            <option value="ta_compact_p_vert">TA-Compact-P Set vertikal (00434.683..685)</option>
-                        </optgroup>
-                    </select>
-                </div>
-
-                <div class="settings-group" style="align-items: flex-start;">
-                    <label style="margin-bottom: 5px;">Zugelassene Verteilerkasten-Modelle:</label>
-                    <div id="setting-cabinets-checkboxes" style="display: flex; flex-direction: column; gap: 6px; width: 100%; font-size: 0.88em; background: var(--zebra-even, #f8fafc); padding: 10px 12px; border-radius: 6px; border: 1px solid var(--border-color, #cbd5e1);">
-                        <label style="display: flex; align-items: center; gap: 8px; font-weight: normal; cursor: pointer;">
-                            <input type="checkbox" class="cb-cabinet-type" value="beton_150" checked> Beton-Kasten 150 (Unterputz, Tiefe 150 mm)
-                        </label>
-                        <label style="display: flex; align-items: center; gap: 8px; font-weight: normal; cursor: pointer;">
-                            <input type="checkbox" class="cb-cabinet-type" value="beton_125" checked> Beton-Kasten 125 (Unterputz, Tiefe 125 mm)
-                        </label>
-                        <label style="display: flex; align-items: center; gap: 8px; font-weight: normal; cursor: pointer;">
-                            <input type="checkbox" class="cb-cabinet-type" value="blech_teleskop" checked> Blech-Teleskopkasten (Unterputz)
-                        </label>
-                        <label style="display: flex; align-items: center; gap: 8px; font-weight: normal; cursor: pointer;">
-                            <input type="checkbox" class="cb-cabinet-type" value="stahlblech" checked> Stahlblechkasten (Aufputz / Unterputz)
-                        </label>
-                        <label style="display: flex; align-items: center; gap: 8px; font-weight: normal; cursor: pointer;">
-                            <input type="checkbox" class="cb-cabinet-type" value="eps_wand" checked> EPS-Wand Kasten (Unterputz)
-                        </label>
-                        <label style="display: flex; align-items: center; gap: 8px; font-weight: normal; cursor: pointer;">
-                            <input type="checkbox" class="cb-cabinet-type" value="eps_boden" checked> EPS-Boden Kasten (Bodenkasten)
-                        </label>
-                        <label style="display: flex; align-items: center; gap: 8px; font-weight: normal; cursor: pointer;">
-                            <input type="checkbox" class="cb-cabinet-type" value="klapptuer_weiss"> Klapptür weiss (Frontabdeckung)
-                        </label>
+            <!-- Scrollable Content Body -->
+            <div style="flex: 1; overflow-y: auto; padding-right: 8px; display: flex; flex-direction: column; gap: 18px;">
+                
+                <!-- Section 1: Material- & Verlege-Parameter -->
+                <div class="vconfig-section" style="background: var(--zebra-even, #f8fafc); padding: 14px 16px; border-radius: 8px; border: 1px solid var(--border-color, #cbd5e1);">
+                    <h4 style="margin: 0 0 12px 0; color: var(--primary-color, #0078d7); font-size: 1.02em;">1. Material- & Verlege-Parameter</h4>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px 18px; font-size: 0.9em;">
+                        <div>
+                            <label for="setting-schiene" style="display: block; margin-bottom: 4px; font-weight: 600; color: var(--text-main, #0f172a);">Verlegeschiene (lfm pro m² Fläche):</label>
+                            <input type="number" id="setting-schiene" step="0.1" value="1.0" style="width: 100%; padding: 7px 10px; border-radius: 6px; border: 1px solid var(--border-color, #cbd5e1); font-size: 0.95em; background: var(--bg-container, #fff); color: var(--text-main, #0f172a);">
+                        </div>
+                        <div>
+                            <label for="setting-klips" style="display: block; margin-bottom: 4px; font-weight: 600; color: var(--text-main, #0f172a);">Clips/Tackerklammer Abstand [m]:</label>
+                            <input type="number" id="setting-klips" step="0.1" value="0.5" style="width: 100%; padding: 7px 10px; border-radius: 6px; border: 1px solid var(--border-color, #cbd5e1); font-size: 0.95em; background: var(--bg-container, #fff); color: var(--text-main, #0f172a);">
+                        </div>
+                        <div>
+                            <label for="setting-target" style="display: block; margin-bottom: 4px; font-weight: 600; color: var(--text-main, #0f172a);">Ziel Ringlänge [m]:</label>
+                            <input type="number" id="setting-target" step="1" value="100" style="width: 100%; padding: 7px 10px; border-radius: 6px; border: 1px solid var(--border-color, #cbd5e1); font-size: 0.95em; background: var(--bg-container, #fff); color: var(--text-main, #0f172a);">
+                        </div>
+                        <div>
+                            <label for="setting-max-over" style="display: block; margin-bottom: 4px; font-weight: 600; color: var(--text-main, #0f172a);">Max. Überschreitung Ziel Ringlänge [m]:</label>
+                            <input type="number" id="setting-max-over" step="1" value="0" style="width: 100%; padding: 7px 10px; border-radius: 6px; border: 1px solid var(--border-color, #cbd5e1); font-size: 0.95em; background: var(--bg-container, #fff); color: var(--text-main, #0f172a);">
+                        </div>
+                        <div style="grid-column: 1 / -1;">
+                            <label for="setting-dist" style="display: block; margin-bottom: 4px; font-weight: 600; color: var(--text-main, #0f172a);">Standard-Anbindungsleitung [m]:</label>
+                            <input type="number" id="setting-dist" step="1" value="10" style="width: 100%; padding: 7px 10px; border-radius: 6px; border: 1px solid var(--border-color, #cbd5e1); font-size: 0.95em; background: var(--bg-container, #fff); color: var(--text-main, #0f172a);">
+                        </div>
                     </div>
                 </div>
+
+                <!-- Section 2: Verteiler-Materialien & Verteilerkasten-Modelle -->
+                <div class="vconfig-section" style="background: var(--zebra-even, #f8fafc); padding: 14px 16px; border-radius: 8px; border: 1px solid var(--border-color, #cbd5e1);">
+                    <h4 style="margin: 0 0 12px 0; color: var(--primary-color, #0078d7); font-size: 1.02em;">2. Zugelassene Verteiler & Verteilerkasten-Modelle</h4>
+                    
+                    <!-- Verteiler-Materialien -->
+                    <div style="margin-bottom: 14px;">
+                        <label style="display: block; margin-bottom: 6px; font-weight: 600; color: var(--text-main, #0f172a); font-size: 0.9em;">Zugelassene Verteiler-Materialien:</label>
+                        <div style="display: flex; flex-wrap: wrap; gap: 18px; font-size: 0.88em; background: var(--bg-container, #fff); padding: 10px 14px; border-radius: 6px; border: 1px solid var(--border-color, #cbd5e1);">
+                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 600; color: var(--text-main, #0f172a);">
+                                <input type="checkbox" class="cb-vconfig-dtype" value="metalplast" checked> metalplast Inox-Verteiler 1" (Edelstahl)
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 600; color: var(--text-main, #0f172a);">
+                                <input type="checkbox" class="cb-vconfig-dtype" value="stramax" checked> Stramax Messing-Verteiler 1" (Messing)
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Verteilerkasten-Modelle -->
+                    <div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                            <label style="font-weight: 600; color: var(--text-main, #0f172a); font-size: 0.9em;">Zugelassene Verteilerkasten-Modelle:</label>
+                            <div style="display: flex; gap: 6px;">
+                                <button type="button" id="btn-vconfig-cabs-all" class="btn-secondary" style="font-size: 0.75em; padding: 2px 8px;">Alle auswählen</button>
+                                <button type="button" id="btn-vconfig-cabs-none" class="btn-secondary" style="font-size: 0.75em; padding: 2px 8px;">Keine</button>
+                            </div>
+                        </div>
+                        <div id="setting-cabinets-checkboxes" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 8px; font-size: 0.88em; background: var(--bg-container, #fff); padding: 10px 14px; border-radius: 6px; border: 1px solid var(--border-color, #cbd5e1);">
+                            <label style="display: flex; align-items: center; gap: 8px; font-weight: normal; cursor: pointer;">
+                                <input type="checkbox" class="cb-vconfig-cabinet cb-cabinet-type" value="beton_150" checked> Beton-Kasten 150 (Tiefe 150 mm)
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 8px; font-weight: normal; cursor: pointer;">
+                                <input type="checkbox" class="cb-vconfig-cabinet cb-cabinet-type" value="beton_125" checked> Beton-Kasten 125 (Tiefe 125 mm)
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 8px; font-weight: normal; cursor: pointer;">
+                                <input type="checkbox" class="cb-vconfig-cabinet cb-cabinet-type" value="blech_teleskop" checked> Blech-Teleskopkasten (UP)
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 8px; font-weight: normal; cursor: pointer;">
+                                <input type="checkbox" class="cb-vconfig-cabinet cb-cabinet-type" value="stahlblech" checked> Stahlblechkasten (AP / UP)
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 8px; font-weight: normal; cursor: pointer;">
+                                <input type="checkbox" class="cb-vconfig-cabinet cb-cabinet-type" value="eps_wand" checked> EPS-Wand Kasten (UP)
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 8px; font-weight: normal; cursor: pointer;">
+                                <input type="checkbox" class="cb-vconfig-cabinet cb-cabinet-type" value="eps_boden" checked> EPS-Boden Kasten (Bodenkasten)
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 8px; font-weight: normal; cursor: pointer;">
+                                <input type="checkbox" class="cb-vconfig-cabinet cb-cabinet-type" value="klapptuer_weiss"> Klapptür weiss (Frontabdeckung)
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 3: Haupt-Anschlussarten & Zugelassene Anschluss-Sets -->
+                <div class="vconfig-section" style="background: var(--zebra-even, #f8fafc); padding: 14px 16px; border-radius: 8px; border: 1px solid var(--border-color, #cbd5e1);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 10px;">
+                        <h4 style="margin: 0; color: var(--primary-color, #0078d7); font-size: 1.02em;">3. Bevorzugte & Zugelassene Anschlussarten</h4>
+                        
+                        <!-- WMZ Toggle Checkbox -->
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <label style="display: flex; align-items: center; gap: 6px; font-weight: bold; color: #d35400; cursor: pointer; background: #fff3e0; padding: 4px 10px; border-radius: 6px; border: 1px solid #ffe0b2; font-size: 0.88em;" title="Bei Aktivierung werden Anschlusssets mit Wärmezähler (WMZ) deaktiviert und ausgegraut">
+                                <input type="checkbox" id="cb-vconfig-wmz"> 🌡️ Kein Wärmezähler (WMZ)
+                            </label>
+                            
+                            <div style="display: flex; gap: 6px;">
+                                <button type="button" id="btn-vconfig-conn-all" class="btn-secondary" style="font-size: 0.75em; padding: 2px 8px;">Alle auswählen</button>
+                                <button type="button" id="btn-vconfig-conn-none" class="btn-secondary" style="font-size: 0.75em; padding: 2px 8px;">Keine</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bevorzugte Haupt-Anschlussarten (Horiz & Vertikal) -->
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 12px; margin-bottom: 16px; background: var(--bg-container, #fff); padding: 12px 14px; border-radius: 6px; border: 1px solid var(--border-color, #cbd5e1);">
+                        <div>
+                            <label for="vconfig-primary-connection-hor" style="display: block; margin-bottom: 4px; font-weight: 600; color: var(--text-main, #0f172a); font-size: 0.88em;">
+                                ↔️ Standard für HORIZONTALE Anschlüsse (Hor):
+                            </label>
+                            <select id="vconfig-primary-connection-hor" style="width: 100%; padding: 7px 10px; border-radius: 6px; border: 1px solid var(--border-color, #cbd5e1); font-size: 0.88em; background: var(--bg-container, #fff); color: var(--text-main, #0f172a);">
+                                <option value="anschluss_horiz" selected>Anschluss-Set horizontal (51192.073/074)</option>
+                                <option value="kugelhahnset">metalplast Kugelhahnset (51192.107/108)</option>
+                                <option value="wmz_horiz">WMZ-Set horizontal (51192.061/062)</option>
+                                <option value="wmz_horiz_mp">metalplast Anschluss-Set WMZ horizontal (51192.140/142)</option>
+                                <option value="stramax_horiz">Stramax Garnitur horizontal (51191.101/102)</option>
+                                <option value="stramax_versal1">Stramax Versal 1 Garnitur (51191.117)</option>
+                                <option value="danfoss_horiz">Danfoss AB-PM Set horizontal (00199.520..)</option>
+                                <option value="oventrop_hycocon_horiz">oventrop Hycocon VTZ horizontal (00227.111..)</option>
+                                <option value="oventrop_cocon_horiz">oventrop Cocon QTZ / QDP horizontal (00227.117..)</option>
+                                <option value="ta_compact_dp_horiz">TA-Compact-DP Set horizontal (00434.690..)</option>
+                                <option value="ta_compact_p_horiz">TA-Compact-P Set horizontal (00434.680..)</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label for="vconfig-primary-connection-ver" style="display: block; margin-bottom: 4px; font-weight: 600; color: var(--text-main, #0f172a); font-size: 0.88em;">
+                                ↕️ Standard für VERTIKALE Anschlüsse (Ver):
+                            </label>
+                            <select id="vconfig-primary-connection-ver" style="width: 100%; padding: 7px 10px; border-radius: 6px; border: 1px solid var(--border-color, #cbd5e1); font-size: 0.88em; background: var(--bg-container, #fff); color: var(--text-main, #0f172a);">
+                                <option value="anschluss_vert">Anschluss-Set vertikal (51192.070/071)</option>
+                                <option value="wmz_vert">WMZ-Set vertikal (51192.064/065)</option>
+                                <option value="wmz_vert_mp">metalplast Anschluss-Set WMZ vertikal (51192.144/146)</option>
+                                <option value="winkel_wmz_vert_mp">Winkel zu metalplast WMZ vertikal (51192.130)</option>
+                                <option value="stramax_vert">Stramax Garnitur vertikal (51191.105/106)</option>
+                                <option value="danfoss_vert" selected>Danfoss AB-PM Set vertikal (00199.526..)</option>
+                                <option value="oventrop_hycocon_vert">oventrop Hycocon VTZ vertikal (00227.110..)</option>
+                                <option value="oventrop_cocon_vert">oventrop Cocon QTZ / QDP vertikal (00227.116..)</option>
+                                <option value="ta_compact_dp_vert">TA-Compact-DP Set vertikal (00434.693..)</option>
+                                <option value="ta_compact_p_vert">TA-Compact-P Set vertikal (00434.683..)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Einzelne Anschluss-Sets Checkbox-Gruppen -->
+                    <div style="display: flex; flex-direction: column; gap: 12px; font-size: 0.88em;">
+                        <!-- Group: Grund- & Standard-Sets -->
+                        <div>
+                            <div style="font-weight: bold; color: var(--text-main, #0f172a); margin-bottom: 4px;">Grund- & Standard-Sets (ohne WMZ):</div>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 12px; margin-left: 4px;">
+                                <label class="lbl-vconfig-conn" data-is-wmz="false" style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                    <input type="checkbox" class="cb-vconfig-conn" data-is-wmz="false" value="kugelhahnset" checked> metalplast Kugelhahnset (51192.107/108)
+                                </label>
+                                <label class="lbl-vconfig-conn" data-is-wmz="false" style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                    <input type="checkbox" class="cb-vconfig-conn" data-is-wmz="false" value="anschluss_horiz" checked> Anschluss-Set horizontal (51192.073/074)
+                                </label>
+                                <label class="lbl-vconfig-conn" data-is-wmz="false" style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                    <input type="checkbox" class="cb-vconfig-conn" data-is-wmz="false" value="anschluss_vert" checked> Anschluss-Set vertikal (51192.070/071)
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Group: WMZ-Sets -->
+                        <div>
+                            <div style="font-weight: bold; color: var(--text-main, #0f172a); margin-bottom: 4px;">WMZ-Sets (mit Wärmezähler):</div>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 12px; margin-left: 4px;">
+                                <label class="lbl-vconfig-conn" data-is-wmz="true" style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                    <input type="checkbox" class="cb-vconfig-conn" data-is-wmz="true" value="wmz_horiz" checked> WMZ-Set horizontal (51192.061/062)
+                                </label>
+                                <label class="lbl-vconfig-conn" data-is-wmz="true" style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                    <input type="checkbox" class="cb-vconfig-conn" data-is-wmz="true" value="wmz_vert" checked> WMZ-Set vertikal (51192.064/065)
+                                </label>
+                                <label class="lbl-vconfig-conn" data-is-wmz="true" style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                    <input type="checkbox" class="cb-vconfig-conn" data-is-wmz="true" value="wmz_horiz_mp" checked> metalplast WMZ horiz. (51192.140/142)
+                                </label>
+                                <label class="lbl-vconfig-conn" data-is-wmz="true" style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                    <input type="checkbox" class="cb-vconfig-conn" data-is-wmz="true" value="wmz_vert_mp" checked> metalplast WMZ vert. (51192.144/146)
+                                </label>
+                                <label class="lbl-vconfig-conn" data-is-wmz="true" style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                    <input type="checkbox" class="cb-vconfig-conn" data-is-wmz="true" value="winkel_wmz_vert_mp" checked> Winkel zu WMZ vert. (51192.130)
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Group: Stramax Garnituren -->
+                        <div>
+                            <div style="font-weight: bold; color: var(--text-main, #0f172a); margin-bottom: 4px;">Stramax Garnituren (ohne WMZ):</div>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 12px; margin-left: 4px;">
+                                <label class="lbl-vconfig-conn" data-is-wmz="false" style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                    <input type="checkbox" class="cb-vconfig-conn" data-is-wmz="false" value="stramax_horiz" checked> Stramax Garnitur horiz. (51191.101/102)
+                                </label>
+                                <label class="lbl-vconfig-conn" data-is-wmz="false" style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                    <input type="checkbox" class="cb-vconfig-conn" data-is-wmz="false" value="stramax_vert" checked> Stramax Garnitur vert. (51191.105/106)
+                                </label>
+                                <label class="lbl-vconfig-conn" data-is-wmz="false" style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                    <input type="checkbox" class="cb-vconfig-conn" data-is-wmz="false" value="stramax_versal1" checked> Stramax Versal 1 Garnitur (51191.117)
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Group: Danfoss AB-PM Sets -->
+                        <div>
+                            <div style="font-weight: bold; color: var(--text-main, #0f172a); margin-bottom: 4px;">Danfoss AB-PM Sets (Differenzdruckventil / auch ohne WMZ nutzbar):</div>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 12px; margin-left: 4px;">
+                                <label class="lbl-vconfig-conn" data-is-wmz="false" style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                    <input type="checkbox" class="cb-vconfig-conn" data-is-wmz="false" value="danfoss_horiz" checked> Danfoss AB-PM Set horiz. (00199.520..)
+                                </label>
+                                <label class="lbl-vconfig-conn" data-is-wmz="false" style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                    <input type="checkbox" class="cb-vconfig-conn" data-is-wmz="false" value="danfoss_vert" checked> Danfoss AB-PM Set vert. (00199.526..)
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Group: Oventrop Sets -->
+                        <div>
+                            <div style="font-weight: bold; color: var(--text-main, #0f172a); margin-bottom: 4px;">Oventrop Sets (mit WMZ):</div>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 12px; margin-left: 4px;">
+                                <label class="lbl-vconfig-conn" data-is-wmz="true" style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                    <input type="checkbox" class="cb-vconfig-conn" data-is-wmz="true" value="oventrop_hycocon_horiz" checked> oventrop Hycocon horiz. (00227.111..)
+                                </label>
+                                <label class="lbl-vconfig-conn" data-is-wmz="true" style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                    <input type="checkbox" class="cb-vconfig-conn" data-is-wmz="true" value="oventrop_cocon_horiz" checked> oventrop Cocon horiz. (00227.117..)
+                                </label>
+                                <label class="lbl-vconfig-conn" data-is-wmz="true" style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                    <input type="checkbox" class="cb-vconfig-conn" data-is-wmz="true" value="oventrop_hycocon_vert" checked> oventrop Hycocon vert. (00227.110..)
+                                </label>
+                                <label class="lbl-vconfig-conn" data-is-wmz="true" style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                    <input type="checkbox" class="cb-vconfig-conn" data-is-wmz="true" value="oventrop_cocon_vert" checked> oventrop Cocon vert. (00227.116..)
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Group: TA-Compact Sets -->
+                        <div>
+                            <div style="font-weight: bold; color: var(--text-main, #0f172a); margin-bottom: 4px;">TA-Compact Sets (mit WMZ):</div>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 12px; margin-left: 4px;">
+                                <label class="lbl-vconfig-conn" data-is-wmz="true" style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                    <input type="checkbox" class="cb-vconfig-conn" data-is-wmz="true" value="ta_compact_dp_horiz" checked> TA-Compact-DP Set horiz. (00434.690..)
+                                </label>
+                                <label class="lbl-vconfig-conn" data-is-wmz="true" style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                    <input type="checkbox" class="cb-vconfig-conn" data-is-wmz="true" value="ta_compact_p_horiz" checked> TA-Compact-P Set horiz. (00434.680..)
+                                </label>
+                                <label class="lbl-vconfig-conn" data-is-wmz="true" style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                    <input type="checkbox" class="cb-vconfig-conn" data-is-wmz="true" value="ta_compact_dp_vert" checked> TA-Compact-DP Set vert. (00434.693..)
+                                </label>
+                                <label class="lbl-vconfig-conn" data-is-wmz="true" style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                    <input type="checkbox" class="cb-vconfig-conn" data-is-wmz="true" value="ta_compact_p_vert" checked> TA-Compact-P Set vert. (00434.683..)
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
-            <div class="modal-actions">
-                <button id="btn-settings-close" class="btn-primary">Übernehmen</button>
+
+            <!-- Footer Actions Bar -->
+            <div style="display: flex; justify-content: flex-end; gap: 12px; border-top: 1px solid var(--border-color, #cbd5e1); padding-top: 14px; margin-top: 14px; flex-shrink: 0;">
+                <button id="btn-settings-close" class="btn-primary" style="padding: 8px 24px; font-weight: bold; font-size: 0.95em;">Übernehmen & Im Projekt Speichern</button>
             </div>
         </div>
     </div>
@@ -1610,7 +1771,7 @@ body.menu-edit-mode .header-top-bar.fh-drag-row {
                         <!-- Group: Grund- & Standard-Sets -->
                         <div>
                             <div style="font-weight: bold; color: var(--text-main, #0f172a); margin-bottom: 4px;">Grund- & Standard-Sets (ohne WMZ):</div>
-                            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 6px; margin-left: 8px;">
+                            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 12px; margin-left: 4px;">
                                 <label class="lbl-vconfig-conn" data-is-wmz="false" style="display: flex; align-items: center; gap: 8px; cursor: pointer; transition: opacity 0.2s;">
                                     <input type="checkbox" class="cb-vconfig-conn" data-is-wmz="false" value="kugelhahnset" checked> metalplast Kugelhahnset (51192.107/108)
                                 </label>
@@ -1626,7 +1787,7 @@ body.menu-edit-mode .header-top-bar.fh-drag-row {
                         <!-- Group: WMZ-Sets -->
                         <div>
                             <div style="font-weight: bold; color: var(--text-main, #0f172a); margin-bottom: 4px;">WMZ-Sets (mit Wärmezähler):</div>
-                            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 6px; margin-left: 8px;">
+                            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 12px; margin-left: 4px;">
                                 <label class="lbl-vconfig-conn" data-is-wmz="true" style="display: flex; align-items: center; gap: 8px; cursor: pointer; transition: opacity 0.2s;">
                                     <input type="checkbox" class="cb-vconfig-conn" data-is-wmz="true" value="wmz_horiz" checked> WMZ-Set horizontal (51192.061/062)
                                 </label>
@@ -1648,7 +1809,7 @@ body.menu-edit-mode .header-top-bar.fh-drag-row {
                         <!-- Group: Stramax -->
                         <div>
                             <div style="font-weight: bold; color: var(--text-main, #0f172a); margin-bottom: 4px;">Stramax Garnituren (ohne WMZ):</div>
-                            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 6px; margin-left: 8px;">
+                            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 12px; margin-left: 4px;">
                                 <label class="lbl-vconfig-conn" data-is-wmz="false" style="display: flex; align-items: center; gap: 8px; cursor: pointer; transition: opacity 0.2s;">
                                     <input type="checkbox" class="cb-vconfig-conn" data-is-wmz="false" value="stramax_horiz" checked> Stramax Garnitur horiz. (51191.101/102)
                                 </label>
@@ -1664,7 +1825,7 @@ body.menu-edit-mode .header-top-bar.fh-drag-row {
                         <!-- Group: Danfoss -->
                         <div>
                             <div style="font-weight: bold; color: var(--text-main, #0f172a); margin-bottom: 4px;">Danfoss AB-PM Sets (Differenzdruckventil / auch ohne WMZ nutzbar):</div>
-                            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 6px; margin-left: 8px;">
+                            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 12px; margin-left: 4px;">
                                 <label class="lbl-vconfig-conn" data-is-wmz="false" style="display: flex; align-items: center; gap: 8px; cursor: pointer; transition: opacity 0.2s;">
                                     <input type="checkbox" class="cb-vconfig-conn" data-is-wmz="false" value="danfoss_horiz" checked> Danfoss AB-PM Set horiz. (00199.520..)
                                 </label>
@@ -1677,7 +1838,7 @@ body.menu-edit-mode .header-top-bar.fh-drag-row {
                         <!-- Group: Oventrop -->
                         <div>
                             <div style="font-weight: bold; color: var(--text-main, #0f172a); margin-bottom: 4px;">Oventrop Sets (mit WMZ):</div>
-                            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 6px; margin-left: 8px;">
+                            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 12px; margin-left: 4px;">
                                 <label class="lbl-vconfig-conn" data-is-wmz="true" style="display: flex; align-items: center; gap: 8px; cursor: pointer; transition: opacity 0.2s;">
                                     <input type="checkbox" class="cb-vconfig-conn" data-is-wmz="true" value="oventrop_hycocon_horiz" checked> oventrop Hycocon horiz. (00227.111..)
                                 </label>
@@ -1696,7 +1857,7 @@ body.menu-edit-mode .header-top-bar.fh-drag-row {
                         <!-- Group: TA-Compact -->
                         <div>
                             <div style="font-weight: bold; color: var(--text-main, #0f172a); margin-bottom: 4px;">TA-Compact Sets (mit WMZ):</div>
-                            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 6px; margin-left: 8px;">
+                            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 12px; margin-left: 4px;">
                                 <label class="lbl-vconfig-conn" data-is-wmz="true" style="display: flex; align-items: center; gap: 8px; cursor: pointer; transition: opacity 0.2s;">
                                     <input type="checkbox" class="cb-vconfig-conn" data-is-wmz="true" value="ta_compact_dp_horiz" checked> TA-Compact-DP Set horiz. (00434.690..)
                                 </label>
@@ -2401,9 +2562,9 @@ body.menu-edit-mode .header-top-bar.fh-drag-row {
     <!-- Tooltip Element -->
     <div id="custom-tooltip" class="custom-tooltip"></div>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-    <script src="fbhv_database.js?v=314"></script>
-    <script src="default_toolbar_layout.js?v=314"></script>
-    <script src="script.js?v=314"></script>
+    <script src="fbhv_database.js?v=337"></script>
+    <script src="default_toolbar_layout.js?v=337"></script>
+    <script src="script.js?v=337"></script>
 </body>
 
 </html>

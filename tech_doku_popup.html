@@ -1,0 +1,973 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Technische Dokumentation & Maßbilder</title>
+    <style>
+        :root {
+            --bg-dark: #0f172a;
+            --bg-panel: #1e293b;
+            --bg-card: #334155;
+            --bg-hover: #475569;
+            --accent: #0284c7;
+            --accent-hover: #0369a1;
+            --text-light: #f8fafc;
+            --text-muted: #94a3b8;
+            --border: #334155;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Header Bar */
+        .header {
+            background-color: var(--bg-panel);
+            padding: 10px 18px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border);
+            gap: 15px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            z-index: 10;
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.15em;
+            font-weight: 700;
+            color: #38bdf8;
+            white-space: nowrap;
+        }
+
+        .search-box {
+            flex: 1;
+            max-width: 450px;
+            position: relative;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 7px 12px 7px 32px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            font-size: 0.9em;
+            outline: none;
+            transition: border-color 0.2s;
+            user-select: text;
+            -webkit-user-select: text;
+        }
+
+        .search-box input:focus {
+            border-color: var(--accent);
+        }
+
+        .search-box::before {
+            content: '🔍';
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 0.85em;
+            opacity: 0.6;
+        }
+
+        /* Filter Pills Bar */
+        .filter-bar {
+            background-color: #162032;
+            padding: 8px 18px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .cat-btn {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            padding: 5px 14px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .cat-btn:hover {
+            background-color: var(--bg-card);
+            color: var(--text-light);
+        }
+
+        .cat-btn.active {
+            background-color: var(--accent);
+            color: #ffffff;
+            border-color: var(--accent);
+            box-shadow: 0 2px 8px rgba(2, 132, 199, 0.4);
+        }
+
+        /* Main Workspace Split View */
+        .workspace {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Left Sidebar: Document List */
+        .sidebar {
+            width: 340px;
+            min-width: 280px;
+            max-width: 420px;
+            background-color: var(--bg-panel);
+            border-right: 1px solid var(--border);
+            overflow-y: auto;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .doc-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 10px 12px;
+            border-radius: 8px;
+            background-color: var(--bg-dark);
+            border: 1px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .doc-item:hover {
+            background-color: var(--bg-card);
+            transform: translateX(2px);
+        }
+
+        .doc-item.active {
+            background-color: #0c4a6e;
+            border-color: var(--accent);
+            box-shadow: 0 2px 10px rgba(2, 132, 199, 0.3);
+        }
+
+        .doc-icon {
+            font-size: 1.5em;
+            line-height: 1;
+            padding-top: 2px;
+        }
+
+        .doc-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .doc-title {
+            font-size: 0.9em;
+            font-weight: 600;
+            color: var(--text-light);
+            line-height: 1.3;
+        }
+
+        .doc-subtitle {
+            font-size: 0.78em;
+            color: var(--text-muted);
+            line-height: 1.3;
+        }
+
+        /* Right Pane: Viewer Area */
+        .viewer-pane {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background-color: #090d16;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Viewer Toolbar */
+        .viewer-toolbar {
+            background-color: var(--bg-panel);
+            padding: 8px 18px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border);
+            gap: 12px;
+        }
+
+        .doc-header-title {
+            font-size: 0.95em;
+            font-weight: 700;
+            color: #7dd3fc;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .controls {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .ctrl-btn {
+            background-color: var(--bg-card);
+            color: var(--text-light);
+            border: 1px solid var(--border);
+            padding: 5px 12px;
+            border-radius: 6px;
+            font-size: 0.85em;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.15s;
+        }
+
+        .ctrl-btn:hover {
+            background-color: var(--bg-hover);
+            border-color: #64748b;
+        }
+
+        .ctrl-btn.active {
+            background-color: #0369a1;
+            border-color: #38bdf8;
+            color: #ffffff;
+        }
+
+        .zoom-badge {
+            background-color: var(--bg-dark);
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 0.85em;
+            font-weight: 700;
+            color: #38bdf8;
+            border: 1px solid var(--border);
+            min-width: 55px;
+            text-align: center;
+        }
+
+        .ext-link {
+            text-decoration: none;
+            color: #ffffff;
+            background-color: #0284c7;
+            border-color: #0284c7;
+        }
+
+        .ext-link:hover {
+            background-color: #0369a1;
+        }
+
+        /* Canvas / Display Container */
+        .canvas-container {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: grab;
+            background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        .canvas-container.grabbing {
+            cursor: grabbing !important;
+        }
+
+        .img-wrapper {
+            position: absolute;
+            transition: transform 0.05s ease-out;
+            transform-origin: center center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.7);
+            border-radius: 4px;
+            background-color: #ffffff;
+        }
+
+        .img-wrapper img {
+            max-width: 90vw;
+            max-height: 80vh;
+            object-fit: contain;
+            display: block;
+            border-radius: 4px;
+            pointer-events: none;
+        }
+
+        .placeholder {
+            text-align: center;
+            color: var(--text-muted);
+            padding: 30px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <div class="header">
+        <div class="header-title">
+            <span>📐</span> Technische Dokumentation & Maßbilder
+        </div>
+        <div class="search-box">
+            <input type="text" id="search-input" placeholder="Dokumentation durchsuchen (z.B. Danfoss, Stramax, Kasten)...">
+        </div>
+        <div style="font-size: 0.85em; color: var(--text-muted);">
+            🖥️ 2. Bildschirm Modus
+        </div>
+    </div>
+
+    <!-- Filter Bar -->
+    <div class="filter-bar">
+        <button type="button" class="cat-btn active" data-cat="all">Alle (<span id="count-all">0</span>)</button>
+        <button type="button" class="cat-btn" data-cat="anschluss_sets">🔌 Anschluss-Sets (<span id="count-anschluss">0</span>)</button>
+        <button type="button" class="cat-btn" data-cat="kasten">📦 Kasten & Schränke (<span id="count-kasten">0</span>)</button>
+    </div>
+
+    <!-- Main Workspace -->
+    <div class="workspace">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div id="doc-list"></div>
+        </div>
+
+        <!-- Viewer Pane -->
+        <div class="viewer-pane">
+            <div class="viewer-toolbar">
+                <div id="doc-title" class="doc-header-title">Kein Dokument ausgewählt</div>
+                <div class="controls">
+                    <button type="button" id="btn-zoom-out" class="ctrl-btn" title="Verkleinern (Zoom - / Mausrad unten)">➖</button>
+                    <span id="zoom-level" class="zoom-badge">100%</span>
+                    <button type="button" id="btn-zoom-in" class="ctrl-btn" title="Vergrößern (Zoom + / Mausrad oben)">➕</button>
+                    <button type="button" id="btn-zoom-reset" class="ctrl-btn" title="Zoom 100%">🔄 100%</button>
+                    <button type="button" id="btn-pan" class="ctrl-btn active" title="Verschiebe-Modus">✋ Verschieben</button>
+                    <a id="btn-open-ext" href="#" target="_blank" class="ctrl-btn ext-link" title="Bild in neuem Tab öffnen">↗️ Extern öffnen</a>
+                </div>
+            </div>
+
+            <div id="canvas-container" class="canvas-container">
+                <div class="placeholder">
+                    <span style="font-size: 3.5em; display: block; margin-bottom: 12px;">📑</span>
+                    <span style="font-size: 1.1em; font-weight: 600;">Bitte wählen Sie links eine Dokumentation oder ein Maßbild aus.</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const TECH_DOKU_DATABASE = [
+            // Anschluss-Sets (Bilder & PDFs)
+            {
+                id: "anschl_set_horiz_jpg",
+                title: "Anschluss-Set horizontal - Maßbild",
+                subtitle: "Stramax Anschluss-Set horizontal mit Überwurfmutter (51192.073/074)",
+                category: "anschluss_sets",
+                type: "jpg",
+                path: "Zus Doku/Anschluss_Sets/Anschluss-Set_horizontal/Massbild Stramax Anschluss-Set horizontal mit Überwurfmutter.jpg",
+                icon: "🔌"
+            },
+            {
+                id: "anschl_set_vert_jpg",
+                title: "Anschluss-Set vertikal - Maßbild",
+                subtitle: "Anschluss-Set vertikal mit Eckkugelhahn (51192.070/071)",
+                category: "anschluss_sets",
+                type: "jpg",
+                path: "Zus Doku/Anschluss_Sets/Anschluss-Set_vertikal/Massbild Anschluss-Set vertikal mit Eckkugelhahn.jpg",
+                icon: "🔌"
+            },
+            {
+                id: "danfoss_horiz_jpg",
+                title: "Danfoss AB-PM Set horizontal - Maßbild",
+                subtitle: "Einbauset horizontal inkl. AB-PM DN20 (00199.551/520/522/524)",
+                category: "anschluss_sets",
+                type: "jpg",
+                path: "Zus Doku/Anschluss_Sets/Danfoss_AB-PM_Set_horizontal/Einbauset horizontal inkl_ AB-PM.jpg",
+                icon: "🔌"
+            },
+            {
+                id: "danfoss_vert_jpg",
+                title: "Danfoss AB-PM Set vertikal - Maßbild",
+                subtitle: "Einbauset vertikal inkl. AB-PM DN15 (00199.526/528/530)",
+                category: "anschluss_sets",
+                type: "jpg",
+                path: "Zus Doku/Anschluss_Sets/Danfoss_AB-PM_Set_vertikal/Einbauset vertikal inkl_ AB-PM.jpg",
+                icon: "🔌"
+            },
+            {
+                id: "mp_kugelhahn_jpg",
+                title: "metalplast Kugelhahnset LL - Maßbild",
+                subtitle: "metalplast Kugelhahnset (51192.107/108)",
+                category: "anschluss_sets",
+                type: "jpg",
+                path: "Zus Doku/Anschluss_Sets/metalplast_Kugelhahnset/Massbild metalplast Kugelhahnset LL.jpg",
+                icon: "🔌"
+            },
+            {
+                id: "mp_wmz_horiz_jpg",
+                title: "metalplast Anschluss-Set WMZ horizontal - Maßbild",
+                subtitle: "metalplast WMZ horizontal (51192.140/142)",
+                category: "anschluss_sets",
+                type: "jpg",
+                path: "Zus Doku/Anschluss_Sets/metalplast_WMZ_horizontal/Massbild metalplast Anschluss-Set WMZ horizontal.jpg",
+                icon: "🔌"
+            },
+            {
+                id: "mp_wmz_vert_jpg",
+                title: "metalplast Anschluss-Set WMZ vertikal - Maßbild",
+                subtitle: "metalplast Anschluss-Set Wärmezähler vertikal (51192.144/146)",
+                category: "anschluss_sets",
+                type: "jpg",
+                path: "Zus Doku/Anschluss_Sets/metalplast_WMZ_vertikal/Massbild metalplast Anschluss-Set Wärmezähler vertikal.jpg",
+                icon: "🔌"
+            },
+            {
+                id: "mp_wmz_vert_diag_jpg",
+                title: "metalplast Anschluss-Set WMZ vertikal - Einstelldiagramm",
+                subtitle: "Einstelldiagramm metalplast Anschluss-Set WMZ vertikal",
+                category: "anschluss_sets",
+                type: "jpg",
+                path: "Zus Doku/Anschluss_Sets/metalplast_WMZ_vertikal/Einstelldiagramm metalplast Anschluss-Set WMZ vertikal.jpg",
+                icon: "📈"
+            },
+            {
+                id: "oventrop_set_jpg",
+                title: "Oventrop Hycocon / Cocon Set - Maßbild",
+                subtitle: "Oventrop Anschluss-Set (00227.111/113/110/117)",
+                category: "anschluss_sets",
+                type: "jpg",
+                path: "Zus Doku/Anschluss_Sets/oventrop_Hycocon_Cocon_Sets/Massbild Oventrop Anschluss-Set.jpg",
+                icon: "🔌"
+            },
+            {
+                id: "stramax_horiz_jpg",
+                title: "Stramax Garnitur horizontal - Maßbild",
+                subtitle: "Anschlussgarnitur horizontal mit Wärmemengenmessung (51191.101/102)",
+                category: "anschluss_sets",
+                type: "jpg",
+                path: "Zus Doku/Anschluss_Sets/Stramax_Garnitur_horizontal/Massbild Anschlussgarnitur horizontal mit Wärmemengenmessung.jpg",
+                icon: "🔌"
+            },
+            {
+                id: "stramax_vert_jpg",
+                title: "Stramax Garnitur vertikal - Maßbild",
+                subtitle: "Anschlussgarnitur vertikal mit Wärmemengenmessung (51191.105/106)",
+                category: "anschluss_sets",
+                type: "jpg",
+                path: "Zus Doku/Anschluss_Sets/Stramax_Garnitur_vertikal/Massbild Anschlussgarnitur vertikal mit Wärmemengenmessung.jpg",
+                icon: "🔌"
+            },
+            {
+                id: "stramax_versal1_jpg",
+                title: "Stramax Versal 1 Garnitur - Maßbild",
+                subtitle: "Anschlussgarnitur Versal 1 - 130mm (51191.117)",
+                category: "anschluss_sets",
+                type: "jpg",
+                path: "Zus Doku/Anschluss_Sets/Stramax_Versal_1_Garnitur/Massbild Anschlussgarnitur Versal 1_-130mm.jpg",
+                icon: "🔌"
+            },
+            {
+                id: "stramax_versal_diag_jpg",
+                title: "Stramax Versal Garnitur - Einstelldiagramm",
+                subtitle: "Einstelldiagramm Garnitur Versal",
+                category: "anschluss_sets",
+                type: "jpg",
+                path: "Zus Doku/Anschluss_Sets/Stramax_Versal_1_Garnitur/Einstelldiagramm Garnitur Versal.jpg",
+                icon: "📈"
+            },
+            {
+                id: "ta_compact_horiz_jpg",
+                title: "TA-Compact-DP Set horizontal - Maßbild",
+                subtitle: "TA-Compact-DP Set horizontal (00434.690/680/693)",
+                category: "anschluss_sets",
+                type: "jpg",
+                path: "Zus Doku/Anschluss_Sets/TA-Compact_DP_P_Sets/Massbild TA-Compact-DP Set horizontal.jpg",
+                icon: "🔌"
+            },
+            {
+                id: "ta_compact_pdf",
+                title: "TA-Compact Sets - Datenblatt",
+                subtitle: "Datenblatt TA-Compact Sets",
+                category: "anschluss_sets",
+                type: "jpg",
+                path: "Zus Doku/Anschluss_Sets/TA-Compact_DP_P_Sets/Datenblatt TA-Compact Sets_7.jpg",
+                icon: "📄"
+            },
+            {
+                id: "wmz_set_horiz_jpg",
+                title: "WMZ-Set horizontal - Maßbild",
+                subtitle: "Stramax Anschluss-Set Wärmemesszähler horizontal (51192.061/062)",
+                category: "anschluss_sets",
+                type: "jpg",
+                path: "Zus Doku/Anschluss_Sets/WMZ-Set_horizontal/Massbild Stramax Anschluss-Set Wärmemesszähler horizontal.jpg",
+                icon: "🔌"
+            },
+            {
+                id: "wmz_set_vert_jpg",
+                title: "WMZ-Set vertikal - Maßbild",
+                subtitle: "Stramax Anschluss-Set Wärmemesszähler vertikal (51192.064/065)",
+                category: "anschluss_sets",
+                type: "jpg",
+                path: "Zus Doku/Anschluss_Sets/WMZ-Set_vertikal/Massbild Stramax Anschluss-Set Wärmemesszähler vertikal.jpg",
+                icon: "🔌"
+            },
+            // Anschluss-Sets Fotos
+            {
+                id: "photo_kugelhahnset",
+                title: "metalplast Kugelhahnset - Foto",
+                subtitle: "Produktfoto metalplast Kugelhahnset (51192.107/108)",
+                category: "anschluss_sets",
+                type: "png",
+                path: "Zus Doku/Anschluss_Sets/Fotos/metalplast_Kugelhahnset.png",
+                icon: "🖼️"
+            },
+            {
+                id: "photo_wmz_horiz_mp",
+                title: "metalplast Anschluss-Set WMZ horizontal - Foto",
+                subtitle: "Produktfoto metalplast WMZ horizontal (51192.140/142)",
+                category: "anschluss_sets",
+                type: "png",
+                path: "Zus Doku/Anschluss_Sets/Fotos/metalplast_Anschluss-Set_WMZ_horizontal.png",
+                icon: "🖼️"
+            },
+            {
+                id: "photo_wmz_vert_mp",
+                title: "metalplast Anschluss-Set WMZ vertikal - Foto",
+                subtitle: "Produktfoto metalplast WMZ vertikal (51192.144/146)",
+                category: "anschluss_sets",
+                type: "png",
+                path: "Zus Doku/Anschluss_Sets/Fotos/metalplast_Anschluss-Set_WMZ_vertikal.png",
+                icon: "🖼️"
+            },
+            {
+                id: "photo_winkel_wmz_vert_mp",
+                title: "Winkel zu metalplast WMZ vertikal - Foto",
+                subtitle: "Produktfoto Winkel zu metalplast WMZ vertikal (51192.130)",
+                category: "anschluss_sets",
+                type: "png",
+                path: "Zus Doku/Anschluss_Sets/Fotos/Winkel_zu_metalplast_Anschluss-Set_WMZ_vertikal.png",
+                icon: "🖼️"
+            },
+            {
+                id: "photo_anschluss_horiz",
+                title: "Anschluss-Set horizontal - Foto",
+                subtitle: "Produktfoto Anschluss-Set horizontal (51192.073/074)",
+                category: "anschluss_sets",
+                type: "png",
+                path: "Zus Doku/Anschluss_Sets/Fotos/Anschluss-Set_horizontal.png",
+                icon: "🖼️"
+            },
+            {
+                id: "photo_anschluss_vert",
+                title: "Anschluss-Set vertikal - Foto",
+                subtitle: "Produktfoto Anschluss-Set vertikal (51192.070/071)",
+                category: "anschluss_sets",
+                type: "png",
+                path: "Zus Doku/Anschluss_Sets/Fotos/Anschluss-Set_vertikal.png",
+                icon: "🖼️"
+            },
+            {
+                id: "photo_wmz_horiz",
+                title: "WMZ-Set horizontal - Foto",
+                subtitle: "Produktfoto WMZ-Set horizontal (51192.061/062)",
+                category: "anschluss_sets",
+                type: "png",
+                path: "Zus Doku/Anschluss_Sets/Fotos/WMZ-Set_horizontal.png",
+                icon: "🖼️"
+            },
+            {
+                id: "photo_wmz_vert",
+                title: "WMZ-Set vertikal - Foto",
+                subtitle: "Produktfoto WMZ-Set vertikal (51192.064/065)",
+                category: "anschluss_sets",
+                type: "png",
+                path: "Zus Doku/Anschluss_Sets/Fotos/WMZ-Set_vertikal.png",
+                icon: "🖼️"
+            },
+            {
+                id: "photo_stramax_horiz",
+                title: "Stramax Garnitur horizontal - Foto",
+                subtitle: "Produktfoto Stramax Garnitur horizontal (51191.101/102)",
+                category: "anschluss_sets",
+                type: "png",
+                path: "Zus Doku/Anschluss_Sets/Fotos/Stramax_Garnitur_horizontal.png",
+                icon: "🖼️"
+            },
+            {
+                id: "photo_stramax_vert",
+                title: "Stramax Garnitur vertikal - Foto",
+                subtitle: "Produktfoto Stramax Garnitur vertikal (51191.105/106)",
+                category: "anschluss_sets",
+                type: "png",
+                path: "Zus Doku/Anschluss_Sets/Fotos/Stramax_Garnitur_vertikal.png",
+                icon: "🖼️"
+            },
+            {
+                id: "photo_stramax_versal1",
+                title: "Stramax Versal 1 Garnitur - Foto",
+                subtitle: "Produktfoto Stramax Versal 1 Garnitur (51191.117)",
+                category: "anschluss_sets",
+                type: "png",
+                path: "Zus Doku/Anschluss_Sets/Fotos/Stramax_Versal_1_Garnitur.png",
+                icon: "🖼️"
+            },
+            {
+                id: "photo_danfoss_horiz",
+                title: "Danfoss AB-PM Set horizontal - Foto",
+                subtitle: "Produktfoto Danfoss AB-PM Set horizontal (00199.520..)",
+                category: "anschluss_sets",
+                type: "png",
+                path: "Zus Doku/Anschluss_Sets/Fotos/Danfoss_AB-PM_Set_horizontal.png",
+                icon: "🖼️"
+            },
+            {
+                id: "photo_danfoss_vert",
+                title: "Danfoss AB-PM Set vertikal - Foto",
+                subtitle: "Produktfoto Danfoss AB-PM Set vertikal (00199.526..)",
+                category: "anschluss_sets",
+                type: "png",
+                path: "Zus Doku/Anschluss_Sets/Fotos/Danfoss_AB-PM_Set_vertikal.png",
+                icon: "🖼️"
+            },
+            {
+                id: "photo_oventrop_hycocon_horiz",
+                title: "oventrop Hycocon VTZ horizontal - Foto",
+                subtitle: "Produktfoto oventrop Hycocon VTZ horizontal (00227.111..)",
+                category: "anschluss_sets",
+                type: "png",
+                path: "Zus Doku/Anschluss_Sets/Fotos/oventrop_Hycocon_VTZ_horizontal.png",
+                icon: "🖼️"
+            },
+            {
+                id: "photo_oventrop_cocon_horiz",
+                title: "oventrop Cocon QTZ / QDP horizontal - Foto",
+                subtitle: "Produktfoto oventrop Cocon QTZ / QDP horizontal (00227.117..)",
+                category: "anschluss_sets",
+                type: "png",
+                path: "Zus Doku/Anschluss_Sets/Fotos/oventrop_Cocon_QTZ_QDP_horizontal.png",
+                icon: "🖼️"
+            },
+            {
+                id: "photo_oventrop_hycocon_vert",
+                title: "oventrop Hycocon VTZ vertikal - Foto",
+                subtitle: "Produktfoto oventrop Hycocon VTZ vertikal (00227.110..)",
+                category: "anschluss_sets",
+                type: "png",
+                path: "Zus Doku/Anschluss_Sets/Fotos/oventrop_Hycocon_VTZ_vertikal.png",
+                icon: "🖼️"
+            },
+            {
+                id: "photo_oventrop_cocon_vert",
+                title: "oventrop Cocon QTZ / QDP vertikal - Foto",
+                subtitle: "Produktfoto oventrop Cocon QTZ / QDP vertikal (00227.116..)",
+                category: "anschluss_sets",
+                type: "png",
+                path: "Zus Doku/Anschluss_Sets/Fotos/oventrop_Cocon_QTZ_QDP_vertikal.png",
+                icon: "🖼️"
+            },
+            {
+                id: "photo_ta_compact_dp_horiz",
+                title: "TA-Compact-DP Set horizontal - Foto",
+                subtitle: "Produktfoto TA-Compact-DP Set horizontal (00434.690..)",
+                category: "anschluss_sets",
+                type: "png",
+                path: "Zus Doku/Anschluss_Sets/Fotos/TA-Compact-DP_Set_horizontal.png",
+                icon: "🖼️"
+            },
+            {
+                id: "photo_ta_compact_p_horiz",
+                title: "TA-Compact-P Set horizontal - Foto",
+                subtitle: "Produktfoto TA-Compact-P Set horizontal (00434.680..)",
+                category: "anschluss_sets",
+                type: "png",
+                path: "Zus Doku/Anschluss_Sets/Fotos/TA-Compact-P_Set_horizontal.png",
+                icon: "🖼️"
+            },
+            {
+                id: "photo_ta_compact_dp_vert",
+                title: "TA-Compact-DP Set vertikal - Foto",
+                subtitle: "Produktfoto TA-Compact-DP Set vertikal (00434.693..)",
+                category: "anschluss_sets",
+                type: "png",
+                path: "Zus Doku/Anschluss_Sets/Fotos/TA-Compact-DP_Set_vertikal.png",
+                icon: "🖼️"
+            },
+            {
+                id: "photo_ta_compact_p_vert",
+                title: "TA-Compact-P Set vertikal - Foto",
+                subtitle: "Produktfoto TA-Compact-P Set vertikal (00434.683..)",
+                category: "anschluss_sets",
+                type: "png",
+                path: "Zus Doku/Anschluss_Sets/Fotos/TA-Compact-P_Set_vertikal.png",
+                icon: "🖼️"
+            },
+            // Kasten & Schränke
+            {
+                id: "kasten_beton_125",
+                title: "Beton-Kasten 125 (UP 125mm) - Maßbild",
+                subtitle: "Maßbild Unterputz Beton-Kasten Tiefe 125mm",
+                category: "kasten",
+                type: "jpg",
+                path: "Zus Doku/Kasten/Massbild_Beton-Kasten_125.jpg",
+                icon: "📦"
+            },
+            {
+                id: "kasten_beton_150",
+                title: "Beton-Kasten 150 (UP 150mm) - Maßbild",
+                subtitle: "Maßbild Unterputz Beton-Kasten Tiefe 150mm",
+                category: "kasten",
+                type: "jpg",
+                path: "Zus Doku/Kasten/Massbild_Beton-Kasten_150.jpg",
+                icon: "📦"
+            },
+            {
+                id: "kasten_blech_teleskop",
+                title: "Blech-Teleskopkasten (UP) - Maßbild",
+                subtitle: "Maßbild Unterputz Blech-Teleskopkasten",
+                category: "kasten",
+                type: "jpg",
+                path: "Zus Doku/Kasten/Massbild_Blech-Teleskopkasten.jpg",
+                icon: "📦"
+            },
+            {
+                id: "kasten_eps_boden",
+                title: "EPS-Boden Kasten - Maßbild",
+                subtitle: "Maßbild EPS-Boden Verteilerkasten",
+                category: "kasten",
+                type: "jpg",
+                path: "Zus Doku/Kasten/Massbild_EPS-Boden_Kasten.jpg",
+                icon: "📦"
+            },
+            {
+                id: "kasten_eps_wand",
+                title: "EPS-Wand Kasten - Maßbild",
+                subtitle: "Maßbild Unterputz EPS-Wand Kasten",
+                category: "kasten",
+                type: "jpg",
+                path: "Zus Doku/Kasten/Massbild_EPS-Wand_Kasten.jpg",
+                icon: "📦"
+            },
+            {
+                id: "kasten_klapptuer_weiss",
+                title: "Klapptür weiss - Maßbild",
+                subtitle: "Maßbild Klapptür weiss",
+                category: "kasten",
+                type: "jpg",
+                path: "Zus Doku/Kasten/Massbild_Klapptuere_weiss.jpg",
+                icon: "🚪"
+            },
+            {
+                id: "kasten_stahlblech",
+                title: "Stahlblechkasten (AP/UP) - Maßbild",
+                subtitle: "Maßbild Aufputz/Unterputz Stahlblechkasten",
+                category: "kasten",
+                type: "jpg",
+                path: "Zus Doku/Kasten/Massbild_Stahlblechkasten.jpg",
+                icon: "📦"
+            }
+        ];
+
+        // State
+        let currentCategory = 'all';
+        let currentItem = null;
+        let zoomScale = 1.0;
+        let panX = 0;
+        let panY = 0;
+        let isDragging = false;
+        let startX = 0;
+        let startY = 0;
+
+        // Elements
+        const searchInput = document.getElementById('search-input');
+        const docList = document.getElementById('doc-list');
+        const docTitle = document.getElementById('doc-title');
+        const canvasContainer = document.getElementById('canvas-container');
+        const btnZoomIn = document.getElementById('btn-zoom-in');
+        const btnZoomOut = document.getElementById('btn-zoom-out');
+        const btnZoomReset = document.getElementById('btn-zoom-reset');
+        const zoomLevel = document.getElementById('zoom-level');
+        const btnPan = document.getElementById('btn-pan');
+        const btnOpenExt = document.getElementById('btn-open-ext');
+
+        // Init Counts
+        document.getElementById('count-all').textContent = TECH_DOKU_DATABASE.length;
+        document.getElementById('count-anschluss').textContent = TECH_DOKU_DATABASE.filter(d => d.category === 'anschluss_sets').length;
+        document.getElementById('count-kasten').textContent = TECH_DOKU_DATABASE.filter(d => d.category === 'kasten').length;
+
+        // Render List
+        function renderList() {
+            docList.innerHTML = '';
+            const query = searchInput.value.toLowerCase().trim();
+
+            const filtered = TECH_DOKU_DATABASE.filter(item => {
+                const matchesCat = (currentCategory === 'all' || item.category === currentCategory);
+                const matchesQuery = !query || item.title.toLowerCase().includes(query) || item.subtitle.toLowerCase().includes(query);
+                return matchesCat && matchesQuery;
+            });
+
+            if (filtered.length === 0) {
+                docList.innerHTML = '<div style="color: var(--text-muted); font-size: 0.85em; text-align: center; padding: 20px;">Keine Dokumente gefunden.</div>';
+                return;
+            }
+
+            filtered.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'doc-item' + (currentItem && currentItem.id === item.id ? ' active' : '');
+                div.innerHTML = `
+                    <div class="doc-icon">${item.icon}</div>
+                    <div class="doc-info">
+                        <div class="doc-title">${item.title}</div>
+                        <div class="doc-subtitle">${item.subtitle}</div>
+                    </div>
+                `;
+                div.addEventListener('click', () => selectItem(item));
+                docList.appendChild(div);
+            });
+        }
+
+        // Select Item
+        function selectItem(item) {
+            currentItem = item;
+            renderList();
+
+            docTitle.textContent = item.title;
+            btnOpenExt.href = encodeURI(item.path);
+
+            zoomScale = 1.0;
+            panX = 0;
+            panY = 0;
+
+            canvasContainer.innerHTML = '';
+
+            const wrapper = document.createElement('div');
+            wrapper.id = 'img-wrapper';
+            wrapper.className = 'img-wrapper';
+
+            const img = document.createElement('img');
+            img.src = encodeURI(item.path);
+            img.alt = item.title;
+
+            wrapper.appendChild(img);
+            canvasContainer.appendChild(wrapper);
+
+            applyZoomPan();
+        }
+
+        // Apply Zoom & Pan
+        function applyZoomPan() {
+            const wrapper = document.getElementById('img-wrapper');
+            if (wrapper) {
+                wrapper.style.transform = `translate(${panX}px, ${panY}px) scale(${zoomScale})`;
+            }
+            zoomLevel.textContent = `${Math.round(zoomScale * 100)}%`;
+        }
+
+        // Event Listeners
+        searchInput.addEventListener('input', renderList);
+
+        document.querySelectorAll('.cat-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentCategory = btn.dataset.cat;
+                renderList();
+            });
+        });
+
+        btnZoomIn.addEventListener('click', () => {
+            zoomScale = Math.min(zoomScale + 0.25, 5.0);
+            applyZoomPan();
+        });
+
+        btnZoomOut.addEventListener('click', () => {
+            zoomScale = Math.max(zoomScale - 0.25, 0.25);
+            applyZoomPan();
+        });
+
+        btnZoomReset.addEventListener('click', () => {
+            zoomScale = 1.0;
+            panX = 0;
+            panY = 0;
+            applyZoomPan();
+        });
+
+        btnPan.addEventListener('click', () => {
+            btnPan.classList.toggle('active');
+        });
+
+        // Mouse Wheel Zooming
+        canvasContainer.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            const delta = e.deltaY < 0 ? 0.15 : -0.15;
+            zoomScale = Math.max(0.25, Math.min(5.0, zoomScale + delta));
+            applyZoomPan();
+        }, { passive: false });
+
+        // Mouse Dragging (Pan)
+        canvasContainer.addEventListener('mousedown', (e) => {
+            if (e.target.closest('.controls')) return;
+            isDragging = true;
+            startX = e.clientX - panX;
+            startY = e.clientY - panY;
+            canvasContainer.classList.add('grabbing');
+        });
+
+        window.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            panX = e.clientX - startX;
+            panY = e.clientY - startY;
+            applyZoomPan();
+        });
+
+        window.addEventListener('mouseup', () => {
+            if (isDragging) {
+                isDragging = false;
+                canvasContainer.classList.remove('grabbing');
+            }
+        });
+
+        // Auto select first document
+        renderList();
+        if (TECH_DOKU_DATABASE.length > 0) {
+            selectTechDokuItemFromUrl() || selectItem(TECH_DOKU_DATABASE[0]);
+        }
+
+        function selectTechDokuItemFromUrl() {
+            const params = new URLSearchParams(window.location.search);
+            const docId = params.get('doc');
+            if (docId) {
+                const found = TECH_DOKU_DATABASE.find(d => d.id === docId);
+                if (found) {
+                    selectItem(found);
+                    return true;
+                }
+            }
+            return false;
+        }
+    </script>
+</body>
+</html>
