@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="data:,">
-    <link rel="stylesheet" href="style.css?v=337">
+    <link rel="stylesheet" href="style.css?v=3.1">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <style>
 /* CSS Custom Properties / Theme Variables */
@@ -996,7 +996,7 @@ body.menu-edit-mode .header-top-bar.fh-drag-row {
                 <!-- Zeile 1: Logo/Version & Objektbezeichnung -->
                 <div style="display: flex; align-items: center; justify-content: space-between; width: 100%; gap: 10px;">
                     <div style="display: flex; align-items: center; gap: 10px; flex: 1;">
-                        <span class="badge-v2" style="font-size: 0.85em; color: var(--text-secondary, #64748b); opacity: 0.85; font-weight: 700; background: var(--bg-container-alt, #e2e8f0); padding: 3px 8px; border-radius: 4px; border: 1px solid var(--border-color, #cbd5e1); flex-shrink: 0;" title="Programmversion">v3.0</span>
+                        <span class="badge-v2" style="font-size: 0.85em; color: var(--text-secondary, #64748b); opacity: 0.85; font-weight: 700; background: var(--bg-container-alt, #e2e8f0); padding: 3px 8px; border-radius: 4px; border: 1px solid var(--border-color, #cbd5e1); flex-shrink: 0;" title="Programmversion">v3.1</span>
                         <input type="text" id="objekt-bez" placeholder="Objektbezeichnung..." title="Objektbezeichnung (Haupttitel des Projekts)">
                     </div>
                 </div>
@@ -1064,8 +1064,8 @@ body.menu-edit-mode .header-top-bar.fh-drag-row {
 
                 <!-- Row 2: Primary Calculation Tools -->
                 <div class="toolbar-row" data-row-index="1">
-                    <button id="btn-settings" class="btn-tool toolbar-item" draggable="false" data-btn-id="btn-settings" style="left: 15px;" title="Material-Parameter einstellen (Ziehen am Griff ⋮⋮ zum Verschieben)">
-                        <span class="drag-handle">⋮⋮</span> ⚙️ Parameter
+                    <button id="btn-settings" class="btn-tool toolbar-item" draggable="false" data-btn-id="btn-settings" style="left: 15px;" title="Projekt-Einstellungen öffnen: Material-Parameter und Faktoren (Ziehen am Griff ⋮⋮ zum Verschieben)">
+                        <span class="drag-handle">⋮⋮</span> ⚙️ Einstellungen
                     </button>
                     <button id="btn-design" class="btn-tool toolbar-item" draggable="false" data-btn-id="btn-design" style="left: 160px;" title="Wähle ein Farb-Design (Ziehen am Griff ⋮⋮ zum Verschieben)">
                         <span class="drag-handle">⋮⋮</span> 🎨 Design
@@ -1099,8 +1099,8 @@ body.menu-edit-mode .header-top-bar.fh-drag-row {
 
                 <!-- Row 3: Storage & File Operations -->
                 <div class="toolbar-row" data-row-index="2">
-                    <button id="btn-save-to-folder" class="btn-tool toolbar-item" draggable="false" data-btn-id="btn-save-to-folder" style="left: 15px;" title="Ergebnisse im Zielordner speichern (Ziehen am Griff ⋮⋮ zum Verschieben)">
-                        <span class="drag-handle">⋮⋮</span> 💾 Projekt
+                    <button id="btn-save-to-folder" class="btn-tool toolbar-item" draggable="false" data-btn-id="btn-save-to-folder" style="left: 15px;" title="Projekt im Zielordner speichern (Ziehen am Griff ⋮⋮ zum Verschieben)">
+                        <span class="drag-handle">⋮⋮</span> 💾 Speichern
                     </button>
                     <button id="btn-load-from-folder" class="btn-tool toolbar-item" draggable="false" data-btn-id="btn-load-from-folder" style="left: 175px;" title="Projekt aus dem Zielordner laden (Ziehen am Griff ⋮⋮ zum Verschieben)">
                         <span class="drag-handle">⋮⋮</span> 📂 Projekt
@@ -1158,7 +1158,22 @@ body.menu-edit-mode .header-top-bar.fh-drag-row {
                         </div>
                         <div class="fh-draggable-item" data-fh-id="input-floor">
                             <span class="drag-handle fh-dh">⋮⋮</span>
-                            <input type="text" class="input-floor-name" placeholder="Ebene / Geschoss" style="width: 190px; padding: 4px 8px; font-weight: bold; border-radius: 4px; border: 1px solid var(--border-color, #cbd5e1);">
+                            <input type="text" class="input-floor-name" placeholder="Ebene / Geschoss" style="width: 110px; padding: 4px 8px; font-weight: bold; border-radius: 4px; border: 1px solid var(--border-color, #cbd5e1);">
+                            <!-- Schnelleingabe: Werte werden auf alle Räume dieses Verteilers angewendet -->
+                            <div class="floor-bulk-defaults" style="display: flex; align-items: center; gap: 6px; margin-left: 10px;">
+                                <label style="display: flex; align-items: center; gap: 3px; font-size: 0.78em; font-weight: 600; color: var(--text-secondary, #475569); white-space: nowrap;" title="Schnelleingabe VA Randzone: Zahl eingeben → wird auf alle Räume dieses Verteilers angewendet und überschreibt bestehende Werte. Die Räume bleiben danach einzeln änderbar.">
+                                    VA Rz
+                                    <input type="number" class="input-bulk-va-rz" placeholder="–" style="width: 58px; padding: 3px 4px; font-size: 1em; font-weight: 600; border-radius: 4px; border: 1px solid var(--border-color, #cbd5e1);">
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 3px; font-size: 0.78em; font-weight: 600; color: var(--text-secondary, #475569); white-space: nowrap;" title="Schnelleingabe VA Innenzone: Zahl eingeben → wird auf alle Räume dieses Verteilers angewendet und überschreibt bestehende Werte. Die Räume bleiben danach einzeln änderbar.">
+                                    VA Iz
+                                    <input type="number" class="input-bulk-va-iz" placeholder="–" style="width: 58px; padding: 3px 4px; font-size: 1em; font-weight: 600; border-radius: 4px; border: 1px solid var(--border-color, #cbd5e1);">
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 3px; font-size: 0.78em; font-weight: 600; color: var(--text-secondary, #475569); white-space: nowrap;" title="Schnelleingabe Anbindung: Zahl eingeben → wird auf alle Räume dieses Verteilers angewendet und überschreibt bestehende Werte. Die Räume bleiben danach einzeln änderbar.">
+                                    Anbindung
+                                    <input type="number" class="input-bulk-dist" placeholder="–" style="width: 64px; padding: 3px 4px; font-size: 1em; font-weight: 600; border-radius: 4px; border: 1px solid var(--border-color, #cbd5e1);">
+                                </label>
+                            </div>
                         </div>
                         <div class="fh-draggable-item" data-fh-id="input-pos" style="flex-shrink: 0;">
                             <span class="drag-handle fh-dh">⋮⋮</span>
@@ -2397,7 +2412,7 @@ body.menu-edit-mode .header-top-bar.fh-drag-row {
     </div>
 
     <!-- Floating Draggable CAD Rooms Pool Window -->
-    <div id="cad-pool-window" class="hidden" style="position: fixed; top: 120px; right: 40px; width: 440px; max-height: 85vh; background: var(--bg-container, #ffffff); border: 2px solid var(--primary-color, #0078d7); border-radius: 10px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); z-index: 999999; flex-direction: column; overflow: hidden; display: none;">
+    <div id="cad-pool-window" class="hidden" style="position: fixed; top: 60px; right: 30px; width: min(1120px, calc(100vw - 40px)); height: min(820px, calc(100vh - 120px)); max-height: 92vh; background: var(--bg-container, #ffffff); border: 2px solid var(--primary-color, #0078d7); border-radius: 10px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); z-index: 999999; flex-direction: column; overflow: hidden; display: none;">
         <!-- Draggable Title Bar -->
         <div id="cad-pool-header" style="background: var(--primary-color, #0078d7); color: #ffffff; padding: 10px 14px; cursor: move; user-select: none; display: flex; justify-content: space-between; align-items: center; font-weight: bold; font-size: 0.95em;">
             <div style="display: flex; align-items: center; gap: 8px;">
@@ -2408,9 +2423,9 @@ body.menu-edit-mode .header-top-bar.fh-drag-row {
             </div>
         </div>
 
-        <div style="padding: 12px; display: flex; flex-direction: column; gap: 10px; flex: 1; overflow: hidden;">
+        <div style="padding: 12px; display: flex; flex-direction: column; gap: 10px; flex: 1; overflow: hidden; min-height: 0;">
             <p style="font-size: 0.82em; color: var(--text-secondary, #64748b); margin: 0; line-height: 1.3;">
-                Ziehen Sie einen Raum per <strong>Drag-and-Drop</strong> direkt in das gewünschte Geschoss der Haupttabelle!
+                Räume per Haken auswählen und dem markierten <strong>Verteiler</strong> rechts zuordnen &ndash; oder Räume weiterhin per <strong>Drag-and-Drop</strong> direkt auf einen Verteiler ziehen.
             </p>
 
             <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.85em; padding-bottom: 6px; border-bottom: 1px solid var(--border-color, #cbd5e1);">
@@ -2418,41 +2433,65 @@ body.menu-edit-mode .header-top-bar.fh-drag-row {
                 <button id="btn-clear-cad-pool" class="btn-secondary" style="padding: 2px 6px; font-size: 0.8em; cursor: pointer; color: #dc2626; border-color: #fca5a5;" title="Alle Räume aus dem Pool löschen">🗑️ Pool leeren</button>
             </div>
 
-            <!-- Multi-Select Actions -->
-            <div id="cad-multi-actions" style="display: none; flex-direction: column; gap: 6px; padding: 8px; background-color: var(--zebra-even, #f1f5f9); border: 1px solid var(--border-color, #cbd5e1); border-radius: 6px; margin-bottom: 4px;">
-                <div style="font-size: 0.82em; font-weight: bold; color: var(--text-secondary, #475569);">
-                    Ausgewählte Räume (<span id="cad-selected-count">0</span>):
+            <!-- Two-pane layout: rooms on the left, existing Verteiler on the right -->
+            <div id="cad-pool-layout" style="display: grid; grid-template-columns: minmax(0, 1fr) minmax(320px, 0.75fr); gap: 14px; flex: 1; min-height: 0;">
+
+                <!-- LEFT: Room pool -->
+                <div style="display: flex; flex-direction: column; gap: 8px; min-height: 0;">
+                    <!-- Filter & Sort Controls -->
+                    <div style="display: flex; gap: 6px; align-items: center;">
+                        <input type="text" id="cad-pool-filter" placeholder="🔍 Filtern (z.B. 1.OG)..." style="flex: 1; padding: 5px 8px; font-size: 0.85em; border-radius: 4px; border: 1px solid var(--border-color, #cbd5e1); background: var(--bg-container, #ffffff); color: var(--text-main, #0f172a);">
+                        <select id="cad-pool-sort" style="padding: 5px; font-size: 0.85em; border-radius: 4px; border: 1px solid var(--border-color, #cbd5e1); background: var(--bg-container, #ffffff); color: var(--text-main, #0f172a); width: 120px; box-sizing: border-box;">
+                            <option value="prio" selected>Prio</option>
+                            <option value="default">Standard</option>
+                            <option value="name-asc">Name (A-Z)</option>
+                            <option value="name-desc">Name (Z-A)</option>
+                            <option value="area-desc">Fläche (Abst.)</option>
+                            <option value="area-asc">Fläche (Aufst.)</option>
+                        </select>
+                    </div>
+
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <label style="font-size: 0.82em; color: var(--text-secondary, #64748b); cursor: pointer; display: flex; align-items: center; gap: 4px; user-select: none;">
+                            <input type="checkbox" id="cad-pool-hide-assigned" style="cursor: pointer; transform: scale(1.05);"> Zugeordnete ausblenden
+                        </label>
+                        <span style="font-size: 0.75em; color: var(--text-secondary, #94a3b8);">Haken setzen &rarr; rechts Verteiler wählen</span>
+                    </div>
+
+                    <!-- Scrollable list of CAD rooms -->
+                    <div id="cad-pool-list" style="flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; padding-right: 4px;">
+                        <!-- Draggable CAD room items injected here -->
+                    </div>
                 </div>
-                <div style="display: flex; gap: 6px; align-items: center;">
-                    <select id="select-target-floor" style="flex: 1; padding: 4px; font-size: 0.85em; border-radius: 4px; border: 1px solid var(--border-color, #cbd5e1); background: var(--bg-container, #ffffff); color: var(--text-main, #0f172a);">
-                        <option value="">-- Geschoss wählen --</option>
-                    </select>
-                    <button id="btn-assign-selected-rooms" class="btn-primary" style="padding: 4px 10px; font-size: 0.8em; font-weight: bold; cursor: pointer;">Zuweisen</button>
+
+                <!-- RIGHT: Existing Verteiler -->
+                <div style="display: flex; flex-direction: column; gap: 8px; min-height: 0; border-left: 1px solid var(--border-color, #cbd5e1); padding-left: 14px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div style="font-size: 0.9em; font-weight: bold; color: var(--text-main, #0f172a);">📊 Erstellte Verteiler</div>
+                        <button id="btn-refresh-cad-verteiler" class="btn-secondary" style="padding: 2px 8px; font-size: 0.75em; cursor: pointer;" title="Verteilerliste aus der Haupttabelle neu einlesen">🔄 Aktualisieren</button>
+                    </div>
+                    <p style="font-size: 0.78em; color: var(--text-secondary, #64748b); margin: 0; line-height: 1.3;">
+                        Ziel-Verteiler markieren. Anschließend links Räume anhaken und unten <strong>Zuweisen</strong> klicken.
+                    </p>
+                    <!-- Scrollable list of Verteiler -->
+                    <div id="cad-pool-verteiler-list" style="flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 7px; padding-right: 4px;">
+                        <!-- Verteiler cards injected here -->
+                    </div>
                 </div>
             </div>
 
-            <!-- Filter & Sort Controls -->
-            <div style="display: flex; gap: 6px; align-items: center; margin-bottom: 4px; margin-top: 2px;">
-                <input type="text" id="cad-pool-filter" placeholder="🔍 Filtern (z.B. 1.OG)..." style="flex: 1; padding: 4px 8px; font-size: 0.85em; border-radius: 4px; border: 1px solid var(--border-color, #cbd5e1); background: var(--bg-container, #ffffff); color: var(--text-main, #0f172a);">
-                <select id="cad-pool-sort" style="padding: 4px; font-size: 0.85em; border-radius: 4px; border: 1px solid var(--border-color, #cbd5e1); background: var(--bg-container, #ffffff); color: var(--text-main, #0f172a); width: 110px; box-sizing: border-box;">
-                    <option value="prio" selected>Prio</option>
-                    <option value="default">Standard</option>
-                    <option value="name-asc">Name (A-Z)</option>
-                    <option value="name-desc">Name (Z-A)</option>
-                    <option value="area-desc">Fläche (Abst.)</option>
-                    <option value="area-asc">Fläche (Aufst.)</option>
-                </select>
-            </div>
-
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                <label style="font-size: 0.82em; color: var(--text-secondary, #64748b); cursor: pointer; display: flex; align-items: center; gap: 4px; user-select: none;">
-                    <input type="checkbox" id="cad-pool-hide-assigned" style="cursor: pointer; transform: scale(1.05);"> Zugeordnete ausblenden
-                </label>
-            </div>
-
-            <!-- Scrollable list of CAD rooms -->
-            <div id="cad-pool-list" style="max-height: 480px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; padding-right: 4px;">
-                <!-- Draggable CAD room items injected here -->
+            <!-- Bottom: assignment actions -->
+            <div id="cad-multi-actions" style="display: none; flex-direction: column; gap: 8px; padding: 10px; background-color: var(--zebra-even, #f1f5f9); border: 1px solid var(--border-color, #cbd5e1); border-radius: 6px;">
+                <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 0.85em; color: var(--text-secondary, #475569);">
+                    <span><strong id="cad-selected-count">0</strong> Raum/Räume ausgewählt</span>
+                    <span style="color: var(--border-color, #cbd5e1);">|</span>
+                    <span>Ziel-Verteiler: <strong id="cad-selected-verteiler-label" style="color: var(--primary-color, #0078d7);">— bitte rechts auswählen —</strong></span>
+                </div>
+                <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center;">
+                    <button id="btn-assign-selected-rooms" class="btn-primary" style="padding: 5px 14px; font-size: 0.82em; font-weight: bold; cursor: pointer;">Zuweisen</button>
+                    <button id="btn-unassign-selected-rooms" class="btn-secondary" style="padding: 5px 12px; font-size: 0.82em; cursor: pointer; color: #dc2626; border-color: #fca5a5;" title="Zuordnung der ausgewählten Räume aufheben (Räume bleiben in der Haupttabelle)">↩ Zuordnung aufheben</button>
+                    <button id="btn-clear-cad-selection" class="btn-secondary" style="padding: 5px 12px; font-size: 0.82em; cursor: pointer;">Auswahl aufheben</button>
+                </div>
             </div>
         </div>
     </div>
@@ -2562,9 +2601,9 @@ body.menu-edit-mode .header-top-bar.fh-drag-row {
     <!-- Tooltip Element -->
     <div id="custom-tooltip" class="custom-tooltip"></div>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-    <script src="fbhv_database.js?v=337"></script>
-    <script src="default_toolbar_layout.js?v=337"></script>
-    <script src="script.js?v=337"></script>
+    <script src="fbhv_database.js?v=3.1"></script>
+    <script src="default_toolbar_layout.js?v=3.1"></script>
+    <script src="script.js?v=3.1"></script>
 </body>
 
 </html>

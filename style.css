@@ -570,6 +570,22 @@ tbody.floor-group.active-verteiler .active-verteiler-badge:hover {
     box-sizing: border-box;
     transition: color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
 }
+/* Feste Breiten im Verteilerkopf.
+   Die dynamische Spaltenbreiten-Regel setzt für Inputs in der ersten Tabellenspalte
+   "width: 100% !important" – hier wird die Größe daher über flex-basis festgelegt. */
+#main-table .floor-header-container .input-floor-name {
+    flex: 0 0 110px !important;
+}
+
+#main-table .floor-header-container .input-bulk-va-rz,
+#main-table .floor-header-container .input-bulk-va-iz {
+    flex: 0 0 62px !important;
+}
+
+#main-table .floor-header-container .input-bulk-dist {
+    flex: 0 0 72px !important;
+}
+
 .input-pos-nr.is-auto,
 .input-pos-nr:placeholder-shown {
     color: #64748b !important;
@@ -1967,4 +1983,24 @@ body.menu-edit-mode .fh-draggable-item:hover {
     color: #64748b;
     text-align: center;
     padding: 40px;
+}
+/* CAD Room Pool: two-pane layout collapses on narrow screens */
+@media (max-width: 820px) {
+    #cad-pool-layout {
+        display: flex !important;
+        flex-direction: column;
+        overflow-y: auto;
+    }
+
+    #cad-pool-layout > div {
+        flex-shrink: 0;
+        min-height: 260px;
+    }
+
+    #cad-pool-layout > div:last-child {
+        border-left: none !important;
+        border-top: 1px solid var(--border-color, #cbd5e1);
+        padding-left: 0 !important;
+        padding-top: 10px;
+    }
 }

@@ -2373,7 +2373,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <tr>
                 <td>
                     <h1 class="header-title">FBH Material-Report</h1>
-                    <div style="font-size: 8.5pt; color: #64748b; margin-top: 3px;">Erstellt mit FBH Material Rechner v3.0</div>
+                    <div style="font-size: 8.5pt; color: #64748b; margin-top: 3px;">Erstellt mit FBH Material Rechner v3.1</div>
                 </td>
                 <td class="header-meta">
                     Objekt: <strong>${objektBezVal}</strong><br>
@@ -3039,7 +3039,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             const initialData = {
-                version: "3.0",
+                version: "3.1",
                 objektBez: projectName || cleanName,
                 floors: [],
                 createdAt: new Date().toISOString()
@@ -3365,6 +3365,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnClearCadPool = document.getElementById('btn-clear-cad-pool');
     const cadPoolList = document.getElementById('cad-pool-list');
     const cadPoolCount = document.getElementById('cad-pool-count');
+    const cadPoolVerteilerList = document.getElementById('cad-pool-verteiler-list');
+    const cadPoolSelectedVerteilerLabel = document.getElementById('cad-selected-verteiler-label');
+    let selectedCadVerteilerIndex = null;
 
     // Helper to make any window draggable
     function makeElementDraggable(header, windowEl) {
@@ -3720,19 +3723,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Ensure window remains visible within current viewport bounds
         if (!cadPoolWindow.style.left || cadPoolWindow.style.left === 'auto') {
-            cadPoolWindow.style.top = '120px';
-            cadPoolWindow.style.right = '40px';
+            cadPoolWindow.style.top = '60px';
+            cadPoolWindow.style.right = '30px';
             cadPoolWindow.style.left = 'auto';
         } else {
             const currentLeft = parseInt(cadPoolWindow.style.left, 10);
             const currentTop = parseInt(cadPoolWindow.style.top, 10);
-            const winWidth = window.innerWidth || 1000;
-            const winHeight = window.innerHeight || 800;
+            const winWidth = window.innerWidth || 1200;
+            const winHeight = window.innerHeight || 900;
 
             if (isNaN(currentLeft) || currentLeft < 0 || currentLeft > winWidth - 100 ||
                 isNaN(currentTop) || currentTop < 0 || currentTop > winHeight - 100) {
-                cadPoolWindow.style.top = '120px';
-                cadPoolWindow.style.right = '40px';
+                cadPoolWindow.style.top = '60px';
+                cadPoolWindow.style.right = '30px';
                 cadPoolWindow.style.left = 'auto';
             }
         }
@@ -4313,6 +4316,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const floorBodies = document.querySelectorAll('tbody.floor-group');
         if (floorBodies.length === 0) {
             verteilerOverviewList.innerHTML = '<p style="color: var(--text-secondary, #94a3b8); font-style: italic; font-size: 0.88em; margin: 15px; text-align: center;">Keine Verteiler vorhanden.</p>';
+            if (typeof renderCadVerteilerList === 'function') renderCadVerteilerList();
             return;
         }
         
@@ -4442,6 +4446,8 @@ document.addEventListener('DOMContentLoaded', () => {
             
             verteilerOverviewList.appendChild(card);
         });
+
+        if (typeof renderCadVerteilerList === 'function') renderCadVerteilerList();
     }
 
     if (btnClearCadPool) {
@@ -4493,8 +4499,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (cadPoolCount) cadPoolCount.textContent = cadRoomPool.length;
 
+        // Keep the Verteiler panel in sync with the main table
+        renderCadVerteilerList();
+
         if (cadRoomPool.length === 0) {
             cadPoolList.innerHTML = '<p style="color: var(--text-secondary, #94a3b8); font-style: italic; font-size: 0.88em; margin: 15px; text-align: center;">Keine Räume im CAD-Pool.<br>Importieren Sie zuerst eine CAD Excel-Datei über "Import aus CAD".</p>';
+            updateMultiSelectUI();
             return;
         }
 
@@ -4550,19 +4560,31 @@ document.addEventListener('DOMContentLoaded', () => {
             const areaNum = typeof rm.area === 'number' ? rm.area : (parseFloat(rm.area) || 0);
 
             if (rm.assignedFloor) {
+                const targetInfo = getCadRoomAssignedVerteiler(rm);
+                const targetLabel = targetInfo
+                    ? `${escapeHtml(targetInfo.ebene)}${targetInfo.fbhv ? ` · ${escapeHtml(targetInfo.fbhv)}` : ''}`
+                    : escapeHtml(rm.assignedFloor || 'Verteiler');
+
                 card.className = 'cad-room-card assigned';
-                card.style.cssText = 'display: flex; justify-content: space-between; align-items: center; padding: 6px 10px; background: var(--header-bg, #f1f5f9); border: 1px solid var(--border-color, #cbd5e1); border-radius: 6px; opacity: 0.75; font-size: 0.85em;';
+                card.style.cssText = 'display: flex; justify-content: space-between; align-items: center; padding: 6px 10px; background: var(--header-bg, #f1f5f9); border: 1px solid var(--border-color, #cbd5e1); border-radius: 6px; opacity: 0.9; font-size: 0.85em;';
                 card.innerHTML = `
                     <div style="display: flex; align-items: center; gap: 6px; overflow: hidden; white-space: nowrap;">
-                        <span style="color: #64748b;">✔</span>
-                        <input type="text" class="cad-room-name-input" value="${rm.name}" style="background: transparent; border: 1px solid transparent; font-weight: bold; color: var(--text-secondary, #475569); text-decoration: line-through; width: 130px; font-size: 1.05em; padding: 2px; border-radius: 4px; outline: none;" title="Name im CAD Pool bearbeiten">
+                        <input type="checkbox" class="cad-room-checkbox" data-id="${rm.id}" style="cursor: pointer; margin-right: 2px; transform: scale(1.12);">
+                        <span style="color: #15803d;">✔</span>
+                        <input type="text" class="cad-room-name-input" value="${escapeHtml(rm.name)}" style="background: transparent; border: 1px solid transparent; font-weight: bold; color: var(--text-secondary, #475569); text-decoration: line-through; width: 150px; font-size: 1.05em; padding: 2px; border-radius: 4px; outline: none;" title="Name im CAD Pool bearbeiten">
                     </div>
                     <div style="display: flex; align-items: center; gap: 6px; flex-shrink: 0;">
                         <span style="color: #64748b; font-size: 0.85em;">${areaNum.toFixed(2)} m²</span>
-                        <span style="font-size: 0.72em; padding: 1px 5px; background: #dcfce7; color: #15803d; border-radius: 4px; font-weight: 600;">Zugeordnet</span>
+                        <span title="Zugeordnet zu: ${targetLabel}" style="font-size: 0.72em; padding: 1px 6px; background: #dcfce7; color: #15803d; border-radius: 4px; font-weight: 600; max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">→ ${targetLabel}</span>
+                        <button class="btn-edit-cad-assignment" style="background: none; border: none; cursor: pointer; color: #0284c7; font-size: 0.9em;" title="Zuordnung bearbeiten / anderen Verteiler wählen">✏️</button>
                         <button class="btn-unassign-cad" style="background: none; border: none; cursor: pointer; color: #64748b; font-size: 0.9em;" title="Zuweisung zurücksetzen">↩</button>
                     </div>
                 `;
+
+                const assignedCheckbox = card.querySelector('.cad-room-checkbox');
+                if (assignedCheckbox) {
+                    assignedCheckbox.addEventListener('change', () => updateMultiSelectUI());
+                }
 
                 const nameInput = card.querySelector('.cad-room-name-input');
                 if (nameInput) {
@@ -4589,14 +4611,30 @@ document.addEventListener('DOMContentLoaded', () => {
                     });
                 }
 
+                const btnEditAssignment = card.querySelector('.btn-edit-cad-assignment');
+                if (btnEditAssignment) {
+                    btnEditAssignment.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        if (assignedCheckbox) assignedCheckbox.checked = true;
+                        if (targetInfo && targetInfo.floorIndex != null) {
+                            selectedCadVerteilerIndex = String(targetInfo.floorIndex);
+                        }
+                        renderCadVerteilerList();
+                        updateMultiSelectUI();
+                        if (cadPoolVerteilerList) cadPoolVerteilerList.scrollTop = 0;
+                    });
+                }
+
                 card.querySelector('.btn-unassign-cad').addEventListener('click', () => {
                     const assignedTr = document.querySelector(`tr.room-row[data-cad-id="${rm.id}"]`);
                     if (assignedTr) {
                         unassignCadRoomForTr(assignedTr);
                     } else {
                         rm.assignedFloor = null;
+                        rm.assignedFloorIndex = null;
                     }
                     renderCadPoolList();
+                    renderCadVerteilerList();
                     debouncedSave();
                 });
             } else {
@@ -4675,40 +4713,179 @@ document.addEventListener('DOMContentLoaded', () => {
         updateMultiSelectUI();
     }
 
+    function getCadVerteilerInfo(fb, idx) {
+        const ebene = (fb.querySelector('.input-floor-name')?.value || '').trim() || `Geschoss ${idx + 1}`;
+        const fbhv = (fb.querySelector('.input-fbhv-name')?.value || '').trim();
+        const pos = (fb.querySelector('.input-pos-nr')?.value || '').trim();
+        const roomRows = fb.querySelectorAll('tr.room-row');
+        let roomCount = 0;
+        let assignedCount = 0;
+        const assignedNames = [];
+        roomRows.forEach(tr => {
+            const roomName = (tr.querySelector('.input-room-name')?.value || '').trim();
+            if (roomName) roomCount++;
+            if (tr.dataset.cadId) {
+                assignedCount++;
+                if (roomName) assignedNames.push(roomName);
+            }
+        });
+        return {
+            floorIndex: fb.dataset.floorIndex,
+            ebene: ebene,
+            fbhv: fbhv,
+            pos: pos,
+            roomCount: roomCount,
+            assignedCount: assignedCount,
+            assignedNames: assignedNames
+        };
+    }
+
+    function getCadRoomAssignedVerteiler(rm) {
+        let tr = document.querySelector(`tr.room-row[data-cad-id="${rm.id}"]`);
+        let fb = tr ? tr.closest('tbody.floor-group') : null;
+        if (!fb && rm.assignedFloorIndex != null && rm.assignedFloorIndex !== '') {
+            fb = document.querySelector(`tbody.floor-group[data-floor-index="${rm.assignedFloorIndex}"]`);
+        }
+        if (!fb) return null;
+        const floorBodies = Array.from(document.querySelectorAll('tbody.floor-group'));
+        const idx = floorBodies.indexOf(fb);
+        return getCadVerteilerInfo(fb, idx >= 0 ? idx : 0);
+    }
+
+    function renderCadVerteilerList() {
+        if (!cadPoolVerteilerList) return;
+
+        const floorBodies = document.querySelectorAll('tbody.floor-group');
+
+        // Drop a selection that no longer exists
+        if (selectedCadVerteilerIndex !== null &&
+            !document.querySelector(`tbody.floor-group[data-floor-index="${selectedCadVerteilerIndex}"]`)) {
+            selectedCadVerteilerIndex = null;
+        }
+
+        cadPoolVerteilerList.innerHTML = '';
+
+        if (floorBodies.length === 0) {
+            cadPoolVerteilerList.innerHTML = '<p style="color: var(--text-secondary, #94a3b8); font-style: italic; font-size: 0.85em; margin: 15px; text-align: center;">Keine Verteiler vorhanden.<br>Legen Sie zuerst über <strong>Vert+</strong> einen Verteiler an.</p>';
+            updateMultiSelectUI();
+            return;
+        }
+
+        floorBodies.forEach((fb, idx) => {
+            const info = getCadVerteilerInfo(fb, idx);
+            const isSelected = String(info.floorIndex) === String(selectedCadVerteilerIndex);
+
+            const card = document.createElement('div');
+            card.className = 'cad-verteiler-card';
+            card.dataset.floorIndex = info.floorIndex;
+            card.style.cssText = `padding: 10px 12px; background: ${isSelected ? 'rgba(0, 120, 215, 0.08)' : 'var(--bg-container, #ffffff)'}; border: 2px solid ${isSelected ? 'var(--primary-color, #0078d7)' : 'var(--border-color, #cbd5e1)'}; border-radius: 8px; cursor: pointer; display: flex; flex-direction: column; gap: 4px; transition: all 0.15s ease;`;
+
+            card.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px;">
+                    <div style="display: flex; align-items: center; gap: 7px; min-width: 0;">
+                        <span style="font-size: 1.1em; color: ${isSelected ? 'var(--primary-color, #0078d7)' : '#94a3b8'}; flex-shrink: 0;">${isSelected ? '●' : '○'}</span>
+                        <strong style="font-size: 0.98em; color: var(--text-main, #0f172a); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${escapeHtml(info.ebene)}</strong>
+                    </div>
+                    <span style="font-size: 0.72em; padding: 1px 7px; background: #e0f2fe; color: #0369a1; border-radius: 10px; font-weight: 600; flex-shrink: 0;">${info.assignedCount} ${info.assignedCount === 1 ? 'CAD-Raum' : 'CAD-Räume'}</span>
+                </div>
+                <div style="font-size: 0.8em; color: var(--text-secondary, #64748b); display: flex; flex-wrap: wrap; gap: 10px;">
+                    <span>FBHV: <strong style="color: var(--text-main, #0f172a);">${escapeHtml(info.fbhv || '—')}</strong></span>
+                    <span>Pos.: <strong style="color: var(--text-main, #0f172a);">${escapeHtml(info.pos || '—')}</strong></span>
+                    <span>Räume: <strong style="color: var(--text-main, #0f172a);">${info.roomCount}</strong></span>
+                </div>
+                ${info.assignedNames.length > 0 ? `
+                <div style="font-size: 0.75em; color: #0369a1; background: rgba(224, 242, 254, 0.6); border-radius: 4px; padding: 3px 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${escapeHtml(info.assignedNames.join(', '))}">
+                    Zugeordnet: ${escapeHtml(info.assignedNames.slice(0, 3).join(', '))}${info.assignedNames.length > 3 ? ` +${info.assignedNames.length - 3} weitere` : ''}
+                </div>` : ''}
+            `;
+
+            card.addEventListener('click', () => {
+                selectedCadVerteilerIndex = String(info.floorIndex);
+                renderCadVerteilerList();
+            });
+
+            // Accept drag-and-drop from the room pool as before
+            card.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                if (e.dataTransfer) e.dataTransfer.dropEffect = 'copy';
+                card.style.borderColor = 'var(--primary-color, #0078d7)';
+                card.style.backgroundColor = 'rgba(0, 120, 215, 0.14)';
+            });
+            card.addEventListener('dragleave', () => {
+                card.style.borderColor = isSelected ? 'var(--primary-color, #0078d7)' : 'var(--border-color, #cbd5e1)';
+                card.style.backgroundColor = isSelected ? 'rgba(0, 120, 215, 0.08)' : 'var(--bg-container, #ffffff)';
+            });
+            card.addEventListener('drop', (e) => {
+                card.style.borderColor = isSelected ? 'var(--primary-color, #0078d7)' : 'var(--border-color, #cbd5e1)';
+                card.style.backgroundColor = isSelected ? 'rgba(0, 120, 215, 0.08)' : 'var(--bg-container, #ffffff)';
+                let jsonStr = '';
+                if (e.dataTransfer) {
+                    jsonStr = e.dataTransfer.getData('text/cad-room-json') || e.dataTransfer.getData('text/plain') || '';
+                }
+                if (!jsonStr) return;
+                e.preventDefault();
+                e.stopPropagation();
+                try {
+                    let roomDataList = JSON.parse(jsonStr);
+                    if (!Array.isArray(roomDataList)) roomDataList = [roomDataList];
+                    const targetFloorBody = document.querySelector(`tbody.floor-group[data-floor-index="${info.floorIndex}"]`);
+                    if (targetFloorBody) {
+                        selectedCadVerteilerIndex = String(info.floorIndex);
+                        assignRoomsToFloor(targetFloorBody, roomDataList);
+                    }
+                } catch (err) {
+                    console.error("Fehler beim Droppen auf Verteiler-Karte (CAD-Pool):", err);
+                }
+            });
+
+            cadPoolVerteilerList.appendChild(card);
+        });
+
+        updateMultiSelectUI();
+    }
+
     function updateMultiSelectUI() {
         const multiActionsDiv = document.getElementById('cad-multi-actions');
         const selectedCountSpan = document.getElementById('cad-selected-count');
         if (!multiActionsDiv || !selectedCountSpan) return;
-        
-        const checkedCount = cadPoolList.querySelectorAll('.cad-room-checkbox:checked').length;
-        if (checkedCount > 0) {
-            selectedCountSpan.textContent = checkedCount;
-            multiActionsDiv.style.display = 'flex';
-            populateTargetFloorDropdown();
-        } else {
-            multiActionsDiv.style.display = 'none';
-        }
-    }
 
-    function populateTargetFloorDropdown() {
-        const select = document.getElementById('select-target-floor');
-        if (!select) return;
-        
-        const currentVal = select.value;
-        select.innerHTML = '<option value="">-- Geschoss wählen --</option>';
-        
-        const floorBodies = document.querySelectorAll('tbody.floor-group');
-        floorBodies.forEach((fb, idx) => {
-            const ebeneInput = fb.querySelector('.input-floor-name');
-            const ebeneName = ebeneInput ? ebeneInput.value : `Geschoss ${idx + 1}`;
-            
-            const opt = document.createElement('option');
-            opt.value = fb.dataset.floorIndex;
-            opt.textContent = (ebeneName || `Geschoss ${idx + 1}`).trim();
-            select.appendChild(opt);
+        const checked = cadPoolList ? Array.from(cadPoolList.querySelectorAll('.cad-room-checkbox:checked')) : [];
+
+        if (checked.length === 0) {
+            multiActionsDiv.style.display = 'none';
+            return;
+        }
+
+        selectedCountSpan.textContent = checked.length;
+        multiActionsDiv.style.display = 'flex';
+
+        // Show the selected target Verteiler
+        let targetInfo = null;
+        if (selectedCadVerteilerIndex !== null) {
+            const floorBodies = Array.from(document.querySelectorAll('tbody.floor-group'));
+            const idx = floorBodies.findIndex(fb => String(fb.dataset.floorIndex) === String(selectedCadVerteilerIndex));
+            if (idx >= 0) targetInfo = getCadVerteilerInfo(floorBodies[idx], idx);
+        }
+
+        if (cadPoolSelectedVerteilerLabel) {
+            cadPoolSelectedVerteilerLabel.textContent = targetInfo
+                ? `${targetInfo.ebene}${targetInfo.fbhv ? ' · ' + targetInfo.fbhv : ''}`
+                : '— bitte rechts auswählen —';
+        }
+
+        // If all checked rooms are already assigned, the action becomes "change assignment"
+        let allAssigned = true;
+        checked.forEach(cb => {
+            const roomData = cadRoomPool.find(r => r.id === cb.dataset.id);
+            if (!roomData || (!roomData.assignedFloor && !getCadRoomAssignedVerteiler(roomData))) {
+                allAssigned = false;
+            }
         });
-        
-        select.value = currentVal;
+
+        const btnAssign = document.getElementById('btn-assign-selected-rooms');
+        if (btnAssign) {
+            btnAssign.textContent = allAssigned ? 'Zuordnung ändern' : 'Zuweisen';
+        }
     }
 
     // Initialize Assign Selected button
@@ -4716,25 +4893,24 @@ document.addEventListener('DOMContentLoaded', () => {
     if (btnAssignSelected && !btnAssignSelected.dataset.listenerAttached) {
         btnAssignSelected.dataset.listenerAttached = "true";
         btnAssignSelected.addEventListener('click', () => {
-            const select = document.getElementById('select-target-floor');
-            const floorIndex = select ? select.value : "";
-            if (!floorIndex) {
-                alert("Bitte wählen Sie ein Ziel-Geschoss aus!");
+            const floorIndex = selectedCadVerteilerIndex;
+            if (floorIndex === null || floorIndex === '') {
+                alert("Bitte wählen Sie zuerst rechts einen Ziel-Verteiler aus!");
                 return;
             }
-            
+
             const floorBody = document.querySelector(`tbody.floor-group[data-floor-index="${floorIndex}"]`);
             if (!floorBody) {
-                alert("Ziel-Geschoss konnte nicht gefunden werden.");
+                alert("Ziel-Verteiler konnte nicht gefunden werden.");
                 return;
             }
-            
+
             const checkedCheckboxes = cadPoolList.querySelectorAll('.cad-room-checkbox:checked');
             if (checkedCheckboxes.length === 0) {
                 alert("Bitte wählen Sie mindestens einen Raum aus!");
                 return;
             }
-            
+
             const selectedRooms = [];
             checkedCheckboxes.forEach(cb => {
                 const roomId = cb.dataset.id;
@@ -4743,10 +4919,62 @@ document.addEventListener('DOMContentLoaded', () => {
                     selectedRooms.push(roomData);
                 }
             });
-            
+
             if (selectedRooms.length > 0) {
                 assignRoomsToFloor(floorBody, selectedRooms);
             }
+        });
+    }
+
+    // Initialize Unassign Selected button
+    const btnUnassignSelected = document.getElementById('btn-unassign-selected-rooms');
+    if (btnUnassignSelected && !btnUnassignSelected.dataset.listenerAttached) {
+        btnUnassignSelected.dataset.listenerAttached = "true";
+        btnUnassignSelected.addEventListener('click', () => {
+            const checkedCheckboxes = cadPoolList ? cadPoolList.querySelectorAll('.cad-room-checkbox:checked') : [];
+            if (checkedCheckboxes.length === 0) {
+                alert("Bitte wählen Sie mindestens einen Raum aus!");
+                return;
+            }
+
+            checkedCheckboxes.forEach(cb => {
+                const roomId = cb.dataset.id;
+                const assignedTr = document.querySelector(`tr.room-row[data-cad-id="${roomId}"]`);
+                if (assignedTr) {
+                    unassignCadRoomForTr(assignedTr);
+                } else {
+                    const roomData = cadRoomPool.find(r => r.id === roomId);
+                    if (roomData) {
+                        roomData.assignedFloor = null;
+                        roomData.assignedFloorIndex = null;
+                    }
+                }
+            });
+
+            renderCadPoolList();
+            renderCadVerteilerList();
+            debouncedSave();
+        });
+    }
+
+    // Initialize Clear Selection button
+    const btnClearCadSelection = document.getElementById('btn-clear-cad-selection');
+    if (btnClearCadSelection && !btnClearCadSelection.dataset.listenerAttached) {
+        btnClearCadSelection.dataset.listenerAttached = "true";
+        btnClearCadSelection.addEventListener('click', () => {
+            if (cadPoolList) {
+                cadPoolList.querySelectorAll('.cad-room-checkbox:checked').forEach(cb => cb.checked = false);
+            }
+            updateMultiSelectUI();
+        });
+    }
+
+    // Initialize Refresh Verteiler button
+    const btnRefreshCadVerteiler = document.getElementById('btn-refresh-cad-verteiler');
+    if (btnRefreshCadVerteiler && !btnRefreshCadVerteiler.dataset.listenerAttached) {
+        btnRefreshCadVerteiler.dataset.listenerAttached = "true";
+        btnRefreshCadVerteiler.addEventListener('click', () => {
+            renderCadVerteilerList();
         });
     }
 
@@ -6081,15 +6309,32 @@ document.addEventListener('DOMContentLoaded', () => {
         
         roomDataList.forEach(roomData => {
             if (roomData && roomData.name) {
+                // If this room is already assigned to another Verteiler, remove the old row first
+                // so that a reassignment really moves the room instead of duplicating it.
+                const oldRow = document.querySelector(`tr.room-row[data-cad-id="${roomData.id}"]`);
+                if (oldRow && !floorBody.contains(oldRow)) {
+                    const oldDeleteBtn = oldRow.querySelector('.btn-delete-room');
+                    if (oldDeleteBtn) {
+                        oldDeleteBtn.click();
+                    } else {
+                        const oldFloorBody = oldRow.closest('tbody.floor-group');
+                        unassignCadRoomForTr(oldRow);
+                        oldRow.remove();
+                        if (oldFloorBody) calculateFloorSum(oldFloorBody);
+                    }
+                }
+
                 const existingRows = Array.from(floorBody.querySelectorAll('tr.room-row'));
-                let targetTr = null;
-                for (const tr of existingRows) {
-                    const name = tr.querySelector('.input-room-name')?.value || '';
-                    const areaRz = parseFloat(tr.querySelector('.input-area')?.value || 0);
-                    const areaIz = parseFloat(tr.querySelector('.input-area-iz')?.value || 0);
-                    if (!name && areaRz === 0 && areaIz === 0) {
-                        targetTr = tr;
-                        break;
+                let targetTr = existingRows.find(tr => tr.dataset.cadId === roomData.id) || null;
+                if (!targetTr) {
+                    for (const tr of existingRows) {
+                        const name = tr.querySelector('.input-room-name')?.value || '';
+                        const areaRz = parseFloat(tr.querySelector('.input-area')?.value || 0);
+                        const areaIz = parseFloat(tr.querySelector('.input-area-iz')?.value || 0);
+                        if (!name && areaRz === 0 && areaIz === 0) {
+                            targetTr = tr;
+                            break;
+                        }
                     }
                 }
 
@@ -6121,6 +6366,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const ebeneName = floorBody.querySelector('.input-floor-name')?.value || 'Geschoss';
                 if (poolRm) {
                     poolRm.assignedFloor = ebeneName;
+                    poolRm.assignedFloorIndex = floorBody.dataset.floorIndex;
                 }
             }
         });
@@ -6128,6 +6374,7 @@ document.addEventListener('DOMContentLoaded', () => {
         calculateFloorSum(floorBody);
         calculateGlobalSum();
         renderCadPoolList();
+        renderCadVerteilerList();
         if (typeof renderVerteilerOverviewList === 'function') {
             renderVerteilerOverviewList();
         }
@@ -6144,6 +6391,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const poolRm = cadRoomPool.find(r => r.id === cadId);
             if (poolRm) {
                 poolRm.assignedFloor = null;
+                poolRm.assignedFloorIndex = null;
             }
             delete tr.dataset.cadId;
         } else {
@@ -6154,6 +6402,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const poolRm = cadRoomPool.find(r => r.name === name && r.assignedFloor !== null);
                 if (poolRm) {
                     poolRm.assignedFloor = null;
+                    poolRm.assignedFloorIndex = null;
                 }
             }
         }
@@ -6373,6 +6622,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
         });
+
+        // Papierkorb (Verteiler löschen) immer am rechten Rand der Kopfzeile halten:
+        // Status-Badge bekommt den automatischen Abstand, der Papierkorb folgt ganz rechts.
+        const metaRow1 = floorBody.querySelector('.fh-drag-row[data-fh-row="meta-row1"]');
+        if (metaRow1) {
+            const deleteItem = metaRow1.querySelector('.fh-draggable-item[data-fh-id="delete-floor"]');
+            const badgeItem = metaRow1.querySelector('.fh-draggable-item[data-fh-id="badge-active"]');
+            if (deleteItem) {
+                if (badgeItem) badgeItem.style.marginLeft = 'auto';
+                const actionsDiv = metaRow1.querySelector('#menu-edit-actions');
+                if (actionsDiv && actionsDiv.parentNode === metaRow1) {
+                    metaRow1.insertBefore(deleteItem, actionsDiv);
+                } else {
+                    metaRow1.appendChild(deleteItem);
+                }
+            }
+        }
     }
 
     /** Sync layout changes across all existing floors */
@@ -6621,6 +6887,36 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
         }
+
+        // Schnelleingabe-Felder (VA Rz / VA Iz / Anbindung):
+        // Zahl eingeben → wird auf alle Räume dieses Verteilers angewendet und
+        // überschreibt bestehende Werte. Die Raumfelder bleiben danach einzeln änderbar.
+        [
+            { input: trInfo.querySelector('.input-bulk-va-rz'), selector: '.input-va-rz' },
+            { input: trInfo.querySelector('.input-bulk-va-iz'), selector: '.input-va-iz' },
+            { input: trInfo.querySelector('.input-bulk-dist'), selector: '.input-dist' }
+        ].forEach(({ input, selector }) => {
+            if (!input) return;
+
+            const applyBulkValueToRooms = () => {
+                const raw = input.value.trim();
+                if (raw === '') return; // Leeres Feld überschreibt nichts
+                const value = parseFloat(raw);
+                if (!Number.isFinite(value)) return;
+
+                floorBody.querySelectorAll('tr.room-row').forEach(row => {
+                    const target = row.querySelector(selector);
+                    if (target) target.value = value;
+                    calculateRow(row);
+                });
+
+                calculateFloorSum(floorBody);
+                calculateGlobalSum();
+                if (!isLoading) debouncedSave();
+            };
+
+            input.addEventListener('input', applyBulkValueToRooms);
+        });
 
         const posInput = trInfo.querySelector('.input-pos-nr');
         if (posInput) {
@@ -7092,20 +7388,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Delete Room
         tr.querySelector('.btn-delete-room').addEventListener('click', () => {
-            const allRoomRows = document.querySelectorAll('tr.room-row');
-            if (allRoomRows.length > 0 && allRoomRows[0] === tr) {
-                // Die erste Zeile darf nie gelöscht werden, nur deren dynamische Eingabewerte
-                clearRoomRow(tr);
-                calculateFloorSum(tbody);
-                calculateGlobalSum();
-                if (!isLoading) debouncedSave();
-            } else {
-                unassignCadRoomForTr(tr);
-                tr.remove();
-                calculateFloorSum(tbody);
-                calculateGlobalSum();
-                if (!isLoading) debouncedSave();
+            unassignCadRoomForTr(tr);
+            tr.remove();
+
+            // Bleibt im Verteiler keine Raumzeile übrig, wird automatisch
+            // eine neue leere, neutrale Zeile eingefügt.
+            if (tbody.querySelectorAll('tr.room-row').length === 0) {
+                addRoomToFloor(tbody);
             }
+
+            calculateFloorSum(tbody);
+            calculateGlobalSum();
+            if (!isLoading) debouncedSave();
         });
 
         const inputName = tr.querySelector('.input-room-name');
@@ -7123,6 +7417,21 @@ document.addEventListener('DOMContentLoaded', () => {
             const globalDist = inputSettingDist ? parseFloat(inputSettingDist.value) || 10 : 10;
             inputDist.value = globalDist;
         }
+
+        // Gesetzte Schnelleingabewerte aus dem Verteilerkopf für die neue Zeile übernehmen
+        [
+            { bulk: '.input-bulk-va-rz', target: '.input-va-rz' },
+            { bulk: '.input-bulk-va-iz', target: '.input-va-iz' },
+            { bulk: '.input-bulk-dist', target: '.input-dist' }
+        ].forEach(({ bulk, target }) => {
+            const bulkInput = tbody.querySelector(bulk);
+            const targetInput = tr.querySelector(target);
+            if (!bulkInput || !targetInput) return;
+            const raw = bulkInput.value.trim();
+            if (raw === '') return;
+            const value = parseFloat(raw);
+            if (Number.isFinite(value)) targetInput.value = value;
+        });
 
         const inputs = tr.querySelectorAll('input, select');
         inputs.forEach(input => {
@@ -9716,7 +10025,7 @@ document.addEventListener('DOMContentLoaded', () => {
         'setting-target-len': "<strong>Ziel-Ringlänge:</strong> Die standardmäßig gewünschte Ziel-Rohrlänge pro Heizkreis.",
         'setting-max-over': "<strong>Max. Überschreitung:</strong> Maximale zulässige Überschreitung der Ziel-Ringlänge (z. B. 10m), bevor aufgeteilt wird.",
         'setting-dist': "<strong>Standard-Anbindung:</strong> Die standardmäßig gewünschte Länge der Anbindungsleitung pro Heizkreis.",
-        'btn-settings': "<strong>Parameter:</strong> Material-Parameter und Faktoren für die Berechnung anpassen.",
+        'btn-settings': "<strong>Einstellungen:</strong> Material-Parameter und Faktoren für die Berechnung anpassen.",
         'btn-design': "<strong>Design:</strong> Farbdesign der Benutzeroberfläche wechseln (z. B. Hell, Dunkel, Blau, etc.).",
         'btn-print-report': "<strong>Drucken:</strong> Öffnet den Druckdialog des Browsers zur Erstellung eines übersichtlichen PDFs oder zum Ausdrucken.",
         'btn-export-file': "<strong>Projekt speichern:</strong> Exportiert die aktuellen Eingaben als .json-Datei auf Ihren Computer.",
@@ -9733,7 +10042,7 @@ document.addEventListener('DOMContentLoaded', () => {
         'btn-toggle-floor': "<strong>Ein-/Ausklappen:</strong> Blendet die Räume dieses Geschosses ein oder aus.",
         'btn-toggle-rz': "<strong>RZ (Randzone):</strong> Randzonen-Eingaben für dieses Geschoss aktivieren/deaktivieren. Bei gedrückter Strg-Taste auf alle Verteiler übertragbar.",
         'btn-delete-floor': "<strong>Geschoss löschen:</strong> Entfernt dieses Geschoss inklusive aller Räume unwiderruflich.",
-        'btn-delete-room': "<strong>Raum löschen:</strong> Entfernt diesen Raum aus dem aktuellen Geschoss.",
+        'btn-delete-room': "<strong>Raum löschen:</strong> Entfernt diesen Raum. Ist es die letzte Zeile im Verteiler, wird automatisch eine neue leere Zeile eingefügt.",
 
         // Input classes
         'input-room-name': "<strong>Raumbezeichnung:</strong> Der Name des Raumes (z. B. Wohnzimmer, Bad, Küche).",
