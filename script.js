@@ -6663,6 +6663,136 @@ document.addEventListener('DOMContentLoaded', () => {
         mainFbhvFilter.addEventListener('input', applyMainTableFilters);
     }
 
+    // ══════════════════════════════════════════════════════════════════
+    //  Raum-Suche in der Spalte "Raum Bez."
+    //  - sucht ganze Wörter und Wortteile (Groß-/Kleinschreibung egal)
+    //  - klappt Verteiler mit Treffern automatisch aus
+    //  - markiert die Trefferzeilen gelb
+    // ══════════════════════════════════════════════════════════════════
+    function normalizeRoomSearchText(str) {
+        return (str || '')
+            .toLowerCase()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '');
+    }
+
+    let roomSearchMatchIndex = -1;
+
+    function getRoomSearchHits() {
+        return Array.from(document.querySelectorAll('#main-table tr.room-row.room-search-hit'));
+    }
+
+    function applyRoomSearch() {
+        const input = document.getElementById('room-search-input');
+        const countEl = document.getElementById('room-search-count');
+        const bar = document.getElementById('room-search-bar');
+        if (!input) return;
+
+        const query = normalizeRoomSearchText(input.value.trim());
+
+        document.querySelectorAll('#main-table tr.room-row.room-search-hit')
+            .forEach(tr => tr.classList.remove('room-search-hit'));
+
+        if (bar) bar.classList.toggle('has-query', query.length > 0);
+
+        if (!query) {
+            if (countEl) {
+                countEl.textContent = '';
+                countEl.classList.remove('no-hits');
+            }
+            roomSearchMatchIndex = -1;
+            if (typeof updateToggleAllFloorsButton === 'function') updateToggleAllFloorsButton();
+            return;
+        }
+
+        let hits = 0;
+        const matchedFloors = new Set();
+
+        document.querySelectorAll('#main-table tr.room-row').forEach(tr => {
+            const nameInput = tr.querySelector('.input-room-name');
+            const name = normalizeRoomSearchText(nameInput ? nameInput.value : '');
+
+            if (name.includes(query)) {
+                tr.classList.add('room-search-hit');
+                hits++;
+
+                const floorBody = tr.closest('tbody.floor-group');
+                if (floorBody) {
+                    matchedFloors.add(floorBody);
+                    // Eingeklappte Verteiler mit Treffern automatisch ausklappen
+                    if (floorBody.classList.contains('collapsed')) {
+                        floorBody.classList.remove('collapsed');
+                    }
+                }
+            }
+        });
+
+        roomSearchMatchIndex = -1;
+
+        if (countEl) {
+            if (hits === 0) {
+                countEl.textContent = 'Keine Treffer';
+            } else {
+                const floorCount = matchedFloors.size;
+                countEl.textContent = `${hits} Treffer in ${floorCount} ${floorCount === 1 ? 'Verteiler' : 'Verteilern'}`;
+            }
+            countEl.classList.toggle('no-hits', hits === 0);
+        }
+
+        if (typeof updateToggleAllFloorsButton === 'function') updateToggleAllFloorsButton();
+    }
+
+    function focusNextRoomSearchHit() {
+        const hits = getRoomSearchHits();
+        if (hits.length === 0) return;
+
+        roomSearchMatchIndex = (roomSearchMatchIndex + 1) % hits.length;
+        hits[roomSearchMatchIndex].scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    function clearRoomSearch() {
+        const input = document.getElementById('room-search-input');
+        if (!input) return;
+        input.value = '';
+        applyRoomSearch();
+        input.focus();
+    }
+
+    const roomSearchInput = document.getElementById('room-search-input');
+    if (roomSearchInput) {
+        roomSearchInput.addEventListener('input', applyRoomSearch);
+        roomSearchInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                focusNextRoomSearchHit();
+            } else if (e.key === 'Escape') {
+                e.preventDefault();
+                e.stopPropagation();
+                clearRoomSearch();
+            }
+        });
+    }
+
+    const roomSearchClear = document.getElementById('room-search-clear');
+    if (roomSearchClear) {
+        roomSearchClear.addEventListener('click', (e) => {
+            e.preventDefault();
+            clearRoomSearch();
+        });
+    }
+
+    // Wenn eine Raumbezeichnung geändert wird, laufende Suche aktualisieren
+    const roomSearchTable = document.getElementById('main-table');
+    if (roomSearchTable) {
+        let roomSearchDebounce = null;
+        roomSearchTable.addEventListener('input', (e) => {
+            if (!e.target.classList || !e.target.classList.contains('input-room-name')) return;
+            if (!roomSearchInput || !roomSearchInput.value.trim()) return;
+            clearTimeout(roomSearchDebounce);
+            roomSearchDebounce = setTimeout(applyRoomSearch, 150);
+        });
+    }
+
     function showDeleteModal(floorBody) {
         floorToDelete = floorBody;
         modalOverlay.classList.remove('hidden');
@@ -10003,6 +10133,9 @@ document.addEventListener('DOMContentLoaded', () => {
         calculateGlobalSum();
         if (typeof applyMainTableFilters === 'function') {
             applyMainTableFilters();
+        }
+        if (typeof applyRoomSearch === 'function') {
+            applyRoomSearch();
         }
         isLoading = false;
     }

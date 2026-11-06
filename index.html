@@ -1134,7 +1134,15 @@ body.menu-edit-mode .header-top-bar.fh-drag-row {
 
         <!-- Main Layout wrapper for table (100% full width) -->
         <div class="layout-wrapper" style="display: block; padding: 20px;">
-            
+
+            <!-- Raum-Suche (Spalte "Raum Bez.") -->
+            <div id="room-search-bar" class="room-search-bar">
+                <span class="room-search-icon" aria-hidden="true">🔍</span>
+                <input type="text" id="room-search-input" placeholder="Raum suchen (Raum Bez.) …" autocomplete="off" spellcheck="false" title="Sucht in allen Raumbezeichnungen – ganze Wörter oder Wortteile. Enter = zum nächsten Treffer, Esc = zurücksetzen">
+                <span id="room-search-count" class="room-search-count" aria-live="polite"></span>
+                <button type="button" id="room-search-clear" class="room-search-clear" title="Suche zurücksetzen (Esc)" aria-label="Suche zurücksetzen">✕</button>
+            </div>
+
             <!-- Main Table Area -->
             <div class="table-wrapper" style="width: 100%; padding-bottom: 20px; overflow-x: auto;">
                 <table id="main-table">
