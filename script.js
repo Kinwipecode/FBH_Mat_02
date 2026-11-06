@@ -1277,6 +1277,43 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    /* ==========================================================================
+       ALLE GESCHOSSE EIN-/AUSKLAPPEN
+       ========================================================================== */
+    function updateToggleAllFloorsButton() {
+        const btn = document.getElementById('btn-toggle-all-floors');
+        const icon = document.getElementById('toggle-all-floors-icon');
+        if (!btn || !icon) return;
+
+        const floors = Array.from(document.querySelectorAll('tbody.floor-group'));
+        const allCollapsed = floors.length > 0 && floors.every(fb => fb.classList.contains('collapsed'));
+
+        icon.textContent = allCollapsed ? '▶' : '▼';
+        btn.title = allCollapsed ? 'Alle Geschosse ausklappen' : 'Alle Geschosse einklappen';
+    }
+
+    function toggleAllFloors() {
+        const floors = Array.from(document.querySelectorAll('tbody.floor-group'));
+        if (floors.length === 0) return;
+
+        const allCollapsed = floors.every(fb => fb.classList.contains('collapsed'));
+        const targetCollapsed = !allCollapsed;
+
+        floors.forEach(fb => fb.classList.toggle('collapsed', targetCollapsed));
+        updateToggleAllFloorsButton();
+
+        if (!isLoading && typeof debouncedSave === 'function') debouncedSave();
+    }
+
+    const btnToggleAllFloors = document.getElementById('btn-toggle-all-floors');
+    if (btnToggleAllFloors) {
+        btnToggleAllFloors.addEventListener('click', (e) => {
+            if (e.target.closest('.drag-handle')) return;
+            if (document.body.classList.contains('menu-edit-mode')) return;
+            toggleAllFloors();
+        });
+    }
+
     if (btnSettings) {
         btnSettings.addEventListener('click', (e) => {
             if (e.target.closest('.drag-handle')) return;
@@ -1839,13 +1876,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                     
                     const kastenKey = floor.selectedKastenKey || 'auto';
-                    const allowedCabs = (kastenKey && kastenKey !== 'auto') ? [kastenKey] : getSelectedCabinetTypesFromUI();
-                    const rec = db.getRecommendation(vTypeGlobal, connToUse, floor.floorRings > 0 ? floor.floorRings : 2, allowedCabs);
+                    const noCabinet = (kastenKey === 'none');
+                    const allowedCabs = (!noCabinet && kastenKey && kastenKey !== 'auto') ? [kastenKey] : getSelectedCabinetTypesFromUI();
+                    const rec = noCabinet ? null : db.getRecommendation(vTypeGlobal, connToUse, floor.floorRings > 0 ? floor.floorRings : 2, allowedCabs);
                     
                     const setObj = db.connectionSets ? db.connectionSets.find(s => s.id === connToUse) : null;
                     const connName = rec ? rec.connectionSetName : (setObj ? setObj.name : 'Anschluss-Set horizontal');
                     
-                    let kastenFull = 'Kein Kasten gewählt';
+                    let kastenFull = noCabinet ? 'Ohne Kasten (bewusst kein Verteilerkasten)' : 'Kein Kasten gewählt';
                     let cabObj = null;
                     let reqIndex = '-';
                     if (rec && rec.matchingCabinets && rec.matchingCabinets.length > 0) {
@@ -1931,7 +1969,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             <tr>
                                 <td colspan="2" style="padding: 0 12px 8px 12px;">
                                     <div style="font-size: 8.5pt; color: #0f172a; background: #ffffff; padding: 4px 10px; border-radius: 4px; border: 1px solid #bae6fd; font-weight: 600;">
-                                        📦 Verteilerkasten: ${kastenFull}
+                                        ${noCabinet ? '🚫' : '📦'} Verteilerkasten: ${kastenFull}
                                     </div>
                                 </td>
                             </tr>
@@ -2085,7 +2123,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <tbody>
                     ${vertRows || `<tr><td colspan="3" class="text-center" style="color:#64748b; font-style:italic;">Keine Heizkreisverteiler erforderlich</td></tr>`}
                     ${erweitRows}
-                    ${kastenRows || `<tr><td colspan="3" class="text-center" style="color:#64748b; font-style:italic;">Keine Verteilerkästen ausgewählt</td></tr>`}
+                    ${kastenRows || `<tr><td colspan="3" class="text-center" style="color:#64748b; font-style:italic;">Keine Verteilerkästen in der Stückliste</td></tr>`}
                     ${connRows || `<tr><td colspan="3" class="text-center" style="color:#64748b; font-style:italic;">Keine Anschluss-Sets ausgewählt</td></tr>`}
                 </tbody>
             </table>
@@ -2654,6 +2692,76 @@ document.addEventListener('DOMContentLoaded', () => {
         return false;
     }
 
+    // Helper: Native directory handle for the portable EXE (real Windows path)
+    function isNativeDirHandle(handle) {
+        return !!(handle && handle.__nativePath && window.fbhNative && window.fbhNative.isElectron);
+    }
+
+    function createNativeDirHandle(dirPath) {
+        const normalized = String(dirPath || '').replace(/[\\/]+$/, '');
+        const folderName = normalized.split(/[\\/]/).filter(Boolean).pop() || normalized;
+
+        return {
+            __nativePath: normalized,
+            name: folderName,
+            async queryPermission() { return 'granted'; },
+            async requestPermission() { return 'granted'; },
+            async getFileHandle(name) {
+                const filePath = await window.fbhNative.joinPath(normalized, name);
+                return {
+                    name,
+                    __nativePath: filePath,
+                    async getFile() {
+                        const info = await window.fbhNative.fileInfo(filePath);
+                        const text = await window.fbhNative.readFile(filePath);
+                        return new File([text], name, { lastModified: info.mtimeMs, type: 'application/json' });
+                    },
+                    async createWritable() {
+                        const chunks = [];
+                        return {
+                            async write(data) {
+                                if (typeof data === 'string') {
+                                    chunks.push(data);
+                                } else if (data instanceof Blob) {
+                                    chunks.push(await data.text());
+                                } else if (data instanceof ArrayBuffer) {
+                                    chunks.push(new TextDecoder().decode(data));
+                                } else {
+                                    chunks.push(String(data));
+                                }
+                            },
+                            async close() {
+                                await window.fbhNative.writeFile(filePath, chunks.join(''));
+                            }
+                        };
+                    }
+                };
+            },
+            async *values() {
+                const entries = await window.fbhNative.listDir(normalized);
+                for (const entry of entries) {
+                    if (entry.isFile) {
+                        yield {
+                            kind: 'file',
+                            name: entry.name,
+                            async getFile() {
+                                const info = await window.fbhNative.fileInfo(entry.path);
+                                const text = await window.fbhNative.readFile(entry.path);
+                                return new File([text], entry.name, { lastModified: info.mtimeMs, type: 'application/json' });
+                            }
+                        };
+                    } else if (entry.isDirectory) {
+                        yield { kind: 'directory', name: entry.name };
+                    }
+                }
+            },
+            async removeEntry(name) {
+                const filePath = await window.fbhNative.joinPath(normalized, name);
+                await window.fbhNative.deleteFile(filePath);
+            }
+        };
+    }
+
     // Helper: Update UI for Directory State & Header Path Display
     function updateFolderUI() {
         const headerFolderName = document.getElementById('header-folder-name');
@@ -2661,22 +2769,35 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (projectDirectoryHandle) {
             const folderName = projectDirectoryHandle.name || 'FBH_Projekte';
-            let fullPath = localStorage.getItem('fbhFullPath');
-            if (!fullPath) {
-                fullPath = `g:\\FBH Mat\\${folderName}`;
-            }
+            const nativePath = projectDirectoryHandle.__nativePath || '';
+            const fullPath = nativePath
+                || localStorage.getItem('fbhFullPath')
+                || folderName;
+            const pathHint = nativePath
+                ? fullPath
+                : `${fullPath} (Browser: vollständiger Pfad aus Sicherheitsgründen nicht auslesbar)`;
 
             if (headerFolderName) {
                 headerFolderName.textContent = fullPath;
+                headerFolderName.title = pathHint;
+            }
+            if (btnSelectFolder) {
+                btnSelectFolder.title = `Aktueller Projektordner: ${pathHint} (Klicken zum Ändern, Ziehen am Griff ⋮⋮ zum Verschieben)`;
             }
             if (headerFolderBadge) {
-                headerFolderBadge.title = `Aktueller Zielordner: ${fullPath} (Klicken zum Ändern)`;
+                headerFolderBadge.title = `Aktueller Projektordner: ${pathHint} (Klicken zum Ändern)`;
             }
         } else {
-            let defaultPath = localStorage.getItem('fbhFullPath') || 'g:\\FBH Mat\\FBH_Projekte';
+            const defaultPath = localStorage.getItem('fbhFullPath') || '–';
 
             if (headerFolderName) {
                 headerFolderName.textContent = defaultPath;
+                headerFolderName.title = defaultPath === '–'
+                    ? 'Projektordner wählen'
+                    : defaultPath;
+            }
+            if (btnSelectFolder) {
+                btnSelectFolder.title = 'Projektordner wählen (Klicken zum Auswählen, Ziehen am Griff ⋮⋮ zum Verschieben)';
             }
         }
         updateActiveProjectFileDisplay();
@@ -2744,6 +2865,28 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Function: Pick Directory
     async function selectProjectDirectory() {
+        // Portable EXE: nativer Windows-Dialog -> echter absoluter Pfad
+        if (window.fbhNative && window.fbhNative.isElectron) {
+            try {
+                const dirPath = await window.fbhNative.pickDirectory();
+                if (!dirPath) return;
+                projectDirectoryHandle = createNativeDirHandle(dirPath);
+                localStorage.setItem('fbhFullPath', dirPath);
+                await FBH_DB.setDirHandle(dirPath);
+                updateFolderUI();
+
+                // Automatically open the folder files modal
+                if (folderFilesModal) {
+                    folderFilesModal.classList.remove('hidden');
+                    refreshFolderFilesList();
+                }
+            } catch (err) {
+                console.error("Ordnerauswahl Fehler:", err);
+                alert("Fehler bei der Ordnerauswahl: " + err.message);
+            }
+            return;
+        }
+
         if (!('showDirectoryPicker' in window)) {
             alert('Ihr Browser unterstützt die direkte Ordnerauswahl (File System Access API) leider nicht. Sie können stattdessen die normale Export/Import-Funktion nutzen.');
             return;
@@ -2753,8 +2896,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 mode: 'readwrite'
             });
             projectDirectoryHandle = handle;
-            const fullPath = `g:\\FBH Mat\\${handle.name}`;
-            localStorage.setItem('fbhFullPath', fullPath);
+            // Der Browser gibt aus Sicherheitsgründen keinen absoluten Pfad heraus.
+            localStorage.setItem('fbhFullPath', handle.name);
             await FBH_DB.setDirHandle(handle);
             updateFolderUI();
 
@@ -2958,7 +3101,15 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const storedHandle = await FBH_DB.getDirHandle();
             if (storedHandle) {
-                projectDirectoryHandle = storedHandle;
+                if (typeof storedHandle === 'string') {
+                    // In der portablen EXE wird der echte Pfad als String gespeichert.
+                    if (window.fbhNative && window.fbhNative.isElectron) {
+                        await window.fbhNative.setActiveDir(storedHandle);
+                        projectDirectoryHandle = createNativeDirHandle(storedHandle);
+                    }
+                } else {
+                    projectDirectoryHandle = storedHandle;
+                }
                 updateFolderUI();
             }
         } catch (e) {
@@ -4354,9 +4505,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 totalFloorRings += rings;
             });
 
-            const rec = getVerteilerRecommendationForFloor(totalFloorRings);
+            const selKastenOverview = fb.querySelector('.select-floor-kasten');
+            const kastenOverviewKey = selKastenOverview ? selKastenOverview.value : 'auto';
+            const rec = kastenOverviewKey === 'none' ? null : getVerteilerRecommendationForFloor(totalFloorRings);
             let recHTML = '';
-            if (rec) {
+            if (kastenOverviewKey === 'none') {
+                recHTML = `
+                    <div style="margin-top: 6px; padding: 10px 12px; background: #f1f5f9; border-left: 4px solid #94a3b8; border-radius: 6px; font-size: 0.85em; pointer-events: none;">
+                        <div style="font-weight: bold; color: #475569; margin-bottom: 3px;">🚫 Ohne Kasten</div>
+                        <div style="color: var(--text-secondary, #64748b); font-size: 0.92em;">
+                            Für diesen Verteiler ist bewusst kein Verteilerkasten vorgesehen (z. B. offene Montage oder bauseitiger Schacht). Ringe gesamt: <strong>${totalFloorRings}</strong>
+                        </div>
+                    </div>
+                `;
+            } else if (rec) {
                 const cabinetBadges = rec.matchingCabinets.length > 0 
                     ? rec.matchingCabinets.map(c => `<span style="display:inline-block; background:var(--zebra-even, #f1f5f9); padding:2px 8px; border-radius:4px; font-weight:600; border:1px solid #cbd5e1; color:#1e293b;">${c.shortName} (${c.width}mm | Art. ${c.articleNo})</span>`).join(' ')
                     : '<span style="color:#dc2626; font-style:italic;">Kein Schrankmodell für gewählte Bauformen erlaubt</span>';
@@ -5489,6 +5651,25 @@ document.addEventListener('DOMContentLoaded', () => {
             Object.keys(allItemsMap).forEach(id => {
                 if (!placedIds.has(id)) {
                     const el = allItemsMap[id];
+
+                    // Migration: Der neue Knopf "Alle Geschosse ein-/ausklappen"
+                    // soll bei bestehenden Layouts in der Verteiler-Zeile landen,
+                    // nicht in der ersten Zeile.
+                    if (id === 'btn-toggle-all-floors') {
+                        const anchor = rowsContainer.querySelector('[data-btn-id="btn-verteiler-move"]')
+                            || rowsContainer.querySelector('[data-btn-id="btn-add-floor-main"]');
+                        const targetRow = anchor ? anchor.closest('.toolbar-row') : firstRow;
+                        const rowItems = Array.from(targetRow.querySelectorAll('.toolbar-item'));
+                        const maxLeft = rowItems.reduce((max, item) => Math.max(max, parseInt(item.style.left, 10) || 0), 0);
+                        const newLeft = snapToSector(maxLeft + 140);
+                        el.style.left = newLeft + 'px';
+                        el.dataset.sector = Math.round(newLeft / GRID_SECTOR_SIZE);
+                        el.style.position = 'absolute';
+                        targetRow.appendChild(el);
+                        placedIds.add(id);
+                        return;
+                    }
+
                     if (!el.style.left) {
                         el.style.left = defaultOffset + 'px';
                         defaultOffset += 140;
@@ -7057,6 +7238,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
                     });
                 }
+
+                if (typeof updateToggleAllFloorsButton === 'function') {
+                    updateToggleAllFloorsButton();
+                }
                 
                 // Save layout to persist collapse state
                 if (!isLoading) debouncedSave();
@@ -7647,7 +7832,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function updateSelectAutoStyle(selectEl) {
         if (!selectEl) return;
-        if (selectEl.value === 'auto') {
+        if (selectEl.value === 'none') {
+            // Bewusste Entscheidung gegen einen Verteilerkasten: neutral, nicht als Fehler darstellen.
+            selectEl.style.background = '#f1f5f9';
+            selectEl.style.color = '#475569';
+            selectEl.style.borderColor = '#cbd5e1';
+            selectEl.style.fontWeight = 'bold';
+        } else if (selectEl.value === 'auto') {
             selectEl.style.background = '#e0f2fe';
             selectEl.style.color = '#0369a1';
             selectEl.style.borderColor = '#bae6fd';
@@ -7824,8 +8015,9 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        const allowedCabs = (kastenKey && kastenKey !== 'auto') ? [kastenKey] : getSelectedCabinetTypesFromUI();
-        const rec = db.getRecommendation(vType, connToUse, rings > 0 ? rings : 2, allowedCabs);
+        const noCabinet = (kastenKey === 'none');
+        const allowedCabs = (!noCabinet && kastenKey && kastenKey !== 'auto') ? [kastenKey] : getSelectedCabinetTypesFromUI();
+        const rec = noCabinet ? null : db.getRecommendation(vType, connToUse, rings > 0 ? rings : 2, allowedCabs);
 
         // Tooltip update for select-floor-conn
         const setObj = db.connectionSets ? db.connectionSets.find(s => s.id === connToUse) : null;
@@ -7848,6 +8040,15 @@ document.addEventListener('DOMContentLoaded', () => {
             dimsSpan.title = "Keine Heizkreise ausgelegt (Klicken für Details)";
             dimsSpan.style.background = "#f1f5f9";
             dimsSpan.style.color = "#64748b";
+            dimsSpan.style.borderColor = "#cbd5e1";
+            return;
+        }
+
+        if (noCabinet) {
+            dimsSpan.innerHTML = `🚫 Ohne Kasten${sep}kein Verteilerkasten vorgesehen ℹ️`;
+            dimsSpan.title = "Für diesen Verteiler ist bewusst kein Verteilerkasten vorgesehen (z. B. offene Montage oder bauseitiger Schacht).\n(Klicken für Details)";
+            dimsSpan.style.background = "#f1f5f9";
+            dimsSpan.style.color = "#475569";
             dimsSpan.style.borderColor = "#cbd5e1";
             return;
         }
@@ -7894,10 +8095,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const kdetailsModal = document.getElementById('kasten-details-modal');
     const btnKdetailsClose = document.getElementById('btn-kdetails-close');
     const btnKdetailsCloseX = document.getElementById('btn-kdetails-close-x');
+    const btnKdetailsToggleCabinet = document.getElementById('btn-kdetails-toggle-cabinet');
+    let currentKdetailsFloorBody = null;
 
     function openKastenDetailsModal(floorBody) {
         const db = (typeof FBHV_DATABASE !== 'undefined') ? FBHV_DATABASE : (typeof window !== 'undefined' ? window.FBHV_DATABASE : null);
         if (!kdetailsModal || !floorBody || !db) return;
+
+        currentKdetailsFloorBody = floorBody;
 
         const ebeneName = floorBody.querySelector('.input-floor-name')?.value || 'Geschoss';
         const fbhvName = floorBody.querySelector('.input-fbhv-name')?.value || '-';
@@ -7971,8 +8176,14 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        const allowedCabs = (kastenKey && kastenKey !== 'auto') ? [kastenKey] : getSelectedCabinetTypesFromUI();
-        const rec = FBHV_DATABASE.getRecommendation(vType, connToUse, rings > 0 ? rings : 2, allowedCabs);
+        const noCabinet = (kastenKey === 'none');
+        const allowedCabs = (!noCabinet && kastenKey && kastenKey !== 'auto') ? [kastenKey] : getSelectedCabinetTypesFromUI();
+        const rec = noCabinet ? null : FBHV_DATABASE.getRecommendation(vType, connToUse, rings > 0 ? rings : 2, allowedCabs);
+
+        if (btnKdetailsToggleCabinet) {
+            btnKdetailsToggleCabinet.textContent = noCabinet ? '🚗 Auto (Empfehlung) wählen' : '🚫 Ohne Kasten wählen';
+            btnKdetailsToggleCabinet.dataset.targetKasten = noCabinet ? 'auto' : 'none';
+        }
 
         const titleEl = document.getElementById('kdetails-primary-title');
         const widthEl = document.getElementById('kdetails-width');
@@ -7983,7 +8194,18 @@ document.addEventListener('DOMContentLoaded', () => {
         const articleEl = document.getElementById('kdetails-article');
         const altListEl = document.getElementById('kdetails-alternatives-list');
 
-        if (rec && rec.matchingCabinets.length > 0) {
+        if (noCabinet) {
+            if (titleEl) titleEl.textContent = "Ohne Kasten (bewusst kein Verteilerkasten)";
+            if (widthEl) widthEl.textContent = "-";
+            if (heightEl) heightEl.textContent = "-";
+            if (depthEl) depthEl.textContent = "-";
+            if (lenEl) lenEl.textContent = "-";
+            if (indexEl) indexEl.textContent = "-";
+            if (articleEl) articleEl.textContent = "-";
+            if (altListEl) {
+                altListEl.innerHTML = '<div style="color:#475569; background:#f1f5f9; border:1px solid #cbd5e1; border-radius:6px; padding:10px 14px;">Für diesen Verteiler ist bewusst kein Verteilerkasten vorgesehen (z. B. offene Montage oder bauseitiger Schacht). Die Kasten-Empfehlungen sind daher ausgeblendet.</div>';
+            }
+        } else if (rec && rec.matchingCabinets.length > 0) {
             const primaryCab = rec.matchingCabinets[0];
             if (titleEl) titleEl.textContent = `Gewählter / Empfohlener Kasten: ${primaryCab.name}`;
             if (widthEl) widthEl.textContent = `${primaryCab.width} mm (Mindestbreite)`;
@@ -9370,6 +9592,21 @@ document.addEventListener('DOMContentLoaded', () => {
             closeKastenDetailsModal();
         });
     }
+    if (btnKdetailsToggleCabinet) {
+        btnKdetailsToggleCabinet.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (!currentKdetailsFloorBody) return;
+            const selKasten = currentKdetailsFloorBody.querySelector('.select-floor-kasten');
+            if (!selKasten) return;
+
+            const target = btnKdetailsToggleCabinet.dataset.targetKasten || 'none';
+            selKasten.value = target;
+            updateSelectAutoStyle(selKasten);
+            calculateFloorSum(currentKdetailsFloorBody);
+            if (!isLoading) debouncedSave();
+            openKastenDetailsModal(currentKdetailsFloorBody);
+        });
+    }
 
     function calculateGlobalSum() {
         const floorBodies = document.querySelectorAll('tbody.floor-group');
@@ -9481,8 +9718,9 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             
             const kastenKey = floor.selectedKastenKey || 'auto';
-            const allowedCabs = (kastenKey && kastenKey !== 'auto') ? [kastenKey] : getSelectedCabinetTypesFromUI();
-            const rec = db ? db.getRecommendation(vTypeGlobal, connToUse, floorRings > 0 ? floorRings : 2, allowedCabs) : null;
+            const noCabinet = (kastenKey === 'none');
+            const allowedCabs = (!noCabinet && kastenKey && kastenKey !== 'auto') ? [kastenKey] : getSelectedCabinetTypesFromUI();
+            const rec = (!noCabinet && db) ? db.getRecommendation(vTypeGlobal, connToUse, floorRings > 0 ? floorRings : 2, allowedCabs) : null;
             
             const setObj = db && db.connectionSets ? db.connectionSets.find(s => s.id === connToUse) : null;
             const connName = rec ? rec.connectionSetName : (setObj ? setObj.name : 'Anschluss-Set horizontal');
@@ -9610,6 +9848,9 @@ document.addEventListener('DOMContentLoaded', () => {
         
         if (typeof renderVerteilerOverviewList === 'function') {
             renderVerteilerOverviewList();
+        }
+        if (typeof updateToggleAllFloorsButton === 'function') {
+            updateToggleAllFloorsButton();
         }
     }
 

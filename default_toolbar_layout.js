@@ -134,6 +134,11 @@ window.DEFAULT_TOOLBAR_LAYOUT = {
           "id": "btn-verteiler-move",
           "left": 565,
           "sector": 113
+        },
+        {
+          "id": "btn-toggle-all-floors",
+          "left": 705,
+          "sector": 141
         }
       ]
     }

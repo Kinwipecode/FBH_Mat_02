@@ -355,9 +355,8 @@ input:focus::placeholder {
     padding: 0;
 }
 
-/* Collapse Floor Rows */
-.floor-group.collapsed tr.room-row,
-.floor-group.collapsed tr.column-header-row {
+/* Collapse Floor Rows – Spaltentitel bleiben sichtbar */
+.floor-group.collapsed tr.room-row {
     display: none;
 }
 

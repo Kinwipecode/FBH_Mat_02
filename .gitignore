@@ -2,6 +2,11 @@
 FBH_*.json
 layout_sync_app_config.json
 
+# Große Binärdateien / Build-Artefakte (nicht ins Repo)
+EXE Version/
+*.exe
+Backup/
+
 # OS & Editor generated files
 .DS_Store
 Thumbs.db
