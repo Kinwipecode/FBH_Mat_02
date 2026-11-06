@@ -372,7 +372,7 @@ input:focus::placeholder {
     border: none;
     outline: none;
     background: transparent;
-    width: 330px;
+    width: 220px;
     color: var(--text-main, #0f172a);
 }
 
