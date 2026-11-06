@@ -5,14 +5,9 @@
       "collapsed": false,
       "items": [
         {
-          "id": "main-floor-filter",
+          "id": "main-search",
           "left": 15,
           "sector": 3
-        },
-        {
-          "id": "main-fbhv-filter",
-          "left": 270,
-          "sector": 54
         },
         {
           "id": "btn-toggle-tooltips",

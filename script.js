@@ -6593,203 +6593,181 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function clearMainTableFilters() {
-        const floorFilterInput = document.getElementById('main-floor-filter');
-        const fbhvFilterInput = document.getElementById('main-fbhv-filter');
-        if (floorFilterInput) floorFilterInput.value = '';
-        if (fbhvFilterInput) fbhvFilterInput.value = '';
-        applyMainTableFilters();
+        const searchInput = document.getElementById('main-search');
+        if (searchInput) {
+            searchInput.value = '';
+            applyMainTableFilters();
+            searchInput.focus();
+        } else {
+            applyMainTableFilters();
+        }
     }
     window.clearMainTableFilters = clearMainTableFilters;
 
-    function applyMainTableFilters() {
-        const floorFilterInput = document.getElementById('main-floor-filter');
-        const fbhvFilterInput = document.getElementById('main-fbhv-filter');
-        
-        const floorText = floorFilterInput ? floorFilterInput.value.toLowerCase().trim() : '';
-        const fbhvText = fbhvFilterInput ? fbhvFilterInput.value.toLowerCase().trim() : '';
-        
-        const floorBodies = document.querySelectorAll('tbody.floor-group');
-        let visibleCount = 0;
-
-        floorBodies.forEach(fb => {
-            const ebeneInput = fb.querySelector('.input-floor-name');
-            const ebeneName = ebeneInput ? ebeneInput.value.toLowerCase() : '';
-            
-            const fbhvInput = fb.querySelector('.input-fbhv-name');
-            const fbhvName = fbhvInput ? fbhvInput.value.toLowerCase() : '';
-            
-            const matchesFloor = !floorText || ebeneName.includes(floorText);
-            const matchesFbhv = !fbhvText || fbhvName.includes(fbhvText);
-            
-            if (matchesFloor && matchesFbhv) {
-                fb.style.display = ''; // Show floor
-                visibleCount++;
-            } else {
-                fb.style.display = 'none'; // Hide floor
-            }
-        });
-
-        // Show notice banner if all floors are filtered out
-        let filterNotice = document.getElementById('main-table-filter-notice');
-        const contentBody = document.getElementById('content-body');
-
-        if (visibleCount === 0 && (floorText || fbhvText)) {
-            if (!filterNotice && contentBody) {
-                filterNotice = document.createElement('tr');
-                filterNotice.id = 'main-table-filter-notice';
-                filterNotice.innerHTML = `
-                    <td colspan="17" style="padding: 30px; text-align: center; background: #fff3cd; color: #856404; border: 2px dashed #ffeeba; border-radius: 8px; font-weight: 600; font-size: 1.05em;">
-                        🔍 Keine Verteiler / Geschosse entsprechen den aktuellen Filtern ("${escapeHtml(floorText || fbhvText)}").
-                        <br><br>
-                        <button type="button" onclick="clearMainTableFilters()" style="padding: 8px 18px; background: #856404; color: #ffffff; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 0.95em; box-shadow: 0 4px 10px rgba(0,0,0,0.15);">
-                            ✕ Filter zurücksetzen
-                        </button>
-                    </td>
-                `;
-                contentBody.appendChild(filterNotice);
-            }
-        } else if (filterNotice) {
-            filterNotice.remove();
-        }
-    }
-
-    // Bind event listeners for main table filters
-    const mainFloorFilter = document.getElementById('main-floor-filter');
-    if (mainFloorFilter) {
-        mainFloorFilter.addEventListener('input', applyMainTableFilters);
-    }
-    const mainFbhvFilter = document.getElementById('main-fbhv-filter');
-    if (mainFbhvFilter) {
-        mainFbhvFilter.addEventListener('input', applyMainTableFilters);
-    }
-
-    // ══════════════════════════════════════════════════════════════════
-    //  Raum-Suche in der Spalte "Raum Bez."
-    //  - sucht ganze Wörter und Wortteile (Groß-/Kleinschreibung egal)
-    //  - klappt Verteiler mit Treffern automatisch aus
-    //  - markiert die Trefferzeilen gelb
-    // ══════════════════════════════════════════════════════════════════
-    function normalizeRoomSearchText(str) {
+    function normalizeMainSearchText(str) {
         return (str || '')
             .toLowerCase()
             .normalize('NFD')
             .replace(/[\u0300-\u036f]/g, '');
     }
 
-    let roomSearchMatchIndex = -1;
+    let mainSearchMatchIndex = -1;
 
-    function getRoomSearchHits() {
+    function getMainSearchRoomHits() {
         return Array.from(document.querySelectorAll('#main-table tr.room-row.room-search-hit'));
     }
 
-    function applyRoomSearch() {
-        const input = document.getElementById('room-search-input');
-        const countEl = document.getElementById('room-search-count');
-        const bar = document.getElementById('room-search-bar');
-        if (!input) return;
+    function focusNextMainSearchHit() {
+        const hits = getMainSearchRoomHits();
+        if (hits.length === 0) return;
 
-        const query = normalizeRoomSearchText(input.value.trim());
+        mainSearchMatchIndex = (mainSearchMatchIndex + 1) % hits.length;
+        hits[mainSearchMatchIndex].scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    function applyMainTableFilters() {
+        const searchInput = document.getElementById('main-search');
+        const countEl = document.getElementById('main-search-count');
+        const searchItem = document.getElementById('main-search-item');
+        if (!searchInput) return;
+
+        const query = normalizeMainSearchText(searchInput.value.trim());
 
         document.querySelectorAll('#main-table tr.room-row.room-search-hit')
             .forEach(tr => tr.classList.remove('room-search-hit'));
 
-        if (bar) bar.classList.toggle('has-query', query.length > 0);
+        if (searchItem) searchItem.classList.toggle('has-query', query.length > 0);
+
+        const floorBodies = Array.from(document.querySelectorAll('tbody.floor-group'));
 
         if (!query) {
+            floorBodies.forEach(fb => { fb.style.display = ''; });
             if (countEl) {
                 countEl.textContent = '';
+                countEl.title = '';
                 countEl.classList.remove('no-hits');
             }
-            roomSearchMatchIndex = -1;
+            mainSearchMatchIndex = -1;
+            const emptyNotice = document.getElementById('main-table-filter-notice');
+            if (emptyNotice) emptyNotice.remove();
             if (typeof updateToggleAllFloorsButton === 'function') updateToggleAllFloorsButton();
             return;
         }
 
-        let hits = 0;
-        const matchedFloors = new Set();
+        let visibleFloors = 0;
+        let roomHits = 0;
 
-        document.querySelectorAll('#main-table tr.room-row').forEach(tr => {
-            const nameInput = tr.querySelector('.input-room-name');
-            const name = normalizeRoomSearchText(nameInput ? nameInput.value : '');
+        floorBodies.forEach(fb => {
+            const floorName = normalizeMainSearchText(fb.querySelector('.input-floor-name')?.value || '');
+            const fbhvName = normalizeMainSearchText(fb.querySelector('.input-fbhv-name')?.value || '');
+            const floorMatches = floorName.includes(query) || fbhvName.includes(query);
 
-            if (name.includes(query)) {
-                tr.classList.add('room-search-hit');
-                hits++;
-
-                const floorBody = tr.closest('tbody.floor-group');
-                if (floorBody) {
-                    matchedFloors.add(floorBody);
-                    // Eingeklappte Verteiler mit Treffern automatisch ausklappen
-                    if (floorBody.classList.contains('collapsed')) {
-                        floorBody.classList.remove('collapsed');
-                    }
+            let floorRoomHits = 0;
+            fb.querySelectorAll('tr.room-row').forEach(tr => {
+                const roomName = normalizeMainSearchText(tr.querySelector('.input-room-name')?.value || '');
+                if (roomName.includes(query)) {
+                    tr.classList.add('room-search-hit');
+                    floorRoomHits++;
                 }
+            });
+
+            if (floorMatches || floorRoomHits > 0) {
+                fb.style.display = ''; // Verteiler anzeigen
+                visibleFloors++;
+                roomHits += floorRoomHits;
+
+                // Eingeklappte Verteiler mit Raumtreffern automatisch ausklappen
+                if (floorRoomHits > 0 && fb.classList.contains('collapsed')) {
+                    fb.classList.remove('collapsed');
+                }
+            } else {
+                fb.style.display = 'none'; // Verteiler ausblenden
             }
         });
 
-        roomSearchMatchIndex = -1;
+        mainSearchMatchIndex = -1;
 
         if (countEl) {
-            if (hits === 0) {
+            if (visibleFloors === 0) {
                 countEl.textContent = 'Keine Treffer';
+                countEl.title = '';
+            } else if (roomHits > 0) {
+                countEl.textContent = `${roomHits} Treffer`;
+                countEl.title = `${roomHits} Raumtreffer in ${visibleFloors} ${visibleFloors === 1 ? 'Verteiler' : 'Verteilern'}`;
             } else {
-                const floorCount = matchedFloors.size;
-                countEl.textContent = `${hits} Treffer in ${floorCount} ${floorCount === 1 ? 'Verteiler' : 'Verteilern'}`;
+                countEl.textContent = `${visibleFloors} Verteiler`;
+                countEl.title = '';
             }
-            countEl.classList.toggle('no-hits', hits === 0);
+            countEl.classList.toggle('no-hits', visibleFloors === 0);
+        }
+
+        // Hinweis anzeigen, wenn kein Verteiler / Raum passt
+        let filterNotice = document.getElementById('main-table-filter-notice');
+        const contentBody = document.getElementById('content-body');
+        const noticeHtml = `
+            <td colspan="17" style="padding: 30px; text-align: center; background: #fff3cd; color: #856404; border: 2px dashed #ffeeba; border-radius: 8px; font-weight: 600; font-size: 1.05em;">
+                🔍 Keine Treffer für "${escapeHtml(searchInput.value.trim())}".
+                <br><br>
+                <button type="button" onclick="clearMainTableFilters()" style="padding: 8px 18px; background: #856404; color: #ffffff; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 0.95em; box-shadow: 0 4px 10px rgba(0,0,0,0.15);">
+                    ✕ Suche zurücksetzen
+                </button>
+            </td>
+        `;
+
+        if (visibleFloors === 0) {
+            if (!filterNotice && contentBody) {
+                filterNotice = document.createElement('tr');
+                filterNotice.id = 'main-table-filter-notice';
+                filterNotice.innerHTML = noticeHtml;
+                contentBody.appendChild(filterNotice);
+            } else if (filterNotice) {
+                filterNotice.innerHTML = noticeHtml;
+            }
+        } else if (filterNotice) {
+            filterNotice.remove();
         }
 
         if (typeof updateToggleAllFloorsButton === 'function') updateToggleAllFloorsButton();
     }
 
-    function focusNextRoomSearchHit() {
-        const hits = getRoomSearchHits();
-        if (hits.length === 0) return;
-
-        roomSearchMatchIndex = (roomSearchMatchIndex + 1) % hits.length;
-        hits[roomSearchMatchIndex].scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
-
-    function clearRoomSearch() {
-        const input = document.getElementById('room-search-input');
-        if (!input) return;
-        input.value = '';
-        applyRoomSearch();
-        input.focus();
-    }
-
-    const roomSearchInput = document.getElementById('room-search-input');
-    if (roomSearchInput) {
-        roomSearchInput.addEventListener('input', applyRoomSearch);
-        roomSearchInput.addEventListener('keydown', (e) => {
+    // Einheitliche Suche: Geschoss / Verteiler / Raum
+    const mainSearchInput = document.getElementById('main-search');
+    if (mainSearchInput) {
+        mainSearchInput.addEventListener('input', applyMainTableFilters);
+        mainSearchInput.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') {
                 e.preventDefault();
-                focusNextRoomSearchHit();
+                focusNextMainSearchHit();
             } else if (e.key === 'Escape') {
                 e.preventDefault();
                 e.stopPropagation();
-                clearRoomSearch();
+                clearMainTableFilters();
             }
         });
     }
 
-    const roomSearchClear = document.getElementById('room-search-clear');
-    if (roomSearchClear) {
-        roomSearchClear.addEventListener('click', (e) => {
+    const mainSearchClear = document.getElementById('main-search-clear');
+    if (mainSearchClear) {
+        mainSearchClear.addEventListener('click', (e) => {
             e.preventDefault();
-            clearRoomSearch();
+            clearMainTableFilters();
         });
     }
 
-    // Wenn eine Raumbezeichnung geändert wird, laufende Suche aktualisieren
-    const roomSearchTable = document.getElementById('main-table');
-    if (roomSearchTable) {
-        let roomSearchDebounce = null;
-        roomSearchTable.addEventListener('input', (e) => {
-            if (!e.target.classList || !e.target.classList.contains('input-room-name')) return;
-            if (!roomSearchInput || !roomSearchInput.value.trim()) return;
-            clearTimeout(roomSearchDebounce);
-            roomSearchDebounce = setTimeout(applyRoomSearch, 150);
+    // Wenn Namen geändert werden, laufende Suche aktualisieren
+    const mainSearchTable = document.getElementById('main-table');
+    if (mainSearchTable) {
+        let mainSearchDebounce = null;
+        mainSearchTable.addEventListener('input', (e) => {
+            const target = e.target;
+            if (!target.classList) return;
+            const isRelevant = target.classList.contains('input-room-name')
+                || target.classList.contains('input-floor-name')
+                || target.classList.contains('input-fbhv-name');
+            if (!isRelevant) return;
+            if (!mainSearchInput || !mainSearchInput.value.trim()) return;
+            clearTimeout(mainSearchDebounce);
+            mainSearchDebounce = setTimeout(applyMainTableFilters, 150);
         });
     }
 
@@ -10133,9 +10111,6 @@ document.addEventListener('DOMContentLoaded', () => {
         calculateGlobalSum();
         if (typeof applyMainTableFilters === 'function') {
             applyMainTableFilters();
-        }
-        if (typeof applyRoomSearch === 'function') {
-            applyRoomSearch();
         }
         isLoading = false;
     }

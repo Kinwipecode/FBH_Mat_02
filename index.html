@@ -1048,13 +1048,11 @@ body.menu-edit-mode .header-top-bar.fh-drag-row {
                     <button id="btn-active-project-file" class="btn-tool toolbar-item" draggable="false" data-btn-id="btn-active-project-file" style="left: 835px;" title="Aktuelle Projektdatei (Klicken zum Öffnen der Ordnerliste, Ziehen am Griff ⋮⋮ zum Verschieben)">
                         <span class="drag-handle">⋮⋮</span> 📄 <span id="header-project-filename" style="font-family: inherit; color: #0284c7; font-weight: 700;">FBH_Projekt.json</span>
                     </button>
-                    <div id="main-floor-filter-item" class="toolbar-item" draggable="false" data-btn-id="main-floor-filter" style="left: 845px; display: inline-flex; align-items: center; gap: 4px; background: var(--bg-container, #ffffff); border: 1px solid var(--border-color, #cbd5e1); border-radius: 6px; padding: 2px 6px;">
+                    <div id="main-search-item" class="toolbar-item" draggable="false" data-btn-id="main-search" style="left: 15px; display: inline-flex; align-items: center; gap: 4px; background: var(--bg-container, #ffffff); border: 1px solid var(--border-color, #cbd5e1); border-radius: 6px; padding: 2px 6px;">
                         <span class="drag-handle">⋮⋮</span>
-                        <input type="text" id="main-floor-filter" placeholder="🔍 Geschoss filtern..." style="padding: 3px 6px; font-size: 0.85em; border: none; outline: none; background: transparent; width: 220px;" title="Filtert die Tabelle nach Geschossname">
-                    </div>
-                    <div id="main-fbhv-filter-item" class="toolbar-item" draggable="false" data-btn-id="main-fbhv-filter" style="left: 1025px; display: inline-flex; align-items: center; gap: 4px; background: var(--bg-container, #ffffff); border: 1px solid var(--border-color, #cbd5e1); border-radius: 6px; padding: 2px 6px;">
-                        <span class="drag-handle">⋮⋮</span>
-                        <input type="text" id="main-fbhv-filter" placeholder="🔍 Verteiler / FBHV filtern..." style="padding: 3px 6px; font-size: 0.85em; border: none; outline: none; background: transparent; width: 220px;" title="Filtert die Tabelle nach FBHV-Bezeichnung">
+                        <input type="text" id="main-search" placeholder="🔍 Geschoss / Verteiler / Raum suchen …" autocomplete="off" spellcheck="false" title="Sucht gleichzeitig in Geschossname, Verteiler/FBHV und Raumbezeichnung (Raum Bez.). Ganze Wörter oder Wortteile. Enter = nächster Raumtreffer, Esc = zurücksetzen">
+                        <span id="main-search-count" class="main-search-count" aria-live="polite"></span>
+                        <button type="button" id="main-search-clear" class="main-search-clear" title="Suche zurücksetzen (Esc)" aria-label="Suche zurücksetzen">✕</button>
                     </div>
                     <button id="btn-open-tools" class="btn-secondary btn-tool toolbar-item" draggable="false" data-btn-id="btn-open-tools" style="left: 1205px;" title="Tools-Fenster öffnen/schließen, um Menü-Knöpfe zu verwalten">
                         <span class="drag-handle">⋮⋮</span> 🛠️ Tools
@@ -1134,14 +1132,6 @@ body.menu-edit-mode .header-top-bar.fh-drag-row {
 
         <!-- Main Layout wrapper for table (100% full width) -->
         <div class="layout-wrapper" style="display: block; padding: 20px;">
-
-            <!-- Raum-Suche (Spalte "Raum Bez.") -->
-            <div id="room-search-bar" class="room-search-bar">
-                <span class="room-search-icon" aria-hidden="true">🔍</span>
-                <input type="text" id="room-search-input" placeholder="Raum suchen (Raum Bez.) …" autocomplete="off" spellcheck="false" title="Sucht in allen Raumbezeichnungen – ganze Wörter oder Wortteile. Enter = zum nächsten Treffer, Esc = zurücksetzen">
-                <span id="room-search-count" class="room-search-count" aria-live="polite"></span>
-                <button type="button" id="room-search-clear" class="room-search-clear" title="Suche zurücksetzen (Esc)" aria-label="Suche zurücksetzen">✕</button>
-            </div>
 
             <!-- Main Table Area -->
             <div class="table-wrapper" style="width: 100%; padding-bottom: 20px; overflow-x: auto;">
